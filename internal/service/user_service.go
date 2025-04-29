@@ -3,10 +3,12 @@ package service
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"user/ent"
 	"user/ent/account"
 	"user/ent/user"
 
+	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -15,71 +17,73 @@ type UserService struct {
 }
 
 type RegisterInput struct {
-    Username  string
-    Password  string
-    FirstName string
-    LastName  string
-    Email     string
-    Phone     string
-    WardCode  string
-    Address   string
-    Gender    string
+	Username  string
+	Password  string
+	FirstName string
+	LastName  string
+	Email     string
+	Phone     string
+	WardCode  string
+	Address   string
+	Gender    string
 }
 
 func NewUserService(client *ent.Client) *UserService {
-	return &UserService{client: client}
+	return &UserService{
+		client: client,
+	}
 }
 
-func (s *UserService) Register(ctx context.Context, input RegisterInput) (*ent.User, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+func (s *UserService) Register(ctx context.Context, c *gin.Context, input RegisterInput) (*ent.User, error) {
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 
 	if err != nil {
-        return nil, fmt.Errorf("Lỗi mã hóa mật khẩu: %v", err)
-    }
+		return nil, fmt.Errorf("HTTP %d: Lỗi mã hóa mật khẩu: %v", http.StatusConflict, err)
+	}
 
+	// Bắt đầu transaction
 	tx, err := s.client.Tx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("HTTP %d: Lỗi bắt đầu transaction: %v", http.StatusInternalServerError, err)
+	}
 
-   	usr, err := tx.User.
-        Create().
-        SetFirstName(input.FirstName).
-        SetLastName(input.LastName).
-        SetEmail(input.Email).
-        SetPhone(input.Phone).
-        SetWardCode(input.WardCode).
-        SetAddress(input.Address).
-        SetGender(user.Gender(input.Gender)).
-        Save(ctx)	
+	// Tạo người dùng mới
+	usr, err := tx.User.
+		Create().
+		SetFirstName(input.FirstName).
+		SetLastName(input.LastName).
+		SetEmail(input.Email).
+		SetPhone(input.Phone).
+		SetWardCode(input.WardCode).
+		SetAddress(input.Address).
+		SetGender(user.Gender(input.Gender)).
+		Save(ctx)
 
 	if err != nil {
-        if rerr := tx.Rollback(); rerr != nil {
-            return nil, fmt.Errorf("Lỗi rollback: %v", rerr)
-        }
-        return nil, fmt.Errorf("Lỗi tạo người dùng: %v", err)
-    }
+		_ = tx.Rollback()
+		return nil, fmt.Errorf("HTTP %d: Lỗi tạo người dùng: %v", http.StatusBadRequest, err)
+	}
 
-	acc, err := tx.Account.
-        Create().
-        SetUsername(input.Username).
-        SetPassword(string(hashedPassword)).
-        SetStatus(account.StatusActive).
-        SetUser(usr). 
-        Save(ctx)
-
+	// Tạo tài khoản cho người dùng
+	acc, err := tx.Account. 
+		Create().
+		SetUsername(input.Username).
+		SetPassword(string(hashedPassword)).
+		SetStatus(account.StatusActive).
+		SetUser(usr).
+		Save(ctx)
 	if err != nil {
-        if rerr := tx.Rollback(); rerr != nil {
-            return nil, fmt.Errorf("Lỗi rollback: %v", rerr)
-        }
-        return nil, fmt.Errorf("Lỗi tạo tài khoản: %v", err)
-    }
-
-	usr, err = tx.User.
-        UpdateOne(usr).
-        SetAccount(acc).
-        Save(ctx)
+		_ = tx.Rollback()
+		return nil, fmt.Errorf("HTTP %d: Lỗi tạo tài khoản: %v", http.StatusBadRequest, err)
+	}
 
 	if err := tx.Commit(); err != nil {
-        return nil, fmt.Errorf("Lỗi commit giao dịch: %v", err)
-    }	
+		return nil, fmt.Errorf("HTTP %d: Lỗi commit giao dịch: %v", http.StatusInternalServerError, err)
+	}
 
-    return usr, nil	
+	usr.Edges.Account = acc
+
+	return usr, nil
 }
+
+

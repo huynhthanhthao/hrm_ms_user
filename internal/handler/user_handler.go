@@ -1,7 +1,12 @@
 package handler
 
 import (
+	"fmt"
+	"log"
 	"net/http"
+	"user/internal/dto"
+	"user/internal/helper"
+	"user/internal/mapper"
 	"user/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -15,45 +20,43 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 	return &UserHandler{userService: userService}
 }
 
-func (h *UserHandler) RegisterHandler(c *gin.Context) {
-	type RegisterRequest struct {
-		Username  string `json:"username" binding:"required,alphanum,min=3,max=20"`
-		Password  string `json:"password" binding:"required,min=6,max=20"`
-		FirstName string `json:"first_name" binding:"required,max=50"`
-		LastName  string `json:"last_name" binding:"required,max=50"`
-		Email     string `json:"email" binding:"required,email"`
-		Phone     string `json:"phone" binding:"required,numeric,min=10,max=15"`
-		WardCode  string `json:"ward_code" binding:"required,numeric,min=3,max=10"`
-		Address   string `json:"address" binding:"required,max=200"`
-		Gender    string `json:"gender" binding:"required,oneof=other female male"`
-	}
-	
-	var req RegisterRequest
-	
+func (h *UserHandler) RegisterHandler(c *gin.Context) { 
+	var req dto.RegisterRequest
+
+	// Kiểm tra dữ liệu đầu vào
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Printf("Error binding JSON: %v", err)
+		helper.Respond(c, http.StatusBadRequest, "Invalid input: "+err.Error(), nil)
 		return
 	}
 
 	input := service.RegisterInput{
-        Username:  req.Username,
-        Password:  req.Password,
-        FirstName: req.FirstName,
-        LastName:  req.LastName,
-        Email:     req.Email,
-        Phone:     req.Phone,
-        WardCode:  req.WardCode,
-        Address:   req.Address,
-        Gender:    req.Gender,
-    }
+		Username:  req.Username,
+		Password:  req.Password,
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     req.Email,
+		Phone:     req.Phone,
+		WardCode:  req.WardCode,
+		Address:   req.Address,
+		Gender:    req.Gender,
+	}
 
-	user, err := h.userService.Register(c.Request.Context(), input)
-	
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
+	// Gọi service để đăng ký người dùng
+	user, err := h.userService.Register(c.Request.Context(), c, input)
 
-	// Trả về response
-	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully", "user": user})
+	if err != nil {
+		log.Printf("Error registering user: %v", err)
+		var statusCode int = http.StatusInternalServerError
+		if errMsg := err.Error(); len(errMsg) > 4 && errMsg[:4] == "HTTP" {
+			fmt.Sscanf(errMsg, "HTTP %d:", &statusCode)
+		}
+		helper.Respond(c, statusCode, err.Error(), nil)
+		return
+	}
+
+	// Chuyển đổi dữ liệu người dùng sang response
+	userResp := mapper.MapUserToResponse(user)
+
+	helper.Respond(c, http.StatusOK, "Đăng ký thành công!", userResp)
 }
