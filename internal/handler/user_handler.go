@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"user/internal/dto"
 	"user/internal/helper"
-	"user/internal/mapper"
 	"user/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -56,9 +55,7 @@ func (h *UserHandler) RegisterHandler(c *gin.Context) {
 	}
 
 	// Chuyển đổi dữ liệu người dùng sang response
-	userResp := mapper.MapUserToResponse(user)
-
-	helper.Respond(c, http.StatusOK, "Đăng ký thành công!", userResp)
+	helper.Respond(c, http.StatusOK, "Đăng ký thành công!", user)
 }
 
 func (h *UserHandler) LoginHandler(c *gin.Context) {
@@ -78,6 +75,7 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 
 	// Gọi service để đăng nhập
 	loginResp, err := h.userService.Login(c.Request.Context(), c, input)
+
 	if err != nil {
 		log.Printf("Error logging in: %v", err)
 		var statusCode int = http.StatusInternalServerError

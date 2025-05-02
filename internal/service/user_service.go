@@ -38,7 +38,7 @@ type RegisterInput struct {
 	Gender    string
 }
 
-func (s *UserService) Register(ctx context.Context, c *gin.Context, input RegisterInput) (*ent.User, error) {
+func (s *UserService) Register(ctx context.Context, c *gin.Context, input RegisterInput) (*dto.UserResponse, error) {
     hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 
 	if err != nil {
@@ -87,7 +87,20 @@ func (s *UserService) Register(ctx context.Context, c *gin.Context, input Regist
 
 	usr.Edges.Account = acc
 
-	return usr, nil
+	return &dto.UserResponse{
+			ID:        usr.ID,
+			FirstName: usr.FirstName,
+			LastName:  usr.LastName,
+			Email:     usr.Email,
+			Phone:     usr.Phone,
+			Address: usr.Address,
+			WardCode: usr.WardCode,
+			Gender:  string(usr.Gender),
+			Account: &dto.AccountResponse{
+				Username: acc.Username,	
+			},
+		},
+	nil
 }
 
 type LoginInput struct {
@@ -131,12 +144,22 @@ func (s *UserService) Login(ctx context.Context, c *gin.Context, input LoginInpu
 		return nil, fmt.Errorf("HTTP %d: Lỗi tạo refresh token: %v", http.StatusInternalServerError, err)
 	}
 
-
 	return &dto.LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		User:         usr,
-		Account:      acc,
+		User: dto.UserResponse{
+			ID:        usr.ID,
+			FirstName: usr.FirstName,
+			LastName:  usr.LastName,
+			Email:     usr.Email,
+			Phone:     usr.Phone,
+			Address: usr.Address,
+			WardCode: usr.WardCode,
+			Gender:  string(usr.Gender),
+			Account: &dto.AccountResponse{
+				Username: acc.Username,	
+			},
+		},
 	}, nil
 }
 
