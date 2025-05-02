@@ -15,6 +15,7 @@ func SetupRouter(client *ent.Client) *gin.Engine {
 	userHandler := handler.NewUserHandler(userService)
 	
 	r.POST("/register", userHandler.RegisterHandler)
+	r.POST("/login", userHandler.LoginHandler)
 
 	return r
 }

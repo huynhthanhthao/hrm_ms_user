@@ -60,3 +60,33 @@ func (h *UserHandler) RegisterHandler(c *gin.Context) {
 
 	helper.Respond(c, http.StatusOK, "Đăng ký thành công!", userResp)
 }
+
+func (h *UserHandler) LoginHandler(c *gin.Context) {
+	var req dto.LoginRequest
+
+	// Kiểm tra dữ liệu đầu vào
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("Error binding JSON: %v", err)
+		helper.Respond(c, http.StatusBadRequest, "Invalid input: "+err.Error(), nil)
+		return
+	}
+
+	input := service.LoginInput{
+		Username: req.Username,
+		Password: req.Password,
+	}
+
+	// Gọi service để đăng nhập
+	loginResp, err := h.userService.Login(c.Request.Context(), c, input)
+	if err != nil {
+		log.Printf("Error logging in: %v", err)
+		var statusCode int = http.StatusInternalServerError
+		if errMsg := err.Error(); len(errMsg) > 4 && errMsg[:4] == "HTTP" {
+			fmt.Sscanf(errMsg, "HTTP %d:", &statusCode)
+		}
+		helper.Respond(c, statusCode, err.Error(), nil)
+		return
+	}
+
+	helper.Respond(c, http.StatusOK, "Đăng nhập thành công!", loginResp)
+}

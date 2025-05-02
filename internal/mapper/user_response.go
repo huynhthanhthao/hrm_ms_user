@@ -20,3 +20,12 @@ func MapUserToResponse(u *ent.User) *dto.UserResponse {
         },
     }
 }
+
+
+func MapLoginToResponse(access_token String, refresh_token string, u *ent.User) *dto.UserResponse {
+    return {
+        access_token,       
+        refresh_token,
+    }
+}
+
