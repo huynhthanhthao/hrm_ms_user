@@ -8,12 +8,12 @@ import (
 	runtime "entgo.io/contrib/entproto/runtime"
 	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	fmt "fmt"
+	uuid "github.com/google/uuid"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	regexp "regexp"
-	strconv "strconv"
 	strings "strings"
 	ent "user/ent"
 	account "user/ent/account"
@@ -62,7 +62,10 @@ func toProtoAccount(e *ent.Account) (*Account, error) {
 	v := &Account{}
 	created_at := timestamppb.New(e.CreatedAt)
 	v.CreatedAt = created_at
-	id := int64(e.ID)
+	id, err := e.ID.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
 	v.Id = id
 	password := e.Password
 	v.Password = password
@@ -70,12 +73,18 @@ func toProtoAccount(e *ent.Account) (*Account, error) {
 	v.Status = status
 	updated_at := timestamppb.New(e.UpdatedAt)
 	v.UpdatedAt = updated_at
-	user := int64(e.UserID)
+	user, err := e.UserID.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
 	v.UserId = user
 	username := e.Username
 	v.Username = username
 	if edg := e.Edges.User; edg != nil {
-		id := int64(edg.ID)
+		id, err := edg.ID.MarshalBinary()
+		if err != nil {
+			return nil, err
+		}
 		v.User = &User{
 			Id: id,
 		}
@@ -127,7 +136,10 @@ func (svc *AccountService) Get(ctx context.Context, req *GetAccountRequest) (*Ac
 		err error
 		get *ent.Account
 	)
-	id := int(req.GetId())
+	var id uuid.UUID
+	if err := (&id).UnmarshalBinary(req.GetId()); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
+	}
 	switch req.GetView() {
 	case GetAccountRequest_VIEW_UNSPECIFIED, GetAccountRequest_BASIC:
 		get, err = svc.client.Account.Get(ctx, id)
@@ -155,7 +167,10 @@ func (svc *AccountService) Get(ctx context.Context, req *GetAccountRequest) (*Ac
 // Update implements AccountServiceServer.Update
 func (svc *AccountService) Update(ctx context.Context, req *UpdateAccountRequest) (*Account, error) {
 	account := req.GetAccount()
-	accountID := int(account.GetId())
+	var accountID uuid.UUID
+	if err := (&accountID).UnmarshalBinary(account.GetId()); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
+	}
 	m := svc.client.Account.UpdateOneID(accountID)
 	accountCreatedAt := runtime.ExtractTime(account.GetCreatedAt())
 	m.SetCreatedAt(accountCreatedAt)
@@ -165,12 +180,18 @@ func (svc *AccountService) Update(ctx context.Context, req *UpdateAccountRequest
 	m.SetStatus(accountStatus)
 	accountUpdatedAt := runtime.ExtractTime(account.GetUpdatedAt())
 	m.SetUpdatedAt(accountUpdatedAt)
-	accountUserID := int(account.GetUserId())
+	var accountUserID uuid.UUID
+	if err := (&accountUserID).UnmarshalBinary(account.GetUserId()); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
+	}
 	m.SetUserID(accountUserID)
 	accountUsername := account.GetUsername()
 	m.SetUsername(accountUsername)
 	if account.GetUser() != nil {
-		accountUser := int(account.GetUser().GetId())
+		var accountUser uuid.UUID
+		if err := (&accountUser).UnmarshalBinary(account.GetUser().GetId()); err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
+		}
 		m.SetUserID(accountUser)
 	}
 
@@ -195,7 +216,10 @@ func (svc *AccountService) Update(ctx context.Context, req *UpdateAccountRequest
 // Delete implements AccountServiceServer.Delete
 func (svc *AccountService) Delete(ctx context.Context, req *DeleteAccountRequest) (*emptypb.Empty, error) {
 	var err error
-	id := int(req.GetId())
+	var id uuid.UUID
+	if err := (&id).UnmarshalBinary(req.GetId()); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
+	}
 	err = svc.client.Account.DeleteOneID(id).Exec(ctx)
 	switch {
 	case err == nil:
@@ -230,11 +254,10 @@ func (svc *AccountService) List(ctx context.Context, req *ListAccountRequest) (*
 		if err != nil {
 			return nil, status.Errorf(codes.InvalidArgument, "page token is invalid")
 		}
-		token, err := strconv.ParseInt(string(bytes), 10, 32)
+		pageToken, err := uuid.ParseBytes(bytes)
 		if err != nil {
 			return nil, status.Errorf(codes.InvalidArgument, "page token is invalid")
 		}
-		pageToken := int(token)
 		listQuery = listQuery.
 			Where(account.IDLTE(pageToken))
 	}
@@ -315,12 +338,18 @@ func (svc *AccountService) createBuilder(account *Account) (*ent.AccountCreate, 
 	m.SetStatus(accountStatus)
 	accountUpdatedAt := runtime.ExtractTime(account.GetUpdatedAt())
 	m.SetUpdatedAt(accountUpdatedAt)
-	accountUserID := int(account.GetUserId())
+	var accountUserID uuid.UUID
+	if err := (&accountUserID).UnmarshalBinary(account.GetUserId()); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
+	}
 	m.SetUserID(accountUserID)
 	accountUsername := account.GetUsername()
 	m.SetUsername(accountUsername)
 	if account.GetUser() != nil {
-		accountUser := int(account.GetUser().GetId())
+		var accountUser uuid.UUID
+		if err := (&accountUser).UnmarshalBinary(account.GetUser().GetId()); err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
+		}
 		m.SetUserID(accountUser)
 	}
 	return m, nil

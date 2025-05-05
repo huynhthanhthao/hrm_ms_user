@@ -90,7 +90,7 @@ func (s *UserService) Register(ctx context.Context, c *gin.Context, input Regist
 	usr.Edges.Account = acc
 
 	return &dto.UserResponse{
-			ID:        usr.ID,
+			ID:        usr.ID.String(),
 			FirstName: usr.FirstName,
 			LastName:  usr.LastName,
 			Email:     usr.Email,
@@ -137,12 +137,12 @@ func (s *UserService) Login(ctx context.Context, c *gin.Context, input LoginInpu
 	accessTokenDuration, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
 	refreshTokenDuration, _ := time.ParseDuration(os.Getenv("JWT_REFRESH_TOKEN_DURATION"))
 
-	accessToken, err := generateToken(acc.ID, accessTokenDuration)
+	accessToken, err := generateToken(acc.ID.String(), accessTokenDuration)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP %d: Lỗi tạo access token: %v", http.StatusInternalServerError, err)
 	}
 
-	refreshToken, err := generateToken(acc.ID, refreshTokenDuration)
+	refreshToken, err := generateToken(acc.ID.String(), refreshTokenDuration)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP %d: Lỗi tạo refresh token: %v", http.StatusInternalServerError, err)
 	}
@@ -151,7 +151,7 @@ func (s *UserService) Login(ctx context.Context, c *gin.Context, input LoginInpu
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		User: dto.UserResponse{
-			ID:        usr.ID,
+			ID:        usr.ID.String(),
 			FirstName: usr.FirstName,
 			LastName:  usr.LastName,
 			Email:     usr.Email,
@@ -167,7 +167,7 @@ func (s *UserService) Login(ctx context.Context, c *gin.Context, input LoginInpu
 	}, nil
 }
 
-func generateToken(accountID int, duration time.Duration) (string, error) {
+func generateToken(accountID string, duration time.Duration) (string, error) {
 	claims := jwt.MapClaims{
 		"account_id": accountID,
 		"exp":        time.Now().Add(duration).Unix(),

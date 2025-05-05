@@ -10,7 +10,7 @@ import "google/protobuf/timestamp.proto";
 option go_package = "user/ent/proto/entpb";
 
 message Account {
-  int64 id = 1;
+  bytes id = 1;
 
   string username = 2;
 
@@ -22,7 +22,7 @@ message Account {
 
   google.protobuf.Timestamp updated_at = 6;
 
-  int64 user_id = 8;
+  bytes user_id = 8;
 
   User user = 7;
 
@@ -38,7 +38,7 @@ message CreateAccountRequest {
 }
 
 message GetAccountRequest {
-  int64 id = 1;
+  bytes id = 1;
 
   View view = 2;
 
@@ -56,7 +56,7 @@ message UpdateAccountRequest {
 }
 
 message DeleteAccountRequest {
-  int64 id = 1;
+  bytes id = 1;
 }
 
 message ListAccountRequest {
@@ -90,7 +90,7 @@ message BatchCreateAccountsResponse {
 }
 
 message User {
-  int64 id = 1;
+  bytes id = 1;
 
   string first_name = 2;
 
@@ -128,7 +128,7 @@ message CreateUserRequest {
 }
 
 message GetUserRequest {
-  int64 id = 1;
+  bytes id = 1;
 
   View view = 2;
 
@@ -146,7 +146,7 @@ message UpdateUserRequest {
 }
 
 message DeleteUserRequest {
-  int64 id = 1;
+  bytes id = 1;
 }
 
 message ListUserRequest {

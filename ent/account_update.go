@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AccountUpdate is the builder for updating Account entities.
@@ -92,15 +93,15 @@ func (au *AccountUpdate) SetUpdatedAt(t time.Time) *AccountUpdate {
 }
 
 // SetUserID sets the "user_id" field.
-func (au *AccountUpdate) SetUserID(i int) *AccountUpdate {
-	au.mutation.SetUserID(i)
+func (au *AccountUpdate) SetUserID(u uuid.UUID) *AccountUpdate {
+	au.mutation.SetUserID(u)
 	return au
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (au *AccountUpdate) SetNillableUserID(i *int) *AccountUpdate {
-	if i != nil {
-		au.SetUserID(*i)
+func (au *AccountUpdate) SetNillableUserID(u *uuid.UUID) *AccountUpdate {
+	if u != nil {
+		au.SetUserID(*u)
 	}
 	return au
 }
@@ -174,11 +175,6 @@ func (au *AccountUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Account.status": %w`, err)}
 		}
 	}
-	if v, ok := au.mutation.UserID(); ok {
-		if err := account.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`ent: validator failed for field "Account.user_id": %w`, err)}
-		}
-	}
 	if au.mutation.UserCleared() && len(au.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Account.user"`)
 	}
@@ -189,7 +185,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := au.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID))
 	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -220,7 +216,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -233,7 +229,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -324,15 +320,15 @@ func (auo *AccountUpdateOne) SetUpdatedAt(t time.Time) *AccountUpdateOne {
 }
 
 // SetUserID sets the "user_id" field.
-func (auo *AccountUpdateOne) SetUserID(i int) *AccountUpdateOne {
-	auo.mutation.SetUserID(i)
+func (auo *AccountUpdateOne) SetUserID(u uuid.UUID) *AccountUpdateOne {
+	auo.mutation.SetUserID(u)
 	return auo
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (auo *AccountUpdateOne) SetNillableUserID(i *int) *AccountUpdateOne {
-	if i != nil {
-		auo.SetUserID(*i)
+func (auo *AccountUpdateOne) SetNillableUserID(u *uuid.UUID) *AccountUpdateOne {
+	if u != nil {
+		auo.SetUserID(*u)
 	}
 	return auo
 }
@@ -419,11 +415,6 @@ func (auo *AccountUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Account.status": %w`, err)}
 		}
 	}
-	if v, ok := auo.mutation.UserID(); ok {
-		if err := account.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`ent: validator failed for field "Account.user_id": %w`, err)}
-		}
-	}
 	if auo.mutation.UserCleared() && len(auo.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Account.user"`)
 	}
@@ -434,7 +425,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 	if err := auo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID))
 	id, ok := auo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Account.id" for update`)}
@@ -482,7 +473,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -495,7 +486,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 )
 
 const (
@@ -94,6 +95,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// CompanyIDValidator is a validator for the "company_id" field. It is called by the builders before save.
 	CompanyIDValidator func(string) error
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )
 
 // Gender defines the type for the "gender" enum field.

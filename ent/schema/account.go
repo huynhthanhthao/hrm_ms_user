@@ -8,9 +8,9 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
-// Account holds the schema definition for the Account entity.
 type Account struct {
 	ent.Schema
 }
@@ -18,6 +18,10 @@ type Account struct {
 // Fields of the Account.
 func (Account) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.New()).Default(uuid.New).
+			Annotations(
+				entproto.Field(1),
+			),
 		field.String("username").Unique().NotEmpty().
 			Annotations(
 				entproto.Field(2),
@@ -44,8 +48,7 @@ func (Account) Fields() []ent.Field {
 			Annotations(
 				entproto.Field(6),
 			),
-		field.Int("user_id").
-			Positive().
+		field.UUID("user_id", uuid.New()).Default(uuid.New).
 			Annotations(
 				entproto.Field(8),
 			),

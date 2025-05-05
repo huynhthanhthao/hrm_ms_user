@@ -8,12 +8,12 @@ import (
 	runtime "entgo.io/contrib/entproto/runtime"
 	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	fmt "fmt"
+	uuid "github.com/google/uuid"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	regexp "regexp"
-	strconv "strconv"
 	strings "strings"
 	ent "user/ent"
 	account "user/ent/account"
@@ -73,7 +73,10 @@ func toProtoUser(e *ent.User) (*User, error) {
 	v.FirstName = first_name
 	gender := toProtoUser_Gender(e.Gender)
 	v.Gender = gender
-	id := int64(e.ID)
+	id, err := e.ID.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
 	v.Id = id
 	last_name := e.LastName
 	v.LastName = last_name
@@ -84,7 +87,10 @@ func toProtoUser(e *ent.User) (*User, error) {
 	ward_code := e.WardCode
 	v.WardCode = ward_code
 	if edg := e.Edges.Account; edg != nil {
-		id := int64(edg.ID)
+		id, err := edg.ID.MarshalBinary()
+		if err != nil {
+			return nil, err
+		}
 		v.Account = &Account{
 			Id: id,
 		}
@@ -136,7 +142,10 @@ func (svc *UserService) Get(ctx context.Context, req *GetUserRequest) (*User, er
 		err error
 		get *ent.User
 	)
-	id := int(req.GetId())
+	var id uuid.UUID
+	if err := (&id).UnmarshalBinary(req.GetId()); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
+	}
 	switch req.GetView() {
 	case GetUserRequest_VIEW_UNSPECIFIED, GetUserRequest_BASIC:
 		get, err = svc.client.User.Get(ctx, id)
@@ -164,7 +173,10 @@ func (svc *UserService) Get(ctx context.Context, req *GetUserRequest) (*User, er
 // Update implements UserServiceServer.Update
 func (svc *UserService) Update(ctx context.Context, req *UpdateUserRequest) (*User, error) {
 	user := req.GetUser()
-	userID := int(user.GetId())
+	var userID uuid.UUID
+	if err := (&userID).UnmarshalBinary(user.GetId()); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
+	}
 	m := svc.client.User.UpdateOneID(userID)
 	userAddress := user.GetAddress()
 	m.SetAddress(userAddress)
@@ -187,7 +199,10 @@ func (svc *UserService) Update(ctx context.Context, req *UpdateUserRequest) (*Us
 	userWardCode := user.GetWardCode()
 	m.SetWardCode(userWardCode)
 	if user.GetAccount() != nil {
-		userAccount := int(user.GetAccount().GetId())
+		var userAccount uuid.UUID
+		if err := (&userAccount).UnmarshalBinary(user.GetAccount().GetId()); err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
+		}
 		m.SetAccountID(userAccount)
 	}
 
@@ -212,7 +227,10 @@ func (svc *UserService) Update(ctx context.Context, req *UpdateUserRequest) (*Us
 // Delete implements UserServiceServer.Delete
 func (svc *UserService) Delete(ctx context.Context, req *DeleteUserRequest) (*emptypb.Empty, error) {
 	var err error
-	id := int(req.GetId())
+	var id uuid.UUID
+	if err := (&id).UnmarshalBinary(req.GetId()); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
+	}
 	err = svc.client.User.DeleteOneID(id).Exec(ctx)
 	switch {
 	case err == nil:
@@ -247,11 +265,10 @@ func (svc *UserService) List(ctx context.Context, req *ListUserRequest) (*ListUs
 		if err != nil {
 			return nil, status.Errorf(codes.InvalidArgument, "page token is invalid")
 		}
-		token, err := strconv.ParseInt(string(bytes), 10, 32)
+		pageToken, err := uuid.ParseBytes(bytes)
 		if err != nil {
 			return nil, status.Errorf(codes.InvalidArgument, "page token is invalid")
 		}
-		pageToken := int(token)
 		listQuery = listQuery.
 			Where(user.IDLTE(pageToken))
 	}
@@ -345,7 +362,10 @@ func (svc *UserService) createBuilder(user *User) (*ent.UserCreate, error) {
 	userWardCode := user.GetWardCode()
 	m.SetWardCode(userWardCode)
 	if user.GetAccount() != nil {
-		userAccount := int(user.GetAccount().GetId())
+		var userAccount uuid.UUID
+		if err := (&userAccount).UnmarshalBinary(user.GetAccount().GetId()); err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid argument: %s", err)
+		}
 		m.SetAccountID(userAccount)
 	}
 	return m, nil

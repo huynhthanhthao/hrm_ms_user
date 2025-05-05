@@ -7,6 +7,8 @@ import (
 	"user/ent/account"
 	"user/ent/schema"
 	"user/ent/user"
+
+	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -16,65 +18,73 @@ func init() {
 	accountFields := schema.Account{}.Fields()
 	_ = accountFields
 	// accountDescUsername is the schema descriptor for username field.
-	accountDescUsername := accountFields[0].Descriptor()
+	accountDescUsername := accountFields[1].Descriptor()
 	// account.UsernameValidator is a validator for the "username" field. It is called by the builders before save.
 	account.UsernameValidator = accountDescUsername.Validators[0].(func(string) error)
 	// accountDescPassword is the schema descriptor for password field.
-	accountDescPassword := accountFields[1].Descriptor()
+	accountDescPassword := accountFields[2].Descriptor()
 	// account.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	account.PasswordValidator = accountDescPassword.Validators[0].(func(string) error)
 	// accountDescCreatedAt is the schema descriptor for created_at field.
-	accountDescCreatedAt := accountFields[3].Descriptor()
+	accountDescCreatedAt := accountFields[4].Descriptor()
 	// account.DefaultCreatedAt holds the default value on creation for the created_at field.
 	account.DefaultCreatedAt = accountDescCreatedAt.Default.(func() time.Time)
 	// accountDescUpdatedAt is the schema descriptor for updated_at field.
-	accountDescUpdatedAt := accountFields[4].Descriptor()
+	accountDescUpdatedAt := accountFields[5].Descriptor()
 	// account.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() time.Time)
 	// account.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	account.UpdateDefaultUpdatedAt = accountDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// accountDescUserID is the schema descriptor for user_id field.
-	accountDescUserID := accountFields[5].Descriptor()
-	// account.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
-	account.UserIDValidator = accountDescUserID.Validators[0].(func(int) error)
+	accountDescUserID := accountFields[6].Descriptor()
+	// account.DefaultUserID holds the default value on creation for the user_id field.
+	account.DefaultUserID = accountDescUserID.Default.(func() uuid.UUID)
+	// accountDescID is the schema descriptor for id field.
+	accountDescID := accountFields[0].Descriptor()
+	// account.DefaultID holds the default value on creation for the id field.
+	account.DefaultID = accountDescID.Default.(func() uuid.UUID)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescFirstName is the schema descriptor for first_name field.
-	userDescFirstName := userFields[0].Descriptor()
+	userDescFirstName := userFields[1].Descriptor()
 	// user.FirstNameValidator is a validator for the "first_name" field. It is called by the builders before save.
 	user.FirstNameValidator = userDescFirstName.Validators[0].(func(string) error)
 	// userDescLastName is the schema descriptor for last_name field.
-	userDescLastName := userFields[1].Descriptor()
+	userDescLastName := userFields[2].Descriptor()
 	// user.LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	user.LastNameValidator = userDescLastName.Validators[0].(func(string) error)
 	// userDescEmail is the schema descriptor for email field.
-	userDescEmail := userFields[3].Descriptor()
+	userDescEmail := userFields[4].Descriptor()
 	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	user.EmailValidator = userDescEmail.Validators[0].(func(string) error)
 	// userDescPhone is the schema descriptor for phone field.
-	userDescPhone := userFields[4].Descriptor()
+	userDescPhone := userFields[5].Descriptor()
 	// user.PhoneValidator is a validator for the "phone" field. It is called by the builders before save.
 	user.PhoneValidator = userDescPhone.Validators[0].(func(string) error)
 	// userDescWardCode is the schema descriptor for ward_code field.
-	userDescWardCode := userFields[5].Descriptor()
+	userDescWardCode := userFields[6].Descriptor()
 	// user.WardCodeValidator is a validator for the "ward_code" field. It is called by the builders before save.
 	user.WardCodeValidator = userDescWardCode.Validators[0].(func(string) error)
 	// userDescAddress is the schema descriptor for address field.
-	userDescAddress := userFields[6].Descriptor()
+	userDescAddress := userFields[7].Descriptor()
 	// user.AddressValidator is a validator for the "address" field. It is called by the builders before save.
 	user.AddressValidator = userDescAddress.Validators[0].(func(string) error)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[7].Descriptor()
+	userDescCreatedAt := userFields[8].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescUpdatedAt is the schema descriptor for updated_at field.
-	userDescUpdatedAt := userFields[8].Descriptor()
+	userDescUpdatedAt := userFields[9].Descriptor()
 	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userDescCompanyID is the schema descriptor for company_id field.
-	userDescCompanyID := userFields[9].Descriptor()
+	userDescCompanyID := userFields[10].Descriptor()
 	// user.CompanyIDValidator is a validator for the "company_id" field. It is called by the builders before save.
 	user.CompanyIDValidator = userDescCompanyID.Validators[0].(func(string) error)
+	// userDescID is the schema descriptor for id field.
+	userDescID := userFields[0].Descriptor()
+	// user.DefaultID holds the default value on creation for the id field.
+	user.DefaultID = userDescID.Default.(func() uuid.UUID)
 }

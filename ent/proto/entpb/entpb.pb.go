@@ -318,13 +318,13 @@ func (ListUserRequest_View) EnumDescriptor() ([]byte, []int) {
 
 type Account struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            []byte                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
 	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
 	Status        Account_Status         `protobuf:"varint,4,opt,name=status,proto3,enum=entpb.Account_Status" json:"status,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	UserId        int64                  `protobuf:"varint,8,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        []byte                 `protobuf:"bytes,8,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	User          *User                  `protobuf:"bytes,7,opt,name=user,proto3" json:"user,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -360,11 +360,11 @@ func (*Account) Descriptor() ([]byte, []int) {
 	return file_entpb_entpb_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Account) GetId() int64 {
+func (x *Account) GetId() []byte {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return nil
 }
 
 func (x *Account) GetUsername() string {
@@ -402,11 +402,11 @@ func (x *Account) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *Account) GetUserId() int64 {
+func (x *Account) GetUserId() []byte {
 	if x != nil {
 		return x.UserId
 	}
-	return 0
+	return nil
 }
 
 func (x *Account) GetUser() *User {
@@ -462,7 +462,7 @@ func (x *CreateAccountRequest) GetAccount() *Account {
 
 type GetAccountRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            []byte                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	View          GetAccountRequest_View `protobuf:"varint,2,opt,name=view,proto3,enum=entpb.GetAccountRequest_View" json:"view,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -498,11 +498,11 @@ func (*GetAccountRequest) Descriptor() ([]byte, []int) {
 	return file_entpb_entpb_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetAccountRequest) GetId() int64 {
+func (x *GetAccountRequest) GetId() []byte {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return nil
 }
 
 func (x *GetAccountRequest) GetView() GetAccountRequest_View {
@@ -558,7 +558,7 @@ func (x *UpdateAccountRequest) GetAccount() *Account {
 
 type DeleteAccountRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            []byte                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -593,11 +593,11 @@ func (*DeleteAccountRequest) Descriptor() ([]byte, []int) {
 	return file_entpb_entpb_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *DeleteAccountRequest) GetId() int64 {
+func (x *DeleteAccountRequest) GetId() []byte {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return nil
 }
 
 type ListAccountRequest struct {
@@ -802,7 +802,7 @@ func (x *BatchCreateAccountsResponse) GetAccounts() []*Account {
 
 type User struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            []byte                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	FirstName     string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
 	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
 	Gender        User_Gender            `protobuf:"varint,4,opt,name=gender,proto3,enum=entpb.User_Gender" json:"gender,omitempty"`
@@ -848,11 +848,11 @@ func (*User) Descriptor() ([]byte, []int) {
 	return file_entpb_entpb_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *User) GetId() int64 {
+func (x *User) GetId() []byte {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return nil
 }
 
 func (x *User) GetFirstName() string {
@@ -978,7 +978,7 @@ func (x *CreateUserRequest) GetUser() *User {
 
 type GetUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            []byte                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	View          GetUserRequest_View    `protobuf:"varint,2,opt,name=view,proto3,enum=entpb.GetUserRequest_View" json:"view,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1014,11 +1014,11 @@ func (*GetUserRequest) Descriptor() ([]byte, []int) {
 	return file_entpb_entpb_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *GetUserRequest) GetId() int64 {
+func (x *GetUserRequest) GetId() []byte {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return nil
 }
 
 func (x *GetUserRequest) GetView() GetUserRequest_View {
@@ -1074,7 +1074,7 @@ func (x *UpdateUserRequest) GetUser() *User {
 
 type DeleteUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            []byte                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1109,11 +1109,11 @@ func (*DeleteUserRequest) Descriptor() ([]byte, []int) {
 	return file_entpb_entpb_proto_rawDescGZIP(), []int{13}
 }
 
-func (x *DeleteUserRequest) GetId() int64 {
+func (x *DeleteUserRequest) GetId() []byte {
 	if x != nil {
 		return x.Id
 	}
-	return 0
+	return nil
 }
 
 type ListUserRequest struct {
@@ -1322,7 +1322,7 @@ const file_entpb_entpb_proto_rawDesc = "" +
 	"\n" +
 	"\x11entpb/entpb.proto\x12\x05entpb\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe2\x02\n" +
 	"\aAccount\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\fR\x02id\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x1a\n" +
 	"\bpassword\x18\x03 \x01(\tR\bpassword\x12-\n" +
 	"\x06status\x18\x04 \x01(\x0e2\x15.entpb.Account.StatusR\x06status\x129\n" +
@@ -1330,7 +1330,7 @@ const file_entpb_entpb_proto_rawDesc = "" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x17\n" +
-	"\auser_id\x18\b \x01(\x03R\x06userId\x12\x1f\n" +
+	"\auser_id\x18\b \x01(\fR\x06userId\x12\x1f\n" +
 	"\x04user\x18\a \x01(\v2\v.entpb.UserR\x04user\"0\n" +
 	"\x06Status\x12\x11\n" +
 	"\rSTATUS_ACTIVE\x10\x00\x12\x13\n" +
@@ -1338,7 +1338,7 @@ const file_entpb_entpb_proto_rawDesc = "" +
 	"\x14CreateAccountRequest\x12(\n" +
 	"\aaccount\x18\x01 \x01(\v2\x0e.entpb.AccountR\aaccount\"\x92\x01\n" +
 	"\x11GetAccountRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x121\n" +
+	"\x02id\x18\x01 \x01(\fR\x02id\x121\n" +
 	"\x04view\x18\x02 \x01(\x0e2\x1d.entpb.GetAccountRequest.ViewR\x04view\":\n" +
 	"\x04View\x12\x14\n" +
 	"\x10VIEW_UNSPECIFIED\x10\x00\x12\t\n" +
@@ -1347,7 +1347,7 @@ const file_entpb_entpb_proto_rawDesc = "" +
 	"\x14UpdateAccountRequest\x12(\n" +
 	"\aaccount\x18\x01 \x01(\v2\x0e.entpb.AccountR\aaccount\"&\n" +
 	"\x14DeleteAccountRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"\xc0\x01\n" +
+	"\x02id\x18\x01 \x01(\fR\x02id\"\xc0\x01\n" +
 	"\x12ListAccountRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
@@ -1365,7 +1365,7 @@ const file_entpb_entpb_proto_rawDesc = "" +
 	"\x1bBatchCreateAccountsResponse\x12*\n" +
 	"\baccounts\x18\x01 \x03(\v2\x0e.entpb.AccountR\baccounts\"\xe0\x03\n" +
 	"\x04User\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\fR\x02id\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
 	"\tlast_name\x18\x03 \x01(\tR\blastName\x12*\n" +
@@ -1389,7 +1389,7 @@ const file_entpb_entpb_proto_rawDesc = "" +
 	"\x11CreateUserRequest\x12\x1f\n" +
 	"\x04user\x18\x01 \x01(\v2\v.entpb.UserR\x04user\"\x8c\x01\n" +
 	"\x0eGetUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12.\n" +
+	"\x02id\x18\x01 \x01(\fR\x02id\x12.\n" +
 	"\x04view\x18\x02 \x01(\x0e2\x1a.entpb.GetUserRequest.ViewR\x04view\":\n" +
 	"\x04View\x12\x14\n" +
 	"\x10VIEW_UNSPECIFIED\x10\x00\x12\t\n" +
@@ -1398,7 +1398,7 @@ const file_entpb_entpb_proto_rawDesc = "" +
 	"\x11UpdateUserRequest\x12\x1f\n" +
 	"\x04user\x18\x01 \x01(\v2\v.entpb.UserR\x04user\"#\n" +
 	"\x11DeleteUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"\xba\x01\n" +
+	"\x02id\x18\x01 \x01(\fR\x02id\"\xba\x01\n" +
 	"\x0fListUserRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
