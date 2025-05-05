@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"user/internal/handler"
 	"user/internal/router"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
 )
@@ -36,12 +38,35 @@ func main() {
 
 // Initialize Ent client
 func initEntClient() *ent.Client {
-	client, err := ent.Open("postgres", "host=localhost port=5432 user=postgres password=0000 dbname=user_service sslmode=disable")
-	if err != nil {
-		logger.Fatalf("❌ failed opening connection to postgres: %v", err)
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+	sslmode := os.Getenv("DB_SSLMODE")
+
+	// Kiểm tra thiếu biến
+	if host == "" || port == "" || user == "" || dbname == "" {
+			log.Fatal("❌ One or more required DB environment variables are not set")
 	}
-	logger.Println("✅ Connected to PostgreSQL")
+
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+			host, port, user, password, dbname, sslmode)
+
+	client, err := ent.Open("postgres", dsn)
+	if err != nil {
+			log.Fatalf("❌ failed opening connection to postgres: %v", err)
+	}
+
+	log.Println("✅ Connected to PostgreSQL")
 	return client
+}
+
+func init() {
+	err := godotenv.Load(".env")
+	if err != nil {
+			log.Fatalf("Error loading .env file")
+	}
 }
 
 // Run schema migration
