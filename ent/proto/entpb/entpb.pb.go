@@ -804,6 +804,7 @@ type User struct {
 	Address       string                 `protobuf:"bytes,8,opt,name=address,proto3" json:"address,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CompanyId     string                 `protobuf:"bytes,12,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"`
 	Account       *Account               `protobuf:"bytes,11,opt,name=account,proto3" json:"account,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -907,6 +908,13 @@ func (x *User) GetUpdatedAt() *timestamppb.Timestamp {
 		return x.UpdatedAt
 	}
 	return nil
+}
+
+func (x *User) GetCompanyId() string {
+	if x != nil {
+		return x.CompanyId
+	}
+	return ""
 }
 
 func (x *User) GetAccount() *Account {
@@ -1346,7 +1354,7 @@ const file_entpb_entpb_proto_rawDesc = "" +
 	"\x1aBatchCreateAccountsRequest\x127\n" +
 	"\brequests\x18\x01 \x03(\v2\x1b.entpb.CreateAccountRequestR\brequests\"I\n" +
 	"\x1bBatchCreateAccountsResponse\x12*\n" +
-	"\baccounts\x18\x01 \x03(\v2\x0e.entpb.AccountR\baccounts\"\xc1\x03\n" +
+	"\baccounts\x18\x01 \x03(\v2\x0e.entpb.AccountR\baccounts\"\xe0\x03\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
 	"\n" +
@@ -1361,7 +1369,9 @@ const file_entpb_entpb_proto_rawDesc = "" +
 	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12(\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x1d\n" +
+	"\n" +
+	"company_id\x18\f \x01(\tR\tcompanyId\x12(\n" +
 	"\aaccount\x18\v \x01(\v2\x0e.entpb.AccountR\aaccount\">\n" +
 	"\x06Gender\x12\x10\n" +
 	"\fGENDER_OTHER\x10\x00\x12\x11\n" +

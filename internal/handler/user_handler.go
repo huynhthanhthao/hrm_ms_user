@@ -39,6 +39,7 @@ func (h *UserHandler) RegisterHandler(c *gin.Context) {
 		WardCode:  req.WardCode,
 		Address:   req.Address,
 		Gender:    req.Gender,
+		CompanyId: req.CompanyId,
 	}
 
 	// Gọi service để đăng ký người dùng

@@ -61,6 +61,10 @@ func (User) Fields() []ent.Field {
 			Annotations(
                 entproto.Field(10),
             ),
+		field.String("company_id").NotEmpty().
+			Annotations(
+                entproto.Field(12),
+            ),
 	}
 }
 

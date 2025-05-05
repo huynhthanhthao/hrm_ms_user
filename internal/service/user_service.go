@@ -36,10 +36,11 @@ type RegisterInput struct {
 	WardCode  string
 	Address   string
 	Gender    string
+	CompanyId string
 }
 
 func (s *UserService) Register(ctx context.Context, c *gin.Context, input RegisterInput) (*dto.UserResponse, error) {
-    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 
 	if err != nil {
 		return nil, fmt.Errorf("HTTP %d: Lỗi mã hóa mật khẩu: %v", http.StatusConflict, err)
@@ -61,6 +62,7 @@ func (s *UserService) Register(ctx context.Context, c *gin.Context, input Regist
 		SetWardCode(input.WardCode).
 		SetAddress(input.Address).
 		SetGender(user.Gender(input.Gender)).
+		SetCompanyID(input.CompanyId).
 		Save(ctx)
 
 	if err != nil {
@@ -69,7 +71,7 @@ func (s *UserService) Register(ctx context.Context, c *gin.Context, input Regist
 	}
 
 	// Tạo tài khoản cho người dùng
-	acc, err := tx.Account. 
+	acc, err := tx.Account.
 		Create().
 		SetUsername(input.Username).
 		SetPassword(string(hashedPassword)).
@@ -93,14 +95,15 @@ func (s *UserService) Register(ctx context.Context, c *gin.Context, input Regist
 			LastName:  usr.LastName,
 			Email:     usr.Email,
 			Phone:     usr.Phone,
-			Address: usr.Address,
-			WardCode: usr.WardCode,
-			Gender:  string(usr.Gender),
+			Address:   usr.Address,
+			WardCode:  usr.WardCode,
+			CompanyId: usr.CompanyID,
+			Gender:    string(usr.Gender),
 			Account: &dto.AccountResponse{
-				Username: acc.Username,	
+				Username: acc.Username,
 			},
 		},
-	nil
+		nil
 }
 
 type LoginInput struct {
@@ -153,11 +156,12 @@ func (s *UserService) Login(ctx context.Context, c *gin.Context, input LoginInpu
 			LastName:  usr.LastName,
 			Email:     usr.Email,
 			Phone:     usr.Phone,
-			Address: usr.Address,
-			WardCode: usr.WardCode,
-			Gender:  string(usr.Gender),
+			Address:   usr.Address,
+			CompanyId: usr.CompanyID,
+			WardCode:  usr.WardCode,
+			Gender:    string(usr.Gender),
 			Account: &dto.AccountResponse{
-				Username: acc.Username,	
+				Username: acc.Username,
 			},
 		},
 	}, nil
@@ -171,5 +175,3 @@ func generateToken(accountID int, duration time.Duration) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }
-
-

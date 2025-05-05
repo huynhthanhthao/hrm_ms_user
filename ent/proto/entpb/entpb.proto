@@ -108,6 +108,8 @@ message User {
 
   google.protobuf.Timestamp updated_at = 10;
 
+  string company_id = 12;
+
   Account account = 11;
 
   enum Gender {

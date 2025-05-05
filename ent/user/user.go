@@ -33,6 +33,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldCompanyID holds the string denoting the company_id field in the database.
+	FieldCompanyID = "company_id"
 	// EdgeAccount holds the string denoting the account edge name in mutations.
 	EdgeAccount = "account"
 	// Table holds the table name of the user in the database.
@@ -58,6 +60,7 @@ var Columns = []string{
 	FieldAddress,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldCompanyID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -89,6 +92,8 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// CompanyIDValidator is a validator for the "company_id" field. It is called by the builders before save.
+	CompanyIDValidator func(string) error
 )
 
 // Gender defines the type for the "gender" enum field.
@@ -169,6 +174,11 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByCompanyID orders the results by the company_id field.
+func ByCompanyID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCompanyID, opts...).ToFunc()
 }
 
 // ByAccountField orders the results by account field.

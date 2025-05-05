@@ -95,6 +95,11 @@ func UpdatedAt(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// CompanyID applies equality check predicate on the "company_id" field. It's identical to CompanyIDEQ.
+func CompanyID(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldCompanyID, v))
+}
+
 // FirstNameEQ applies the EQ predicate on the "first_name" field.
 func FirstNameEQ(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldFirstName, v))
@@ -583,6 +588,71 @@ func UpdatedAtLT(v time.Time) predicate.User {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// CompanyIDEQ applies the EQ predicate on the "company_id" field.
+func CompanyIDEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldCompanyID, v))
+}
+
+// CompanyIDNEQ applies the NEQ predicate on the "company_id" field.
+func CompanyIDNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldCompanyID, v))
+}
+
+// CompanyIDIn applies the In predicate on the "company_id" field.
+func CompanyIDIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldCompanyID, vs...))
+}
+
+// CompanyIDNotIn applies the NotIn predicate on the "company_id" field.
+func CompanyIDNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldCompanyID, vs...))
+}
+
+// CompanyIDGT applies the GT predicate on the "company_id" field.
+func CompanyIDGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldCompanyID, v))
+}
+
+// CompanyIDGTE applies the GTE predicate on the "company_id" field.
+func CompanyIDGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldCompanyID, v))
+}
+
+// CompanyIDLT applies the LT predicate on the "company_id" field.
+func CompanyIDLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldCompanyID, v))
+}
+
+// CompanyIDLTE applies the LTE predicate on the "company_id" field.
+func CompanyIDLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldCompanyID, v))
+}
+
+// CompanyIDContains applies the Contains predicate on the "company_id" field.
+func CompanyIDContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldCompanyID, v))
+}
+
+// CompanyIDHasPrefix applies the HasPrefix predicate on the "company_id" field.
+func CompanyIDHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldCompanyID, v))
+}
+
+// CompanyIDHasSuffix applies the HasSuffix predicate on the "company_id" field.
+func CompanyIDHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldCompanyID, v))
+}
+
+// CompanyIDEqualFold applies the EqualFold predicate on the "company_id" field.
+func CompanyIDEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldCompanyID, v))
+}
+
+// CompanyIDContainsFold applies the ContainsFold predicate on the "company_id" field.
+func CompanyIDContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldCompanyID, v))
 }
 
 // HasAccount applies the HasEdge predicate on the "account" edge.

@@ -36,6 +36,8 @@ type User struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CompanyID holds the value of the "company_id" field.
+	CompanyID string `json:"company_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -69,7 +71,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldID:
 			values[i] = new(sql.NullInt64)
-		case user.FieldFirstName, user.FieldLastName, user.FieldGender, user.FieldEmail, user.FieldPhone, user.FieldWardCode, user.FieldAddress:
+		case user.FieldFirstName, user.FieldLastName, user.FieldGender, user.FieldEmail, user.FieldPhone, user.FieldWardCode, user.FieldAddress, user.FieldCompanyID:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -148,6 +150,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.UpdatedAt = value.Time
 			}
+		case user.FieldCompanyID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field company_id", values[i])
+			} else if value.Valid {
+				u.CompanyID = value.String
+			}
 		default:
 			u.selectValues.Set(columns[i], values[i])
 		}
@@ -215,6 +223,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("company_id=")
+	builder.WriteString(u.CompanyID)
 	builder.WriteByte(')')
 	return builder.String()
 }

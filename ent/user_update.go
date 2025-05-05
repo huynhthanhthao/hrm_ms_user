@@ -147,6 +147,20 @@ func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
 	return uu
 }
 
+// SetCompanyID sets the "company_id" field.
+func (uu *UserUpdate) SetCompanyID(s string) *UserUpdate {
+	uu.mutation.SetCompanyID(s)
+	return uu
+}
+
+// SetNillableCompanyID sets the "company_id" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableCompanyID(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetCompanyID(*s)
+	}
+	return uu
+}
+
 // SetAccountID sets the "account" edge to the Account entity by ID.
 func (uu *UserUpdate) SetAccountID(id int) *UserUpdate {
 	uu.mutation.SetAccountID(id)
@@ -250,6 +264,11 @@ func (uu *UserUpdate) check() error {
 			return &ValidationError{Name: "address", err: fmt.Errorf(`ent: validator failed for field "User.address": %w`, err)}
 		}
 	}
+	if v, ok := uu.mutation.CompanyID(); ok {
+		if err := user.CompanyIDValidator(v); err != nil {
+			return &ValidationError{Name: "company_id", err: fmt.Errorf(`ent: validator failed for field "User.company_id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -291,6 +310,9 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := uu.mutation.CompanyID(); ok {
+		_spec.SetField(user.FieldCompanyID, field.TypeString, value)
 	}
 	if uu.mutation.AccountCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -459,6 +481,20 @@ func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
 	return uuo
 }
 
+// SetCompanyID sets the "company_id" field.
+func (uuo *UserUpdateOne) SetCompanyID(s string) *UserUpdateOne {
+	uuo.mutation.SetCompanyID(s)
+	return uuo
+}
+
+// SetNillableCompanyID sets the "company_id" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableCompanyID(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetCompanyID(*s)
+	}
+	return uuo
+}
+
 // SetAccountID sets the "account" edge to the Account entity by ID.
 func (uuo *UserUpdateOne) SetAccountID(id int) *UserUpdateOne {
 	uuo.mutation.SetAccountID(id)
@@ -575,6 +611,11 @@ func (uuo *UserUpdateOne) check() error {
 			return &ValidationError{Name: "address", err: fmt.Errorf(`ent: validator failed for field "User.address": %w`, err)}
 		}
 	}
+	if v, ok := uuo.mutation.CompanyID(); ok {
+		if err := user.CompanyIDValidator(v); err != nil {
+			return &ValidationError{Name: "company_id", err: fmt.Errorf(`ent: validator failed for field "User.company_id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -633,6 +674,9 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := uuo.mutation.CompanyID(); ok {
+		_spec.SetField(user.FieldCompanyID, field.TypeString, value)
 	}
 	if uuo.mutation.AccountCleared() {
 		edge := &sqlgraph.EdgeSpec{

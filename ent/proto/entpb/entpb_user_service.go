@@ -63,6 +63,8 @@ func toProtoUser(e *ent.User) (*User, error) {
 	v := &User{}
 	address := e.Address
 	v.Address = address
+	company_id := e.CompanyID
+	v.CompanyId = company_id
 	created_at := timestamppb.New(e.CreatedAt)
 	v.CreatedAt = created_at
 	email := e.Email
@@ -166,6 +168,8 @@ func (svc *UserService) Update(ctx context.Context, req *UpdateUserRequest) (*Us
 	m := svc.client.User.UpdateOneID(userID)
 	userAddress := user.GetAddress()
 	m.SetAddress(userAddress)
+	userCompanyID := user.GetCompanyId()
+	m.SetCompanyID(userCompanyID)
 	userCreatedAt := runtime.ExtractTime(user.GetCreatedAt())
 	m.SetCreatedAt(userCreatedAt)
 	userEmail := user.GetEmail()
@@ -322,6 +326,8 @@ func (svc *UserService) createBuilder(user *User) (*ent.UserCreate, error) {
 	m := svc.client.User.Create()
 	userAddress := user.GetAddress()
 	m.SetAddress(userAddress)
+	userCompanyID := user.GetCompanyId()
+	m.SetCompanyID(userCompanyID)
 	userCreatedAt := runtime.ExtractTime(user.GetCreatedAt())
 	m.SetCreatedAt(userCreatedAt)
 	userEmail := user.GetEmail()

@@ -69,4 +69,8 @@ func init() {
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userDescCompanyID is the schema descriptor for company_id field.
+	userDescCompanyID := userFields[9].Descriptor()
+	// user.CompanyIDValidator is a validator for the "company_id" field. It is called by the builders before save.
+	user.CompanyIDValidator = userDescCompanyID.Validators[0].(func(string) error)
 }
