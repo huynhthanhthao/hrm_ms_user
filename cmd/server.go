@@ -16,14 +16,11 @@ import (
 	"google.golang.org/grpc"
 )
 
-const (
-	httpPort = ":8089"
-	grpcPort = ":50051"
-)
-
 var (
-	ctx    = context.Background()
-	logger = log.New(os.Stdout, "[user-service] ", log.LstdFlags)
+	ctx      = context.Background()
+	logger   = log.New(os.Stdout, "[user-service] ", log.LstdFlags)
+	httpPort = os.Getenv("HTTP_PORT")
+	grpcPort = os.Getenv("GRPC_PORT")
 )
 
 func main() {
@@ -61,12 +58,17 @@ func initEntClient() *ent.Client {
 	log.Println("✅ Connected to PostgreSQL")
 	return client
 }
-
 func init() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
+
+	// Log loaded environment variables for debugging
+	fmt.Printf("Loaded HTTP_PORT: %s", os.Getenv("HTTP_PORT"))
+	fmt.Printf("Loaded GRPC_PORT: %s", os.Getenv("GRPC_PORT"))
+	httpPort = ":" + os.Getenv("HTTP_PORT")
+	grpcPort = ":" + os.Getenv("GRPC_PORT")
 }
 
 // Run schema migration
