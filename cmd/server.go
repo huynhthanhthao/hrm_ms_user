@@ -47,15 +47,15 @@ func initEntClient() *ent.Client {
 
 	// Kiểm tra thiếu biến
 	if host == "" || port == "" || user == "" || dbname == "" {
-			log.Fatal("❌ One or more required DB environment variables are not set")
+		log.Fatal("❌ One or more required DB environment variables are not set")
 	}
 
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-			host, port, user, password, dbname, sslmode)
+		host, port, user, password, dbname, sslmode)
 
 	client, err := ent.Open("postgres", dsn)
 	if err != nil {
-			log.Fatalf("❌ failed opening connection to postgres: %v", err)
+		log.Fatalf("❌ failed opening connection to postgres: %v", err)
 	}
 
 	log.Println("✅ Connected to PostgreSQL")
@@ -65,7 +65,7 @@ func initEntClient() *ent.Client {
 func init() {
 	err := godotenv.Load(".env")
 	if err != nil {
-			log.Fatalf("Error loading .env file")
+		log.Fatalf("Error loading .env file")
 	}
 }
 
@@ -101,7 +101,7 @@ func startHTTPServer(client *ent.Client) {
 	r.Use(handler.Logger())
 
 	logger.Printf("✅ HTTP server listening on %s", httpPort)
-	
+
 	if err := r.Run(httpPort); err != nil {
 		logger.Fatalf("❌ HTTP server stopped: %v", err)
 	}
