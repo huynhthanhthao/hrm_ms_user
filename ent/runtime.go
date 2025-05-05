@@ -33,6 +33,10 @@ func init() {
 	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() time.Time)
 	// account.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	account.UpdateDefaultUpdatedAt = accountDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// accountDescUserID is the schema descriptor for user_id field.
+	accountDescUserID := accountFields[5].Descriptor()
+	// account.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	account.UserIDValidator = accountDescUserID.Validators[0].(func(int) error)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescFirstName is the schema descriptor for first_name field.

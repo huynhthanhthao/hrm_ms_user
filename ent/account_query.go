@@ -24,7 +24,6 @@ type AccountQuery struct {
 	inters     []Interceptor
 	predicates []predicate.Account
 	withUser   *UserQuery
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -370,18 +369,11 @@ func (aq *AccountQuery) prepareQuery(ctx context.Context) error {
 func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Account, error) {
 	var (
 		nodes       = []*Account{}
-		withFKs     = aq.withFKs
 		_spec       = aq.querySpec()
 		loadedTypes = [1]bool{
 			aq.withUser != nil,
 		}
 	)
-	if aq.withUser != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, account.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Account).scanValues(nil, columns)
 	}
@@ -413,10 +405,7 @@ func (aq *AccountQuery) loadUser(ctx context.Context, query *UserQuery, nodes []
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Account)
 	for i := range nodes {
-		if nodes[i].user_account == nil {
-			continue
-		}
-		fk := *nodes[i].user_account
+		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -433,7 +422,7 @@ func (aq *AccountQuery) loadUser(ctx context.Context, query *UserQuery, nodes []
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_account" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -466,6 +455,9 @@ func (aq *AccountQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != account.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if aq.withUser != nil {
+			_spec.Node.AddColumnOnce(account.FieldUserID)
 		}
 	}
 	if ps := aq.predicates; len(ps) > 0 {

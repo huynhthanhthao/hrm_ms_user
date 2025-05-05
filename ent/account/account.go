@@ -25,6 +25,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the account in the database.
@@ -35,7 +37,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_account"
+	UserColumn = "user_id"
 )
 
 // Columns holds all SQL columns for account fields.
@@ -46,23 +48,13 @@ var Columns = []string{
 	FieldStatus,
 	FieldCreatedAt,
 	FieldUpdatedAt,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "accounts"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"user_account",
+	FieldUserID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -80,6 +72,8 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	UserIDValidator func(int) error
 )
 
 // Status defines the type for the "status" enum field.
@@ -139,6 +133,11 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

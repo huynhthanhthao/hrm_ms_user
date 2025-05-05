@@ -70,6 +70,8 @@ func toProtoAccount(e *ent.Account) (*Account, error) {
 	v.Status = status
 	updated_at := timestamppb.New(e.UpdatedAt)
 	v.UpdatedAt = updated_at
+	user := int64(e.UserID)
+	v.UserId = user
 	username := e.Username
 	v.Username = username
 	if edg := e.Edges.User; edg != nil {
@@ -163,6 +165,8 @@ func (svc *AccountService) Update(ctx context.Context, req *UpdateAccountRequest
 	m.SetStatus(accountStatus)
 	accountUpdatedAt := runtime.ExtractTime(account.GetUpdatedAt())
 	m.SetUpdatedAt(accountUpdatedAt)
+	accountUserID := int(account.GetUserId())
+	m.SetUserID(accountUserID)
 	accountUsername := account.GetUsername()
 	m.SetUsername(accountUsername)
 	if account.GetUser() != nil {
@@ -311,6 +315,8 @@ func (svc *AccountService) createBuilder(account *Account) (*ent.AccountCreate, 
 	m.SetStatus(accountStatus)
 	accountUpdatedAt := runtime.ExtractTime(account.GetUpdatedAt())
 	m.SetUpdatedAt(accountUpdatedAt)
+	accountUserID := int(account.GetUserId())
+	m.SetUserID(accountUserID)
 	accountUsername := account.GetUsername()
 	m.SetUsername(accountUsername)
 	if account.GetUser() != nil {

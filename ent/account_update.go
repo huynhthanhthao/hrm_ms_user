@@ -91,9 +91,17 @@ func (au *AccountUpdate) SetUpdatedAt(t time.Time) *AccountUpdate {
 	return au
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (au *AccountUpdate) SetUserID(id int) *AccountUpdate {
-	au.mutation.SetUserID(id)
+// SetUserID sets the "user_id" field.
+func (au *AccountUpdate) SetUserID(i int) *AccountUpdate {
+	au.mutation.SetUserID(i)
+	return au
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (au *AccountUpdate) SetNillableUserID(i *int) *AccountUpdate {
+	if i != nil {
+		au.SetUserID(*i)
+	}
 	return au
 }
 
@@ -164,6 +172,11 @@ func (au *AccountUpdate) check() error {
 	if v, ok := au.mutation.Status(); ok {
 		if err := account.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Account.status": %w`, err)}
+		}
+	}
+	if v, ok := au.mutation.UserID(); ok {
+		if err := account.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`ent: validator failed for field "Account.user_id": %w`, err)}
 		}
 	}
 	if au.mutation.UserCleared() && len(au.mutation.UserIDs()) > 0 {
@@ -310,9 +323,17 @@ func (auo *AccountUpdateOne) SetUpdatedAt(t time.Time) *AccountUpdateOne {
 	return auo
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (auo *AccountUpdateOne) SetUserID(id int) *AccountUpdateOne {
-	auo.mutation.SetUserID(id)
+// SetUserID sets the "user_id" field.
+func (auo *AccountUpdateOne) SetUserID(i int) *AccountUpdateOne {
+	auo.mutation.SetUserID(i)
+	return auo
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (auo *AccountUpdateOne) SetNillableUserID(i *int) *AccountUpdateOne {
+	if i != nil {
+		auo.SetUserID(*i)
+	}
 	return auo
 }
 
@@ -396,6 +417,11 @@ func (auo *AccountUpdateOne) check() error {
 	if v, ok := auo.mutation.Status(); ok {
 		if err := account.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Account.status": %w`, err)}
+		}
+	}
+	if v, ok := auo.mutation.UserID(); ok {
+		if err := account.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`ent: validator failed for field "Account.user_id": %w`, err)}
 		}
 	}
 	if auo.mutation.UserCleared() && len(auo.mutation.UserIDs()) > 0 {

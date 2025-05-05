@@ -22,6 +22,8 @@ message Account {
 
   google.protobuf.Timestamp updated_at = 6;
 
+  int64 user_id = 8;
+
   User user = 7;
 
   enum Status {

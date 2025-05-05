@@ -28,10 +28,11 @@ type Account struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID int `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AccountQuery when eager-loading is set.
 	Edges        AccountEdges `json:"edges"`
-	user_account *int
 	selectValues sql.SelectValues
 }
 
@@ -60,14 +61,12 @@ func (*Account) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case account.FieldID:
+		case account.FieldID, account.FieldUserID:
 			values[i] = new(sql.NullInt64)
 		case account.FieldUsername, account.FieldPassword, account.FieldStatus:
 			values[i] = new(sql.NullString)
 		case account.FieldCreatedAt, account.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case account.ForeignKeys[0]: // user_account
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -119,12 +118,11 @@ func (a *Account) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				a.UpdatedAt = value.Time
 			}
-		case account.ForeignKeys[0]:
+		case account.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_account", value)
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				a.user_account = new(int)
-				*a.user_account = int(value.Int64)
+				a.UserID = int(value.Int64)
 			}
 		default:
 			a.selectValues.Set(columns[i], values[i])
@@ -180,6 +178,9 @@ func (a *Account) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(a.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", a.UserID))
 	builder.WriteByte(')')
 	return builder.String()
 }

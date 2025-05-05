@@ -45,7 +45,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "account" package.
 	AccountInverseTable = "accounts"
 	// AccountColumn is the table column denoting the account relation/edge.
-	AccountColumn = "user_account"
+	AccountColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.

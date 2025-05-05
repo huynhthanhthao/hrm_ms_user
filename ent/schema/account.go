@@ -20,30 +20,35 @@ func (Account) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("username").Unique().NotEmpty().
 			Annotations(
-                entproto.Field(2),
-            ),
+				entproto.Field(2),
+			),
 		field.String("password").Sensitive().NotEmpty().
 			Annotations(
-                entproto.Field(3),
-            ),
+				entproto.Field(3),
+			),
 		field.Enum("status").
 			Values("active", "inactive").
 			Default("active").
 			Annotations(
-                entproto.Field(4),
+				entproto.Field(4),
 				entproto.Enum(map[string]int32{
 					"active":   0,
 					"inactive": 1,
 				}),
-            ),
+			),
 		field.Time("created_at").Default(time.Now).
 			Annotations(
-                entproto.Field(5),
-            ),
+				entproto.Field(5),
+			),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now).
 			Annotations(
-                entproto.Field(6),
-            ),
+				entproto.Field(6),
+			),
+		field.Int("user_id").
+			Positive().
+			Annotations(
+				entproto.Field(8),
+			),
 	}
 }
 
@@ -54,13 +59,14 @@ func (Account) Edges() []ent.Edge {
 			Ref("account").
 			Unique().
 			Required().
-			Annotations(entproto.Field(7)), 
+			Field("user_id").
+			Annotations(entproto.Field(7)),
 	}
 }
 
 func (Account) Annotations() []schema.Annotation {
-    return []schema.Annotation{
-        entproto.Message(),
-        entproto.Service(), 
-    }
+	return []schema.Annotation{
+		entproto.Message(),
+		entproto.Service(),
+	}
 }

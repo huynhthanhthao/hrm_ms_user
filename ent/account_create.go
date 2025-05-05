@@ -75,9 +75,9 @@ func (ac *AccountCreate) SetNillableUpdatedAt(t *time.Time) *AccountCreate {
 	return ac
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (ac *AccountCreate) SetUserID(id int) *AccountCreate {
-	ac.mutation.SetUserID(id)
+// SetUserID sets the "user_id" field.
+func (ac *AccountCreate) SetUserID(i int) *AccountCreate {
+	ac.mutation.SetUserID(i)
 	return ac
 }
 
@@ -167,6 +167,14 @@ func (ac *AccountCreate) check() error {
 	if _, ok := ac.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Account.updated_at"`)}
 	}
+	if _, ok := ac.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Account.user_id"`)}
+	}
+	if v, ok := ac.mutation.UserID(); ok {
+		if err := account.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`ent: validator failed for field "Account.user_id": %w`, err)}
+		}
+	}
 	if len(ac.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Account.user"`)}
 	}
@@ -230,7 +238,7 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_account = &nodes[0]
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

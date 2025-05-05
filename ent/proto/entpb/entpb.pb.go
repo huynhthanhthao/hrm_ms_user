@@ -324,6 +324,7 @@ type Account struct {
 	Status        Account_Status         `protobuf:"varint,4,opt,name=status,proto3,enum=entpb.Account_Status" json:"status,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	UserId        int64                  `protobuf:"varint,8,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	User          *User                  `protobuf:"bytes,7,opt,name=user,proto3" json:"user,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -399,6 +400,13 @@ func (x *Account) GetUpdatedAt() *timestamppb.Timestamp {
 		return x.UpdatedAt
 	}
 	return nil
+}
+
+func (x *Account) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
 }
 
 func (x *Account) GetUser() *User {
@@ -1312,7 +1320,7 @@ var File_entpb_entpb_proto protoreflect.FileDescriptor
 
 const file_entpb_entpb_proto_rawDesc = "" +
 	"\n" +
-	"\x11entpb/entpb.proto\x12\x05entpb\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc9\x02\n" +
+	"\x11entpb/entpb.proto\x12\x05entpb\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe2\x02\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x1a\n" +
@@ -1321,7 +1329,8 @@ const file_entpb_entpb_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x1f\n" +
+	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x17\n" +
+	"\auser_id\x18\b \x01(\x03R\x06userId\x12\x1f\n" +
 	"\x04user\x18\a \x01(\v2\v.entpb.UserR\x04user\"0\n" +
 	"\x06Status\x12\x11\n" +
 	"\rSTATUS_ACTIVE\x10\x00\x12\x13\n" +
