@@ -4,9 +4,9 @@ package ent
 
 import (
 	"time"
-	"user/ent/account"
-	"user/ent/schema"
-	"user/ent/user"
+	"github.com/huynhthanhthao/hrm_user_service/ent/account"
+	"github.com/huynhthanhthao/hrm_user_service/ent/schema"
+	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 
 	"github.com/google/uuid"
 )

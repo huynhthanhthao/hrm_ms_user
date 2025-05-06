@@ -1,6 +1,6 @@
 package dto
 
-import "user/ent"
+import "github.com/huynhthanhthao/hrm_user_service/ent"
 
 type LoginResponse struct {
 	AccessToken  string    `json:"access_token"`

@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"user/ent/account"
-	"user/ent/user"
+	"github.com/huynhthanhthao/hrm_user_service/ent/account"
+	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"

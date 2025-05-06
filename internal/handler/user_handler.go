@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"user/internal/dto"
-	"user/internal/helper"
-	"user/internal/service"
+	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
+	"github.com/huynhthanhthao/hrm_user_service/internal/helper"
+	"github.com/huynhthanhthao/hrm_user_service/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

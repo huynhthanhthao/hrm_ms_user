@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"user/ent"
+	"github.com/huynhthanhthao/hrm_user_service/ent"
 )
 
 // The AccountFunc type is an adapter to allow the use of ordinary

@@ -15,9 +15,9 @@ import (
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	regexp "regexp"
 	strings "strings"
-	ent "user/ent"
-	account "user/ent/account"
-	user "user/ent/user"
+	ent "github.com/huynhthanhthao/hrm_user_service/ent"
+	account "github.com/huynhthanhthao/hrm_user_service/ent/account"
+	user "github.com/huynhthanhthao/hrm_user_service/ent/user"
 )
 
 // UserService implements UserServiceServer

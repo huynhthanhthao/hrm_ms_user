@@ -5,11 +5,11 @@ package enttest
 import (
 	"context"
 
-	"user/ent"
+	"github.com/huynhthanhthao/hrm_user_service/ent"
 	// required by schema hooks.
-	_ "user/ent/runtime"
+	_ "github.com/huynhthanhthao/hrm_user_service/ent/runtime"
 
-	"user/ent/migrate"
+	"github.com/huynhthanhthao/hrm_user_service/ent/migrate"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

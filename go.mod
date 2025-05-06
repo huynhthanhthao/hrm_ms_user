@@ -1,4 +1,4 @@
-module user
+module github.com/huynhthanhthao/hrm_user_service
 
 go 1.23.0
 

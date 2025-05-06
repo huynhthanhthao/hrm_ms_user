@@ -1,9 +1,9 @@
 package router
 
 import (
-	"user/ent"
-	"user/internal/handler"
-	"user/internal/service"
+	"github.com/huynhthanhthao/hrm_user_service/ent"
+	"github.com/huynhthanhthao/hrm_user_service/internal/handler"
+	"github.com/huynhthanhthao/hrm_user_service/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

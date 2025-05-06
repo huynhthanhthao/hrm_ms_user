@@ -4,8 +4,8 @@ package ent
 
 import (
 	"context"
-	"user/ent/predicate"
-	"user/ent/user"
+	"github.com/huynhthanhthao/hrm_user_service/ent/predicate"
+	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
