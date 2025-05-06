@@ -147,7 +147,7 @@ func generateToken(accountID string, duration time.Duration) (string, error) {
 	claims := jwt.MapClaims{
 		"account_id": accountID,
 		"exp":        time.Now().Add(duration).Unix(),
-		"iss":        "Rcoi4yCMsAdoEnn7LFPbbxSCUqYWVIoq",
+		"iss":        os.Getenv("ISS_KEY"),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
