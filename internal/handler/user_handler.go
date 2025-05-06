@@ -19,7 +19,7 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 	return &UserHandler{userService: userService}
 }
 
-func (h *UserHandler) RegisterHandler(c *gin.Context) { 
+func (h *UserHandler) RegisterHandler(c *gin.Context) {
 	var req dto.RegisterRequest
 
 	// Kiểm tra dữ liệu đầu vào
@@ -88,4 +88,31 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 	}
 
 	helper.Respond(c, http.StatusOK, "Đăng nhập thành công!", loginResp)
+}
+
+func (h *UserHandler) GetMe(c *gin.Context) {
+	// Lấy token từ header Authorization
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		helper.Respond(c, http.StatusUnauthorized, "Authorization header is missing", nil)
+		return
+	}
+
+	// Tách Bearer token
+	var token string
+	fmt.Sscanf(authHeader, "Bearer %s", &token)
+	if token == "" {
+		helper.Respond(c, http.StatusUnauthorized, "Invalid token format", nil)
+		return
+	}
+
+	// Decode token để lấy thông tin người dùng
+	userInfo, err := h.userService.DecodeToken(token)
+	if err != nil {
+		helper.Respond(c, http.StatusUnauthorized, "Invalid or expired token", nil)
+		return
+	}
+
+	// Trả về thông tin người dùng
+	helper.Respond(c, http.StatusOK, "Thông tin người dùng", userInfo)
 }

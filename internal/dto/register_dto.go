@@ -12,20 +12,3 @@ type RegisterRequest struct {
 	Address   string `json:"address" binding:"required,max=200"`
 	Gender    string `json:"gender" binding:"required,oneof=other female male"`
 }
-
-type AccountResponse struct {
-	Username string `json:"username"`
-}
-
-type UserResponse struct {
-	ID        string           `json:"id"`
-	FirstName string           `json:"first_name"`
-	LastName  string           `json:"last_name"`
-	Email     string           `json:"email"`
-	Phone     string           `json:"phone"`
-	Address   string           `json:"address"`
-	WardCode  string           `json:"ward_code"`
-	Gender    string           `json:"gender"`
-	CompanyId string           `json:"company_id"`
-	Account   *AccountResponse `json:"account"`
-}

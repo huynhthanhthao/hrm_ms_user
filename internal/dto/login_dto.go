@@ -1,9 +1,11 @@
 package dto
 
+import "user/ent"
+
 type LoginResponse struct {
-	AccessToken  string       `json:"access_token"`
-	RefreshToken string       `json:"refresh_token"`
-	User         UserResponse `json:"user"`
+	AccessToken  string    `json:"access_token"`
+	RefreshToken string    `json:"refresh_token"`
+	User         *ent.User `json:"user"`
 }
 
 type LoginRequest struct {

@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -39,7 +40,7 @@ type RegisterInput struct {
 	CompanyId string
 }
 
-func (s *UserService) Register(ctx context.Context, c *gin.Context, input RegisterInput) (*dto.UserResponse, error) {
+func (s *UserService) Register(ctx context.Context, c *gin.Context, input RegisterInput) (*ent.User, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 
 	if err != nil {
@@ -89,21 +90,7 @@ func (s *UserService) Register(ctx context.Context, c *gin.Context, input Regist
 
 	usr.Edges.Account = acc
 
-	return &dto.UserResponse{
-			ID:        usr.ID.String(),
-			FirstName: usr.FirstName,
-			LastName:  usr.LastName,
-			Email:     usr.Email,
-			Phone:     usr.Phone,
-			Address:   usr.Address,
-			WardCode:  usr.WardCode,
-			CompanyId: usr.CompanyID,
-			Gender:    string(usr.Gender),
-			Account: &dto.AccountResponse{
-				Username: acc.Username,
-			},
-		},
-		nil
+	return usr, nil
 }
 
 type LoginInput struct {
@@ -147,23 +134,12 @@ func (s *UserService) Login(ctx context.Context, c *gin.Context, input LoginInpu
 		return nil, fmt.Errorf("HTTP %d: Lỗi tạo refresh token: %v", http.StatusInternalServerError, err)
 	}
 
+	usr.Edges.Account = acc
+
 	return &dto.LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		User: dto.UserResponse{
-			ID:        usr.ID.String(),
-			FirstName: usr.FirstName,
-			LastName:  usr.LastName,
-			Email:     usr.Email,
-			Phone:     usr.Phone,
-			Address:   usr.Address,
-			CompanyId: usr.CompanyID,
-			WardCode:  usr.WardCode,
-			Gender:    string(usr.Gender),
-			Account: &dto.AccountResponse{
-				Username: acc.Username,
-			},
-		},
+		User:         usr,
 	}, nil
 }
 
@@ -171,7 +147,55 @@ func generateToken(accountID string, duration time.Duration) (string, error) {
 	claims := jwt.MapClaims{
 		"account_id": accountID,
 		"exp":        time.Now().Add(duration).Unix(),
+		"iss":        "CwTrBRN5swG7OivikMRkWXcex102L2SX",
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+}
+
+func (s *UserService) DecodeToken(token string) (*ent.User, error) {
+	// Parse the token
+	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+
+	if err != nil || !parsedToken.Valid {
+		return nil, fmt.Errorf("invalid token: %v", err)
+	}
+
+	// Extract claims
+	claims, ok := parsedToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("invalid token claims")
+	}
+
+	accountIDStr, ok := claims["account_id"].(string)
+	if !ok {
+		return nil, fmt.Errorf("account_id not found in token claims")
+	}
+
+	// Convert accountID to uuid.UUID
+	accountID, err := uuid.Parse(accountIDStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid account_id format: %v", err)
+	}
+
+	// Query the user associated with the account ID
+	ctx := context.Background()
+	acc, err := s.client.Account.Query().Where(account.IDEQ(accountID)).Only(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("account not found: %v", err)
+	}
+
+	usr, err := acc.QueryUser().Only(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("user not found: %v", err)
+	}
+
+	usr.Edges.Account = acc
+
+	return usr, nil
 }
