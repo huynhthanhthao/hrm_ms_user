@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
-	"github.com/huynhthanhthao/hrm_user_service/ent/account"
-	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/huynhthanhthao/hrm_user_service/ent/account"
+	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.

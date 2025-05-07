@@ -5,6 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
+
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 )
 

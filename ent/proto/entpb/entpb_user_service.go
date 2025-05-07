@@ -9,15 +9,15 @@ import (
 	sqlgraph "entgo.io/ent/dialect/sql/sqlgraph"
 	fmt "fmt"
 	uuid "github.com/google/uuid"
+	ent "github.com/huynhthanhthao/hrm_user_service/ent"
+	account "github.com/huynhthanhthao/hrm_user_service/ent/account"
+	user "github.com/huynhthanhthao/hrm_user_service/ent/user"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	regexp "regexp"
 	strings "strings"
-	ent "github.com/huynhthanhthao/hrm_user_service/ent"
-	account "github.com/huynhthanhthao/hrm_user_service/ent/account"
-	user "github.com/huynhthanhthao/hrm_user_service/ent/user"
 )
 
 // UserService implements UserServiceServer

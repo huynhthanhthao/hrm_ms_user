@@ -4,11 +4,11 @@ package user
 
 import (
 	"time"
-	"github.com/huynhthanhthao/hrm_user_service/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
+	"github.com/huynhthanhthao/hrm_user_service/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

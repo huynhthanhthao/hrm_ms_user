@@ -7,12 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"github.com/huynhthanhthao/hrm_user_service/ent/account"
-	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/huynhthanhthao/hrm_user_service/ent/account"
+	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 )
 
 // UserCreate is the builder for creating a User entity.

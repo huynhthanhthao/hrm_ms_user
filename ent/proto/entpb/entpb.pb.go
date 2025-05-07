@@ -1428,7 +1428,7 @@ const file_entpb_entpb_proto_rawDesc = "" +
 	"\x06Update\x12\x18.entpb.UpdateUserRequest\x1a\v.entpb.User\x12:\n" +
 	"\x06Delete\x12\x18.entpb.DeleteUserRequest\x1a\x16.google.protobuf.Empty\x127\n" +
 	"\x04List\x12\x16.entpb.ListUserRequest\x1a\x17.entpb.ListUserResponse\x12N\n" +
-	"\vBatchCreate\x12\x1e.entpb.BatchCreateUsersRequest\x1a\x1f.entpb.BatchCreateUsersResponseB\x16Z\x14user/ent/proto/entpbb\x06proto3"
+	"\vBatchCreate\x12\x1e.entpb.BatchCreateUsersRequest\x1a\x1f.entpb.BatchCreateUsersResponseB<Z:github.com/huynhthanhthao/hrm_user_service/ent/proto/entpbb\x06proto3"
 
 var (
 	file_entpb_entpb_proto_rawDescOnce sync.Once

@@ -7,15 +7,15 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
-	"github.com/huynhthanhthao/hrm_user_service/ent/account"
-	"github.com/huynhthanhthao/hrm_user_service/ent/predicate"
-	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/huynhthanhthao/hrm_user_service/ent/account"
+	"github.com/huynhthanhthao/hrm_user_service/ent/predicate"
+	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 )
 
 // UserQuery is the builder for querying User entities.

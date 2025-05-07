@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"github.com/huynhthanhthao/hrm_user_service/ent/account"
-	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/huynhthanhthao/hrm_user_service/ent/account"
+	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 )
 
 // User is the model entity for the User schema.

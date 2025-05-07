@@ -9,16 +9,15 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/google/uuid"
 	"github.com/huynhthanhthao/hrm_user_service/ent/migrate"
-
-	"github.com/huynhthanhthao/hrm_user_service/ent/account"
-	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/google/uuid"
+	"github.com/huynhthanhthao/hrm_user_service/ent/account"
+	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 )
 
 // Client is the client that holds all ent builders.

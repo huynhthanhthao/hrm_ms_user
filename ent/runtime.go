@@ -4,11 +4,11 @@ package ent
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	"github.com/huynhthanhthao/hrm_user_service/ent/schema"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
-
-	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
