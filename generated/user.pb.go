@@ -373,7 +373,7 @@ var File_proto_user_proto protoreflect.FileDescriptor
 
 const file_proto_user_proto_rawDesc = "" +
 	"\n" +
-	"\x10proto/user.proto\x12\x04user\"z\n" +
+	"\x10proto/user.proto\x12\x05entpb\"z\n" +
 	"\x10ListUsersRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x16\n" +
@@ -396,23 +396,21 @@ const file_proto_user_proto_rawDesc = "" +
 	"created_at\x18\n" +
 	" \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\tR\tupdatedAt\"\x9a\x01\n" +
-	"\x11ListUsersResponse\x12 \n" +
-	"\x05users\x18\x01 \x03(\v2\n" +
-	".user.UserR\x05users\x12\x1f\n" +
+	"updated_at\x18\v \x01(\tR\tupdatedAt\"\x9b\x01\n" +
+	"\x11ListUsersResponse\x12!\n" +
+	"\x05users\x18\x01 \x03(\v2\v.entpb.UserR\x05users\x12\x1f\n" +
 	"\vtotal_pages\x18\x02 \x01(\x05R\n" +
 	"totalPages\x12\x1f\n" +
 	"\vtotal_users\x18\x03 \x01(\x05R\n" +
 	"totalUsers\x12!\n" +
 	"\fcurrent_page\x18\x04 \x01(\x05R\vcurrentPage\" \n" +
 	"\x0eGetUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"1\n" +
-	"\x0fGetUserResponse\x12\x1e\n" +
-	"\x04user\x18\x01 \x01(\v2\n" +
-	".user.UserR\x04user2\x83\x01\n" +
-	"\vUserService\x12<\n" +
-	"\tListUsers\x12\x16.user.ListUsersRequest\x1a\x17.user.ListUsersResponse\x126\n" +
-	"\aGetUser\x12\x14.user.GetUserRequest\x1a\x15.user.GetUserResponseB\rZ\v./generatedb\x06proto3"
+	"\x02id\x18\x01 \x01(\tR\x02id\"2\n" +
+	"\x0fGetUserResponse\x12\x1f\n" +
+	"\x04user\x18\x01 \x01(\v2\v.entpb.UserR\x04user2\x87\x01\n" +
+	"\vUserService\x12>\n" +
+	"\tListUsers\x12\x17.entpb.ListUsersRequest\x1a\x18.entpb.ListUsersResponse\x128\n" +
+	"\aGetUser\x12\x15.entpb.GetUserRequest\x1a\x16.entpb.GetUserResponseB\rZ\v./generatedb\x06proto3"
 
 var (
 	file_proto_user_proto_rawDescOnce sync.Once
@@ -428,19 +426,19 @@ func file_proto_user_proto_rawDescGZIP() []byte {
 
 var file_proto_user_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_proto_user_proto_goTypes = []any{
-	(*ListUsersRequest)(nil),  // 0: user.ListUsersRequest
-	(*User)(nil),              // 1: user.User
-	(*ListUsersResponse)(nil), // 2: user.ListUsersResponse
-	(*GetUserRequest)(nil),    // 3: user.GetUserRequest
-	(*GetUserResponse)(nil),   // 4: user.GetUserResponse
+	(*ListUsersRequest)(nil),  // 0: entpb.ListUsersRequest
+	(*User)(nil),              // 1: entpb.User
+	(*ListUsersResponse)(nil), // 2: entpb.ListUsersResponse
+	(*GetUserRequest)(nil),    // 3: entpb.GetUserRequest
+	(*GetUserResponse)(nil),   // 4: entpb.GetUserResponse
 }
 var file_proto_user_proto_depIdxs = []int32{
-	1, // 0: user.ListUsersResponse.users:type_name -> user.User
-	1, // 1: user.GetUserResponse.user:type_name -> user.User
-	0, // 2: user.UserService.ListUsers:input_type -> user.ListUsersRequest
-	3, // 3: user.UserService.GetUser:input_type -> user.GetUserRequest
-	2, // 4: user.UserService.ListUsers:output_type -> user.ListUsersResponse
-	4, // 5: user.UserService.GetUser:output_type -> user.GetUserResponse
+	1, // 0: entpb.ListUsersResponse.users:type_name -> entpb.User
+	1, // 1: entpb.GetUserResponse.user:type_name -> entpb.User
+	0, // 2: entpb.UserService.ListUsers:input_type -> entpb.ListUsersRequest
+	3, // 3: entpb.UserService.GetUser:input_type -> entpb.GetUserRequest
+	2, // 4: entpb.UserService.ListUsers:output_type -> entpb.ListUsersResponse
+	4, // 5: entpb.UserService.GetUser:output_type -> entpb.GetUserResponse
 	4, // [4:6] is the sub-list for method output_type
 	2, // [2:4] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
