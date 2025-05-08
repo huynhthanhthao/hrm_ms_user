@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "./generated";
+
+service UserService {
+  rpc ListUsers (ListUsersRequest) returns (ListUsersResponse);
+  rpc GetUser (GetUserRequest) returns (GetUserResponse);
+}
+
+message ListUsersRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string search = 3;
+  string company_id = 4; 
+}
+
+message User {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string gender = 4;
+  string email = 5;
+  string phone = 6;
+  string ward_code = 7;
+  string address = 8;
+  string company_id = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+  int32 total_pages = 2;
+  int32 total_users = 3;
+  int32 current_page = 4;
+}
+
+message GetUserRequest {
+  string id = 1; // ID của người dùng cần lấy
+}
+
+message GetUserResponse {
+  User user = 1; // Thông tin người dùng
+}

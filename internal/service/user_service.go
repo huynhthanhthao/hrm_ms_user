@@ -197,3 +197,28 @@ func GenerateToken(accountID string, duration time.Duration) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }
+
+// GetAllUsers retrieves all users from the database
+func (s *UserService) GetAllUsers(ctx context.Context) ([]*ent.User, error) {
+	users, err := s.client.User.Query().All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve users: %w", err)
+	}
+	return users, nil
+}
+
+// GetUser retrieves a user by their ID
+func (s *UserService) GetUser(ctx context.Context, id string) (*ent.User, error) {
+	// Convert the string ID to uuid.UUID
+	userID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user ID format: %w", err)
+	}
+
+	// Use the converted UUID
+	user, err := s.client.User.Get(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve user: %w", err)
+	}
+	return user, nil
+}

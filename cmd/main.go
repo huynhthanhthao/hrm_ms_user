@@ -4,14 +4,18 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"os"
 
 	"github.com/huynhthanhthao/hrm_user_service/ent"
+	"github.com/huynhthanhthao/hrm_user_service/ent/migrate"
 	"github.com/huynhthanhthao/hrm_user_service/internal/handler"
 	"github.com/huynhthanhthao/hrm_user_service/internal/router"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 var (
@@ -72,27 +76,33 @@ func init() {
 
 // Run schema migration
 func runMigration(client *ent.Client) {
-	if err := client.Schema.Create(ctx); err != nil {
-		logger.Fatalf("❌ failed creating schema resources: %v", err)
+	ctx := context.Background()
+	if err := client.Schema.Create(ctx, migrate.WithDropColumn(true)); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
 	}
-	logger.Println("✅ Database schema created with Ent")
 }
 
 // Start gRPC server
 func startGRPCServer(client *ent.Client) {
-	// grpcSvc := entpb.NewUserService(client)
-	// grpcServer := grpc.NewServer()
-	// entpb.RegisterUserServiceServer(grpcServer, grpcSvc)
+	grpcServer := grpc.NewServer()
 
-	// lis, err := net.Listen("tcp", grpcPort)
-	// if err != nil {
-	// 	logger.Fatalf("❌ failed to listen for gRPC: %v", err)
-	// }
+	// Register the UserService
+	// userService := userGrpc.NewUserGRPCServer(client.UserService())
+	// userpb.RegisterUserServiceServer(grpcServer, userService)
 
-	// logger.Printf("✅ gRPC server listening on %s", grpcPort)
-	// if err := grpcServer.Serve(lis); err != nil {
-	// 	logger.Fatalf("❌ gRPC server stopped: %v", err)
-	// }
+	// Bật reflection để hỗ trợ gRPC CLI (tùy chọn)
+	reflection.Register(grpcServer)
+
+	lis, err := net.Listen("tcp", grpcPort)
+	if err != nil {
+		logger.Fatalf("❌ failed to listen for gRPC: %v", err)
+	}
+
+	logger.Printf("✅ gRPC server listening on %s", grpcPort)
+
+	if err := grpcServer.Serve(lis); err != nil {
+		logger.Fatalf("❌ gRPC server stopped: %v", err)
+	}
 }
 
 // Start HTTP server
