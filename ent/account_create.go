@@ -76,20 +76,6 @@ func (ac *AccountCreate) SetNillableUpdatedAt(t *time.Time) *AccountCreate {
 	return ac
 }
 
-// SetUserID sets the "user_id" field.
-func (ac *AccountCreate) SetUserID(u uuid.UUID) *AccountCreate {
-	ac.mutation.SetUserID(u)
-	return ac
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableUserID(u *uuid.UUID) *AccountCreate {
-	if u != nil {
-		ac.SetUserID(*u)
-	}
-	return ac
-}
-
 // SetID sets the "id" field.
 func (ac *AccountCreate) SetID(u uuid.UUID) *AccountCreate {
 	ac.mutation.SetID(u)
@@ -101,6 +87,12 @@ func (ac *AccountCreate) SetNillableID(u *uuid.UUID) *AccountCreate {
 	if u != nil {
 		ac.SetID(*u)
 	}
+	return ac
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (ac *AccountCreate) SetUserID(id uuid.UUID) *AccountCreate {
+	ac.mutation.SetUserID(id)
 	return ac
 }
 
@@ -156,10 +148,6 @@ func (ac *AccountCreate) defaults() {
 		v := account.DefaultUpdatedAt()
 		ac.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := ac.mutation.UserID(); !ok {
-		v := account.DefaultUserID()
-		ac.mutation.SetUserID(v)
-	}
 	if _, ok := ac.mutation.ID(); !ok {
 		v := account.DefaultID()
 		ac.mutation.SetID(v)
@@ -197,9 +185,6 @@ func (ac *AccountCreate) check() error {
 	}
 	if _, ok := ac.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Account.updated_at"`)}
-	}
-	if _, ok := ac.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Account.user_id"`)}
 	}
 	if len(ac.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Account.user"`)}
@@ -273,7 +258,7 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.UserID = nodes[0]
+		_node.user_account = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

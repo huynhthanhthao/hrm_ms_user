@@ -35,10 +35,6 @@ func init() {
 	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() time.Time)
 	// account.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	account.UpdateDefaultUpdatedAt = accountDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// accountDescUserID is the schema descriptor for user_id field.
-	accountDescUserID := accountFields[6].Descriptor()
-	// account.DefaultUserID holds the default value on creation for the user_id field.
-	account.DefaultUserID = accountDescUserID.Default.(func() uuid.UUID)
 	// accountDescID is the schema descriptor for id field.
 	accountDescID := accountFields[0].Descriptor()
 	// account.DefaultID holds the default value on creation for the id field.

@@ -8,7 +8,12 @@ type LoginResponse struct {
 	User         *ent.User `json:"user"`
 }
 
-type LoginRequest struct {
+type LoginDto struct {
 	Username string `json:"username" binding:"required,alphanum,min=3,max=20"`
 	Password string `json:"password" binding:"required"`
+}
+
+type LoginInput struct {
+	Username string
+	Password string
 }

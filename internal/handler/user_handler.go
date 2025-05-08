@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
 	"github.com/huynhthanhthao/hrm_user_service/internal/helper"
 	"github.com/huynhthanhthao/hrm_user_service/internal/service"
@@ -20,7 +21,7 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 }
 
 func (h *UserHandler) RegisterHandler(c *gin.Context) {
-	var req dto.RegisterRequest
+	var req dto.RegisterDto
 
 	// Kiểm tra dữ liệu đầu vào
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -29,18 +30,7 @@ func (h *UserHandler) RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	input := service.RegisterInput{
-		Username:  req.Username,
-		Password:  req.Password,
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		Email:     req.Email,
-		Phone:     req.Phone,
-		WardCode:  req.WardCode,
-		Address:   req.Address,
-		Gender:    req.Gender,
-		CompanyId: req.CompanyId,
-	}
+	input := dto.RegisterInput(req)
 
 	// Gọi service để đăng ký người dùng
 	user, err := h.userService.Register(c.Request.Context(), c, input)
@@ -60,7 +50,7 @@ func (h *UserHandler) RegisterHandler(c *gin.Context) {
 }
 
 func (h *UserHandler) LoginHandler(c *gin.Context) {
-	var req dto.LoginRequest
+	var req dto.LoginDto
 
 	// Kiểm tra dữ liệu đầu vào
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -69,10 +59,7 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	input := service.LoginInput{
-		Username: req.Username,
-		Password: req.Password,
-	}
+	input := dto.LoginInput(req)
 
 	// Gọi service để đăng nhập
 	loginResp, err := h.userService.Login(c.Request.Context(), c, input)
@@ -114,5 +101,5 @@ func (h *UserHandler) GetMe(c *gin.Context) {
 	}
 
 	// Trả về thông tin người dùng
-	helper.Respond(c, http.StatusOK, "Thông tin người dùng", userInfo)
+	helper.Respond(c, http.StatusOK, "Thông tin người dùng!", userInfo)
 }

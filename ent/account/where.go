@@ -76,11 +76,6 @@ func UpdatedAt(v time.Time) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v uuid.UUID) predicate.Account {
-	return predicate.Account(sql.FieldEQ(FieldUserID, v))
-}
-
 // UsernameEQ applies the EQ predicate on the "username" field.
 func UsernameEQ(v string) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldUsername, v))
@@ -309,26 +304,6 @@ func UpdatedAtLT(v time.Time) predicate.Account {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Account {
 	return predicate.Account(sql.FieldLTE(FieldUpdatedAt, v))
-}
-
-// UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v uuid.UUID) predicate.Account {
-	return predicate.Account(sql.FieldEQ(FieldUserID, v))
-}
-
-// UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v uuid.UUID) predicate.Account {
-	return predicate.Account(sql.FieldNEQ(FieldUserID, v))
-}
-
-// UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...uuid.UUID) predicate.Account {
-	return predicate.Account(sql.FieldIn(FieldUserID, vs...))
-}
-
-// UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...uuid.UUID) predicate.Account {
-	return predicate.Account(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

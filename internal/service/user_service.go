@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/huynhthanhthao/hrm_hr_service/generate"
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
@@ -18,29 +20,30 @@ import (
 )
 
 type UserService struct {
-	client *ent.Client
+	hrClient generate.ValidateCompanyServiceClient
+	client   *ent.Client
 }
 
-func NewUserService(client *ent.Client) *UserService {
+func NewUserService(client *ent.Client) (*UserService, error) {
 	return &UserService{
 		client: client,
-	}
+	}, nil
 }
 
-type RegisterInput struct {
-	Username  string
-	Password  string
-	FirstName string
-	LastName  string
-	Email     string
-	Phone     string
-	WardCode  string
-	Address   string
-	Gender    string
-	CompanyId string
-}
+func (s *UserService) Register(ctx context.Context, c *gin.Context, input dto.RegisterInput) (*ent.User, error) {
+	// Gọi gRPC để kiểm tra company_id
+	// resp, err := s.hrClient.ValidateCompany(ctx, &generate.ValidateCompanyRequest{
+	// 	CompanyId: input.CompanyId,
+	// })
 
-func (s *UserService) Register(ctx context.Context, c *gin.Context, input RegisterInput) (*ent.User, error) {
+	// if err != nil {
+	// 	return nil, fmt.Errorf("HTTP %d: Lỗi validate ID công ty: %v", http.StatusInternalServerError, err)
+	// }
+
+	// if !resp.Exists {
+	// 	return nil, fmt.Errorf("HTTP %d: ID công ty không tồn tại: %v", http.StatusNotFound, err)
+	// }
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 
 	if err != nil {
@@ -93,12 +96,7 @@ func (s *UserService) Register(ctx context.Context, c *gin.Context, input Regist
 	return usr, nil
 }
 
-type LoginInput struct {
-	Username string
-	Password string
-}
-
-func (s *UserService) Login(ctx context.Context, c *gin.Context, input LoginInput) (*dto.LoginResponse, error) {
+func (s *UserService) Login(ctx context.Context, c *gin.Context, input dto.LoginInput) (*dto.LoginResponse, error) {
 	// Tìm tài khoản theo tên đăng nhập
 	acc, err := s.client.Account.
 		Query().
@@ -124,12 +122,12 @@ func (s *UserService) Login(ctx context.Context, c *gin.Context, input LoginInpu
 	accessTokenDuration, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
 	refreshTokenDuration, _ := time.ParseDuration(os.Getenv("JWT_REFRESH_TOKEN_DURATION"))
 
-	accessToken, err := generateToken(acc.ID.String(), accessTokenDuration)
+	accessToken, err := GenerateToken(acc.ID.String(), accessTokenDuration)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP %d: Lỗi tạo access token: %v", http.StatusInternalServerError, err)
 	}
 
-	refreshToken, err := generateToken(acc.ID.String(), refreshTokenDuration)
+	refreshToken, err := GenerateToken(acc.ID.String(), refreshTokenDuration)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP %d: Lỗi tạo refresh token: %v", http.StatusInternalServerError, err)
 	}
@@ -141,16 +139,6 @@ func (s *UserService) Login(ctx context.Context, c *gin.Context, input LoginInpu
 		RefreshToken: refreshToken,
 		User:         usr,
 	}, nil
-}
-
-func generateToken(accountID string, duration time.Duration) (string, error) {
-	claims := jwt.MapClaims{
-		"account_id": accountID,
-		"exp":        time.Now().Add(duration).Unix(),
-		"iss":        os.Getenv("ISS_KEY"),
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }
 
 func (s *UserService) DecodeToken(token string) (*ent.User, error) {
@@ -198,4 +186,14 @@ func (s *UserService) DecodeToken(token string) (*ent.User, error) {
 	usr.Edges.Account = acc
 
 	return usr, nil
+}
+
+func GenerateToken(accountID string, duration time.Duration) (string, error) {
+	claims := jwt.MapClaims{
+		"account_id": accountID,
+		"exp":        time.Now().Add(duration).Unix(),
+		"iss":        os.Getenv("ISS_KEY"),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }

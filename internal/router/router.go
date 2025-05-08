@@ -11,7 +11,10 @@ import (
 func SetupRouter(client *ent.Client) *gin.Engine {
 	r := gin.Default()
 
-	userService := service.NewUserService(client)
+	userService, err := service.NewUserService(client)
+	if err != nil {
+		panic(err)
+	}
 	userHandler := handler.NewUserHandler(userService)
 
 	r.POST("/register", userHandler.RegisterHandler)

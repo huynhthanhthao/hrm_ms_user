@@ -333,51 +333,27 @@ func (m *AccountMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetUserID sets the "user_id" field.
-func (m *AccountMutation) SetUserID(u uuid.UUID) {
-	m.user = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *AccountMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the Account entity.
-// If the Account object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AccountMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *AccountMutation) ResetUserID() {
-	m.user = nil
+// SetUserID sets the "user" edge to the User entity by id.
+func (m *AccountMutation) SetUserID(id uuid.UUID) {
+	m.user = &id
 }
 
 // ClearUser clears the "user" edge to the User entity.
 func (m *AccountMutation) ClearUser() {
 	m.cleareduser = true
-	m.clearedFields[account.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *AccountMutation) UserCleared() bool {
 	return m.cleareduser
+}
+
+// UserID returns the "user" edge ID in the mutation.
+func (m *AccountMutation) UserID() (id uuid.UUID, exists bool) {
+	if m.user != nil {
+		return *m.user, true
+	}
+	return
 }
 
 // UserIDs returns the "user" edge IDs in the mutation.
@@ -430,7 +406,7 @@ func (m *AccountMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AccountMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 5)
 	if m.username != nil {
 		fields = append(fields, account.FieldUsername)
 	}
@@ -445,9 +421,6 @@ func (m *AccountMutation) Fields() []string {
 	}
 	if m.updated_at != nil {
 		fields = append(fields, account.FieldUpdatedAt)
-	}
-	if m.user != nil {
-		fields = append(fields, account.FieldUserID)
 	}
 	return fields
 }
@@ -467,8 +440,6 @@ func (m *AccountMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case account.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case account.FieldUserID:
-		return m.UserID()
 	}
 	return nil, false
 }
@@ -488,8 +459,6 @@ func (m *AccountMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldCreatedAt(ctx)
 	case account.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case account.FieldUserID:
-		return m.OldUserID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Account field %s", name)
 }
@@ -533,13 +502,6 @@ func (m *AccountMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
-		return nil
-	case account.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Account field %s", name)
@@ -604,9 +566,6 @@ func (m *AccountMutation) ResetField(name string) error {
 		return nil
 	case account.FieldUpdatedAt:
 		m.ResetUpdatedAt()
-		return nil
-	case account.FieldUserID:
-		m.ResetUserID()
 		return nil
 	}
 	return fmt.Errorf("unknown Account field %s", name)

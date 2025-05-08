@@ -92,17 +92,9 @@ func (au *AccountUpdate) SetUpdatedAt(t time.Time) *AccountUpdate {
 	return au
 }
 
-// SetUserID sets the "user_id" field.
-func (au *AccountUpdate) SetUserID(u uuid.UUID) *AccountUpdate {
-	au.mutation.SetUserID(u)
-	return au
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (au *AccountUpdate) SetNillableUserID(u *uuid.UUID) *AccountUpdate {
-	if u != nil {
-		au.SetUserID(*u)
-	}
+// SetUserID sets the "user" edge to the User entity by ID.
+func (au *AccountUpdate) SetUserID(id uuid.UUID) *AccountUpdate {
+	au.mutation.SetUserID(id)
 	return au
 }
 
@@ -319,17 +311,9 @@ func (auo *AccountUpdateOne) SetUpdatedAt(t time.Time) *AccountUpdateOne {
 	return auo
 }
 
-// SetUserID sets the "user_id" field.
-func (auo *AccountUpdateOne) SetUserID(u uuid.UUID) *AccountUpdateOne {
-	auo.mutation.SetUserID(u)
-	return auo
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (auo *AccountUpdateOne) SetNillableUserID(u *uuid.UUID) *AccountUpdateOne {
-	if u != nil {
-		auo.SetUserID(*u)
-	}
+// SetUserID sets the "user" edge to the User entity by ID.
+func (auo *AccountUpdateOne) SetUserID(id uuid.UUID) *AccountUpdateOne {
+	auo.mutation.SetUserID(id)
 	return auo
 }
 
