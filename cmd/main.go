@@ -22,7 +22,6 @@ import (
 )
 
 var (
-	ctx      = context.Background()
 	logger   = log.New(os.Stdout, "[user-service] ", log.LstdFlags)
 	httpPort = os.Getenv("HTTP_PORT")
 	grpcPort = os.Getenv("GRPC_PORT")
