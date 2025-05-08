@@ -9,8 +9,11 @@ import (
 
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/migrate"
+	userpb "github.com/huynhthanhthao/hrm_user_service/generated"
+	userGrpc "github.com/huynhthanhthao/hrm_user_service/internal/grpc"
 	"github.com/huynhthanhthao/hrm_user_service/internal/handler"
 	"github.com/huynhthanhthao/hrm_user_service/internal/router"
+	"github.com/huynhthanhthao/hrm_user_service/internal/service"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -86,11 +89,17 @@ func runMigration(client *ent.Client) {
 func startGRPCServer(client *ent.Client) {
 	grpcServer := grpc.NewServer()
 
-	// Register the UserService
-	// userService := userGrpc.NewUserGRPCServer(client.UserService())
-	// userpb.RegisterUserServiceServer(grpcServer, userService)
+	userService, err := service.NewUserService(client)
 
-	// Bật reflection để hỗ trợ gRPC CLI (tùy chọn)
+	if err != nil {
+		logger.Fatalf("❌ failed to initialize user service: %v", err)
+	}
+
+	// Register the user service with the gRPC server
+	userGrpcServer := userGrpc.NewUserGRPCServer(userService)
+	userpb.RegisterUserServiceServer(grpcServer, userGrpcServer)
+
+	// Register reflection service on gRPC server
 	reflection.Register(grpcServer)
 
 	lis, err := net.Listen("tcp", grpcPort)
