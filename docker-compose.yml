@@ -4,8 +4,8 @@ services:
     build:
       dockerfile: Dockerfile.dev
     ports:
-      - "5001:5000" # GRPC
-      - "8081:8080"
+      - "50051:50051" # GRPC
+      - "8089:8089"
     environment:
       GIN_MODE: ${GIN_MODE:-debug}
     volumes:
@@ -24,6 +24,14 @@ services:
       POSTGRES_DB: ${DB_NAME:-postgres}
     volumes:
       - data:/var/lib/postgresql/data
+    networks:
+      - shared_network
+      
+  adminer:
+    container_name: hrm_adminer
+    image: adminer
+    ports:
+      - "81:8080"
     networks:
       - shared_network
 

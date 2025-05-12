@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
+	"github.com/huynhthanhthao/hrm_user_service/internal/helper"
 	"github.com/huynhthanhthao/hrm_user_service/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -102,4 +103,33 @@ func (h *UserHandler) GetUsersByIDsHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"users": users, "totalCount": totalCount})
+}
+
+func (h *UserHandler) RegisterHandler(c *gin.Context) {
+	var req dto.RegisterDto
+
+	// Kiểm tra dữ liệu đầu vào
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("Error binding JSON: %v", err)
+		helper.Respond(c, http.StatusBadRequest, "Invalid input: "+err.Error(), nil)
+		return
+	}
+
+	input := dto.RegisterInput(req)
+
+	// Gọi service để đăng ký người dùng
+	user, err := h.userService.Register(c.Request.Context(), c, input)
+
+	if err != nil {
+		log.Printf("Error registering user: %v", err)
+		var statusCode int = http.StatusInternalServerError
+		if errMsg := err.Error(); len(errMsg) > 4 && errMsg[:4] == "HTTP" {
+			fmt.Sscanf(errMsg, "HTTP %d:", &statusCode)
+		}
+		helper.Respond(c, statusCode, err.Error(), nil)
+		return
+	}
+
+	// Chuyển đổi dữ liệu người dùng sang response
+	helper.Respond(c, http.StatusOK, "Đăng ký thành công!", user)
 }
