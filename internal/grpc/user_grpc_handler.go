@@ -4,6 +4,7 @@ import (
 	"context"
 
 	userpb "github.com/huynhthanhthao/hrm_user_service/generated"
+	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
 	"github.com/huynhthanhthao/hrm_user_service/internal/service"
 )
 
@@ -71,8 +72,16 @@ func (s *UserGRPCServer) GetUser(ctx context.Context, req *userpb.GetUserRequest
 }
 
 func (s *UserGRPCServer) GetUsersByIDs(ctx context.Context, req *userpb.GetUsersByIDsRequest) (*userpb.GetUsersByIDsResponse, error) {
-	// Fetch the users by IDs using the service
-	users, err := s.userService.GetUsersByIDs(ctx, req.Ids)
+	params := dto.UserParams{
+		IDs: req.Ids,
+		PaginationParams: dto.PaginationParams{
+			Page:     int(req.Page),
+			PageSize: int(req.PageSize),
+		},
+	}
+
+	// Fetch the users by IDs using the service with pagination
+	users, totalCount, err := s.userService.GetUsersByIDs(ctx, params)
 	if err != nil {
 		return nil, err
 	}
@@ -95,5 +104,8 @@ func (s *UserGRPCServer) GetUsersByIDs(ctx context.Context, req *userpb.GetUsers
 		})
 	}
 
-	return &userpb.GetUsersByIDsResponse{Users: res}, nil
+	return &userpb.GetUsersByIDsResponse{
+		Users:      res,
+		TotalCount: int32(totalCount),
+	}, nil
 }

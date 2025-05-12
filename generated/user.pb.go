@@ -283,7 +283,7 @@ func (x *ListUsersResponse) GetCurrentPage() int32 {
 
 type GetUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // ID của người dùng cần lấy
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -327,7 +327,7 @@ func (x *GetUserRequest) GetId() string {
 
 type GetUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"` // Thông tin người dùng
+	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -371,7 +371,9 @@ func (x *GetUserResponse) GetUser() *User {
 
 type GetUsersByIDsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Ids           []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"` // List of user IDs to fetch
+	Ids           []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`                         // Page number for pagination
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // Page size for pagination
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -413,9 +415,24 @@ func (x *GetUsersByIDsRequest) GetIds() []string {
 	return nil
 }
 
+func (x *GetUsersByIDsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetUsersByIDsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
 type GetUsersByIDsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"` // List of user details
+	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	TotalCount    int32                  `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"` // Total number of users matching the query
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -457,6 +474,13 @@ func (x *GetUsersByIDsResponse) GetUsers() []*User {
 	return nil
 }
 
+func (x *GetUsersByIDsResponse) GetTotalCount() int32 {
+	if x != nil {
+		return x.TotalCount
+	}
+	return 0
+}
+
 var File_proto_user_proto protoreflect.FileDescriptor
 
 const file_proto_user_proto_rawDesc = "" +
@@ -495,11 +519,15 @@ const file_proto_user_proto_rawDesc = "" +
 	"\x0eGetUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"2\n" +
 	"\x0fGetUserResponse\x12\x1f\n" +
-	"\x04user\x18\x01 \x01(\v2\v.entpb.UserR\x04user\"(\n" +
+	"\x04user\x18\x01 \x01(\v2\v.entpb.UserR\x04user\"Y\n" +
 	"\x14GetUsersByIDsRequest\x12\x10\n" +
-	"\x03ids\x18\x01 \x03(\tR\x03ids\":\n" +
+	"\x03ids\x18\x01 \x03(\tR\x03ids\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"[\n" +
 	"\x15GetUsersByIDsResponse\x12!\n" +
-	"\x05users\x18\x01 \x03(\v2\v.entpb.UserR\x05users2\xd3\x01\n" +
+	"\x05users\x18\x01 \x03(\v2\v.entpb.UserR\x05users\x12\x1f\n" +
+	"\vtotal_count\x18\x02 \x01(\x05R\n" +
+	"totalCount2\xd3\x01\n" +
 	"\vUserService\x12>\n" +
 	"\tListUsers\x12\x17.entpb.ListUsersRequest\x1a\x18.entpb.ListUsersResponse\x128\n" +
 	"\aGetUser\x12\x15.entpb.GetUserRequest\x1a\x16.entpb.GetUserResponse\x12J\n" +

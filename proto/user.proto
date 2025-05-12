@@ -48,8 +48,11 @@ message GetUserResponse {
 
 message GetUsersByIDsRequest {
   repeated string ids = 1;
+  int32 page = 2; // Page number for pagination
+  int32 page_size = 3; // Page size for pagination
 }
 
 message GetUsersByIDsResponse {
   repeated User users = 1;
+  int32 total_count = 2; // Total number of users matching the query
 }
