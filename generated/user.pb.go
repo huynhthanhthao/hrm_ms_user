@@ -369,6 +369,94 @@ func (x *GetUserResponse) GetUser() *User {
 	return nil
 }
 
+type GetUsersByIDsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ids           []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"` // List of user IDs to fetch
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUsersByIDsRequest) Reset() {
+	*x = GetUsersByIDsRequest{}
+	mi := &file_proto_user_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUsersByIDsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUsersByIDsRequest) ProtoMessage() {}
+
+func (x *GetUsersByIDsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUsersByIDsRequest.ProtoReflect.Descriptor instead.
+func (*GetUsersByIDsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_user_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetUsersByIDsRequest) GetIds() []string {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+type GetUsersByIDsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"` // List of user details
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUsersByIDsResponse) Reset() {
+	*x = GetUsersByIDsResponse{}
+	mi := &file_proto_user_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUsersByIDsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUsersByIDsResponse) ProtoMessage() {}
+
+func (x *GetUsersByIDsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUsersByIDsResponse.ProtoReflect.Descriptor instead.
+func (*GetUsersByIDsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_user_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetUsersByIDsResponse) GetUsers() []*User {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
+
 var File_proto_user_proto protoreflect.FileDescriptor
 
 const file_proto_user_proto_rawDesc = "" +
@@ -407,10 +495,15 @@ const file_proto_user_proto_rawDesc = "" +
 	"\x0eGetUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"2\n" +
 	"\x0fGetUserResponse\x12\x1f\n" +
-	"\x04user\x18\x01 \x01(\v2\v.entpb.UserR\x04user2\x87\x01\n" +
+	"\x04user\x18\x01 \x01(\v2\v.entpb.UserR\x04user\"(\n" +
+	"\x14GetUsersByIDsRequest\x12\x10\n" +
+	"\x03ids\x18\x01 \x03(\tR\x03ids\":\n" +
+	"\x15GetUsersByIDsResponse\x12!\n" +
+	"\x05users\x18\x01 \x03(\v2\v.entpb.UserR\x05users2\xd3\x01\n" +
 	"\vUserService\x12>\n" +
 	"\tListUsers\x12\x17.entpb.ListUsersRequest\x1a\x18.entpb.ListUsersResponse\x128\n" +
-	"\aGetUser\x12\x15.entpb.GetUserRequest\x1a\x16.entpb.GetUserResponseB\rZ\v./generatedb\x06proto3"
+	"\aGetUser\x12\x15.entpb.GetUserRequest\x1a\x16.entpb.GetUserResponse\x12J\n" +
+	"\rGetUsersByIDs\x12\x1b.entpb.GetUsersByIDsRequest\x1a\x1c.entpb.GetUsersByIDsResponseB\rZ\v./generatedb\x06proto3"
 
 var (
 	file_proto_user_proto_rawDescOnce sync.Once
@@ -424,26 +517,31 @@ func file_proto_user_proto_rawDescGZIP() []byte {
 	return file_proto_user_proto_rawDescData
 }
 
-var file_proto_user_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_proto_user_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_proto_user_proto_goTypes = []any{
-	(*ListUsersRequest)(nil),  // 0: entpb.ListUsersRequest
-	(*User)(nil),              // 1: entpb.User
-	(*ListUsersResponse)(nil), // 2: entpb.ListUsersResponse
-	(*GetUserRequest)(nil),    // 3: entpb.GetUserRequest
-	(*GetUserResponse)(nil),   // 4: entpb.GetUserResponse
+	(*ListUsersRequest)(nil),      // 0: entpb.ListUsersRequest
+	(*User)(nil),                  // 1: entpb.User
+	(*ListUsersResponse)(nil),     // 2: entpb.ListUsersResponse
+	(*GetUserRequest)(nil),        // 3: entpb.GetUserRequest
+	(*GetUserResponse)(nil),       // 4: entpb.GetUserResponse
+	(*GetUsersByIDsRequest)(nil),  // 5: entpb.GetUsersByIDsRequest
+	(*GetUsersByIDsResponse)(nil), // 6: entpb.GetUsersByIDsResponse
 }
 var file_proto_user_proto_depIdxs = []int32{
 	1, // 0: entpb.ListUsersResponse.users:type_name -> entpb.User
 	1, // 1: entpb.GetUserResponse.user:type_name -> entpb.User
-	0, // 2: entpb.UserService.ListUsers:input_type -> entpb.ListUsersRequest
-	3, // 3: entpb.UserService.GetUser:input_type -> entpb.GetUserRequest
-	2, // 4: entpb.UserService.ListUsers:output_type -> entpb.ListUsersResponse
-	4, // 5: entpb.UserService.GetUser:output_type -> entpb.GetUserResponse
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	1, // 2: entpb.GetUsersByIDsResponse.users:type_name -> entpb.User
+	0, // 3: entpb.UserService.ListUsers:input_type -> entpb.ListUsersRequest
+	3, // 4: entpb.UserService.GetUser:input_type -> entpb.GetUserRequest
+	5, // 5: entpb.UserService.GetUsersByIDs:input_type -> entpb.GetUsersByIDsRequest
+	2, // 6: entpb.UserService.ListUsers:output_type -> entpb.ListUsersResponse
+	4, // 7: entpb.UserService.GetUser:output_type -> entpb.GetUserResponse
+	6, // 8: entpb.UserService.GetUsersByIDs:output_type -> entpb.GetUsersByIDsResponse
+	6, // [6:9] is the sub-list for method output_type
+	3, // [3:6] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_proto_user_proto_init() }
@@ -457,7 +555,7 @@ func file_proto_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_user_proto_rawDesc), len(file_proto_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

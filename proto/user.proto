@@ -7,6 +7,7 @@ option go_package = "./generated";
 service UserService {
   rpc ListUsers (ListUsersRequest) returns (ListUsersResponse);
   rpc GetUser (GetUserRequest) returns (GetUserResponse);
+  rpc GetUsersByIDs (GetUsersByIDsRequest) returns (GetUsersByIDsResponse);
 }
 
 message ListUsersRequest {
@@ -38,9 +39,17 @@ message ListUsersResponse {
 }
 
 message GetUserRequest {
-  string id = 1; // ID của người dùng cần lấy
+  string id = 1;
 }
 
 message GetUserResponse {
-  User user = 1; // Thông tin người dùng
+  User user = 1; 
+}
+
+message GetUsersByIDsRequest {
+  repeated string ids = 1;
+}
+
+message GetUsersByIDsResponse {
+  repeated User users = 1;
 }

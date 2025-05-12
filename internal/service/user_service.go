@@ -198,7 +198,6 @@ func GenerateToken(accountID string, duration time.Duration) (string, error) {
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }
 
-// GetAllUsers retrieves all users from the database
 func (s *UserService) GetAllUsers(ctx context.Context) ([]*ent.User, error) {
 	users, err := s.client.User.Query().All(ctx)
 	if err != nil {
@@ -207,7 +206,6 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]*ent.User, error) {
 	return users, nil
 }
 
-// GetUser retrieves a user by their ID
 func (s *UserService) GetUser(ctx context.Context, id string) (*ent.User, error) {
 	// Convert the string ID to uuid.UUID
 	userID, err := uuid.Parse(id)
@@ -221,4 +219,24 @@ func (s *UserService) GetUser(ctx context.Context, id string) (*ent.User, error)
 		return nil, fmt.Errorf("failed to retrieve user: %w", err)
 	}
 	return user, nil
+}
+
+func (s *UserService) GetUsersByIDs(ctx context.Context, ids []string) ([]*ent.User, error) {
+	// Convert string IDs to uuid.UUID
+	uuidIDs := make([]uuid.UUID, len(ids))
+	for i, id := range ids {
+		uuidID, err := uuid.Parse(id)
+		if err != nil {
+			return nil, fmt.Errorf("invalid user ID format for ID %s: %w", id, err)
+		}
+		uuidIDs[i] = uuidID
+	}
+
+	// Query users by IDs
+	users, err := s.client.User.Query().Where(user.IDIn(uuidIDs...)).All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve users: %w", err)
+	}
+
+	return users, nil
 }

@@ -69,3 +69,31 @@ func (s *UserGRPCServer) GetUser(ctx context.Context, req *userpb.GetUserRequest
 		},
 	}, nil
 }
+
+func (s *UserGRPCServer) GetUsersByIDs(ctx context.Context, req *userpb.GetUsersByIDsRequest) (*userpb.GetUsersByIDsResponse, error) {
+	// Fetch the users by IDs using the service
+	users, err := s.userService.GetUsersByIDs(ctx, req.Ids)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map the user entities to the gRPC response
+	var res []*userpb.User
+	for _, u := range users {
+		res = append(res, &userpb.User{
+			Id:        u.ID.String(),
+			FirstName: u.FirstName,
+			LastName:  u.LastName,
+			Gender:    string(u.Gender),
+			Email:     u.Email,
+			Phone:     u.Phone,
+			WardCode:  u.WardCode,
+			Address:   u.Address,
+			CompanyId: u.CompanyID,
+			CreatedAt: u.CreatedAt.String(),
+			UpdatedAt: u.UpdatedAt.String(),
+		})
+	}
+
+	return &userpb.GetUsersByIDsResponse{Users: res}, nil
+}
