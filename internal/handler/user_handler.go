@@ -60,9 +60,12 @@ func (h *UserHandler) GetMe(c *gin.Context) {
 		return
 	}
 
+	// Extract Bearer token
 	var token string
-	if token == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token not found!"})
+	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		token = authHeader[7:]
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header format!"})
 		return
 	}
 
