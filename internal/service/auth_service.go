@@ -12,6 +12,7 @@ import (
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 	hrpb "github.com/huynhthanhthao/hrm_user_service/generated"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
+	"github.com/huynhthanhthao/hrm_user_service/internal/helper"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -29,31 +30,34 @@ func NewUserService(client *ent.Client, hrClients *HRServiceClients) (*UserServi
 	}, nil
 }
 
-func (s *UserService) Register(ctx context.Context, c *gin.Context, input dto.RegisterInput) (*ent.User, error) {
+func (s *UserService) Register(ctx context.Context, c *gin.Context, input dto.RegisterInput) {
 	// Call gRPC to validate company_id
 	resp, err := s.hrClients.Company.Get(ctx, &hrpb.GetCompanyRequest{
 		Id: []byte(input.CompanyId),
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("Lỗi validate ID công ty: %v",
-			http.StatusInternalServerError, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	if resp == nil {
-		return nil, fmt.Errorf("ID công ty không tồn tại", http.StatusNotFound)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 
 	if err != nil {
-		return nil, fmt.Errorf("Lỗi mã hóa mật khẩu: %v", http.StatusConflict, err)
+		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		return
 	}
 
 	// Bắt đầu transaction
 	tx, err := s.client.Tx(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Lỗi bắt đầu transaction: %v", http.StatusInternalServerError, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	// Tạo người dùng mới
@@ -71,7 +75,8 @@ func (s *UserService) Register(ctx context.Context, c *gin.Context, input dto.Re
 
 	if err != nil {
 		_ = tx.Rollback()
-		return nil, fmt.Errorf("Lỗi tạo người dùng: %v", http.StatusBadRequest, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	// Tạo tài khoản cho người dùng
@@ -84,55 +89,64 @@ func (s *UserService) Register(ctx context.Context, c *gin.Context, input dto.Re
 		Save(ctx)
 	if err != nil {
 		_ = tx.Rollback()
-		return nil, fmt.Errorf("Lỗi tạo tài khoản: %v", http.StatusBadRequest, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, fmt.Errorf("Lỗi commit giao dịch: %v", http.StatusInternalServerError, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	usr.Edges.Account = acc
 
-	return usr, nil
+	c.JSON(http.StatusOK, gin.H{
+		"user": usr,
+	})
 }
 
-func (s *UserService) Login(ctx context.Context, c *gin.Context, input dto.LoginInput) (*dto.LoginResponse, error) {
+func (s *UserService) Login(ctx context.Context, c *gin.Context, input dto.LoginInput) {
 	// Tìm tài khoản theo tên đăng nhập
 	acc, err := s.client.Account.
 		Query().
 		Where(account.UsernameEQ(input.Username)).
 		Only(ctx)
+
 	if err != nil {
-		return nil, fmt.Errorf("Tài khoản không tồn tại: %v", http.StatusNotFound, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
-	// Kiểm tra mật khẩu
 	err = bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(input.Password))
 	if err != nil {
-		return nil, fmt.Errorf("Mật khẩu không đúng: %v", http.StatusUnauthorized, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
-	// Lấy thông tin người dùng
 	usr, err := acc.QueryUser().Only(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Không thể lấy thông tin người dùng: %v", http.StatusInternalServerError, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	branch, err := s.hrClients.HrExt.GetBranchByUserId(ctx, &hrpb.GetBranchByUserIdRequest{
 		UserId: usr.ID.String(),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("Không tìm thấy chi nhánh: %v", http.StatusNotFound, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	branchID, err := uuid.FromBytes(branch.Id)
 	if err != nil {
-		return nil, fmt.Errorf("Lỗi branch ID: %v", http.StatusInternalServerError, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	companyID, err := uuid.FromBytes(branch.CompanyId)
 	if err != nil {
-		return nil, fmt.Errorf("Lỗi company ID: %v", http.StatusInternalServerError, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	accessDur, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
@@ -140,25 +154,23 @@ func (s *UserService) Login(ctx context.Context, c *gin.Context, input dto.Login
 
 	accessToken, err := GenerateToken(acc.ID.String(), usr.ID.String(), branchID.String(), companyID.String(), accessDur)
 	if err != nil {
-		return nil, fmt.Errorf("Lỗi tạo access token: %v", http.StatusInternalServerError, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	refreshToken, err := GenerateToken(acc.ID.String(), usr.ID.String(), branchID.String(), companyID.String(), refreshDur)
 	if err != nil {
-		return nil, fmt.Errorf("Lỗi tạo refresh token: %v", http.StatusInternalServerError, err)
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("Lỗi tạo refresh token: %v", http.StatusInternalServerError, err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	usr.Edges.Account = acc
 
-	return &dto.LoginResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-		User:         usr,
-	}, nil
+	c.JSON(http.StatusOK, gin.H{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+		"user":          usr,
+	})
 }
 
 func (s *UserService) DecodeToken(token string) (*ent.User, error) {
