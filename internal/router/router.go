@@ -8,19 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(client *ent.Client) *gin.Engine {
+func SetupRouter(client *ent.Client, userService *service.UserService) *gin.Engine {
 	r := gin.Default()
 
-	userService, err := service.NewUserService(client)
-	if err != nil {
-		panic(err)
-	}
 	userHandler := handler.NewUserHandler(userService)
 
-	r.POST("/register", userHandler.RegisterHandler)
 	r.POST("/login", userHandler.LoginHandler)
 	r.GET("/me", userHandler.GetMe)
-	r.GET("/users-by-ids", userHandler.GetUsersByIDsHandler)
 
 	return r
 }

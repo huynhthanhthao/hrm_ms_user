@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package entpb;
+
+import "proto/hr.proto";
+
+option go_package = "./generated";
+
+message GetBranchByUserIdRequest {
+  string user_id = 1;
+}
+
+service ExtService {
+  rpc GetBranchByUserId (GetBranchByUserIdRequest) returns (Branch);
+}

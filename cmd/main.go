@@ -9,6 +9,7 @@ import (
 
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/migrate"
+	hrpb "github.com/huynhthanhthao/hrm_user_service/generated"
 	userpb "github.com/huynhthanhthao/hrm_user_service/generated"
 	userGrpc "github.com/huynhthanhthao/hrm_user_service/internal/grpc"
 	"github.com/huynhthanhthao/hrm_user_service/internal/handler"
@@ -18,6 +19,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -33,8 +35,21 @@ func main() {
 
 	runMigration(client)
 
-	go startGRPCServer(client)
-	startHTTPServer(client)
+	hrClients, err := NewHRServiceClients()
+	if err != nil {
+		log.Fatalf("❌ failed to initialize HR service clients: %v", err)
+	}
+	defer hrClients.Close()
+
+	userService, err := service.NewUserService(client, hrClients)
+
+	if err != nil {
+		log.Fatalf("❌ failed to initialize UserService: %v", err)
+	}
+
+	// Pass userService to gRPC and HTTP servers
+	go startGRPCServer(client, userService)
+	startHTTPServer(client, userService)
 }
 
 // Initialize Ent client
@@ -85,20 +100,12 @@ func runMigration(client *ent.Client) {
 }
 
 // Start gRPC server
-func startGRPCServer(client *ent.Client) {
+func startGRPCServer(client *ent.Client, userService *service.UserService) {
 	grpcServer := grpc.NewServer()
 
-	userService, err := service.NewUserService(client)
-
-	if err != nil {
-		logger.Fatalf("❌ failed to initialize user service: %v", err)
-	}
-
-	// Register the user service with the gRPC server
 	userGrpcServer := userGrpc.NewUserGRPCServer(userService)
 	userpb.RegisterUserServiceServer(grpcServer, userGrpcServer)
 
-	// Register reflection service on gRPC server
 	reflection.Register(grpcServer)
 
 	lis, err := net.Listen("tcp", grpcPort)
@@ -114,8 +121,8 @@ func startGRPCServer(client *ent.Client) {
 }
 
 // Start HTTP server
-func startHTTPServer(client *ent.Client) {
-	r := router.SetupRouter(client)
+func startHTTPServer(client *ent.Client, userService *service.UserService) {
+	r := router.SetupRouter(client, userService)
 
 	r.Use(handler.Logger())
 
@@ -124,4 +131,24 @@ func startHTTPServer(client *ent.Client) {
 	if err := r.Run(httpPort); err != nil {
 		logger.Fatalf("❌ HTTP server stopped: %v", err)
 	}
+}
+
+// NewHRServiceClients khởi tạo các client cho HR service
+func NewHRServiceClients() (*service.HRServiceClients, error) {
+	url := os.Getenv("HR_SERVICE_URL")
+	if url == "" {
+		return nil, fmt.Errorf("HR_SERVICE_URL is not set")
+	}
+
+	conn, err := grpc.NewClient(url, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to HR service: %v", err)
+	}
+
+	return &service.HRServiceClients{
+		Conn:    conn,
+		Company: hrpb.NewCompanyServiceClient(conn),
+		Branch:  hrpb.NewBranchServiceClient(conn),
+		HrExt:   hrpb.NewExtServiceClient(conn),
+	}, nil
 }

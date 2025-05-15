@@ -10,7 +10,9 @@ import (
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
+	hrpb "github.com/huynhthanhthao/hrm_user_service/generated"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
+	"google.golang.org/grpc"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -18,29 +20,47 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type HRServiceClients struct {
+	Company hrpb.CompanyServiceClient
+	Branch  hrpb.BranchServiceClient
+	HrExt   hrpb.ExtServiceClient
+	Conn    *grpc.ClientConn
+}
 type UserService struct {
-	client *ent.Client
+	client    *ent.Client
+	hrClients *HRServiceClients
 }
 
-func NewUserService(client *ent.Client) (*UserService, error) {
+func (c *HRServiceClients) Close() {
+	if c.Conn != nil {
+		c.Conn.Close()
+	}
+}
+
+func NewUserService(client *ent.Client, hrClients *HRServiceClients) (*UserService, error) {
+	if client == nil || hrClients == nil || hrClients.Company == nil || hrClients.Branch == nil {
+		return nil, fmt.Errorf("client or hrClients cannot be nil")
+	}
 	return &UserService{
-		client: client,
+		client:    client,
+		hrClients: hrClients,
 	}, nil
 }
 
 func (s *UserService) Register(ctx context.Context, c *gin.Context, input dto.RegisterInput) (*ent.User, error) {
-	// Gọi gRPC để kiểm tra company_id
-	// resp, err := s.hrClient.ValidateCompany(ctx, &generate.ValidateCompanyRequest{
-	// 	CompanyId: input.CompanyId,
-	// })
+	// Call gRPC to validate company_id
+	resp, err := s.hrClients.Company.Get(ctx, &hrpb.GetCompanyRequest{
+		Id: []byte(input.CompanyId),
+	})
 
-	// if err != nil {
-	// 	return nil, fmt.Errorf("HTTP %d: Lỗi validate ID công ty: %v", http.StatusInternalServerError, err)
-	// }
+	if err != nil {
+		return nil, fmt.Errorf("HTTP %d: Lỗi validate ID công ty: %v",
+			http.StatusInternalServerError, err)
+	}
 
-	// if !resp.Exists {
-	// 	return nil, fmt.Errorf("HTTP %d: ID công ty không tồn tại: %v", http.StatusNotFound, err)
-	// }
+	if resp == nil {
+		return nil, fmt.Errorf("HTTP %d: ID công ty không tồn tại", http.StatusNotFound)
+	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 
@@ -116,16 +136,36 @@ func (s *UserService) Login(ctx context.Context, c *gin.Context, input dto.Login
 		return nil, fmt.Errorf("HTTP %d: Không thể lấy thông tin người dùng: %v", http.StatusInternalServerError, err)
 	}
 
-	// Tạo token
-	accessTokenDuration, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
-	refreshTokenDuration, _ := time.ParseDuration(os.Getenv("JWT_REFRESH_TOKEN_DURATION"))
+	branch, err := s.hrClients.HrExt.GetBranchByUserId(ctx, &hrpb.GetBranchByUserIdRequest{
+		UserId: usr.ID.String(),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("HTTP %d: Không tìm thấy chi nhánh: %v", http.StatusNotFound, err)
+	}
 
-	accessToken, err := GenerateToken(acc.ID.String(), accessTokenDuration)
+	branchID, err := uuid.FromBytes(branch.Id)
+	if err != nil {
+		return nil, fmt.Errorf("HTTP %d: Lỗi branch ID: %v", http.StatusInternalServerError, err)
+	}
+
+	companyID, err := uuid.FromBytes(branch.CompanyId)
+	if err != nil {
+		return nil, fmt.Errorf("HTTP %d: Lỗi company ID: %v", http.StatusInternalServerError, err)
+	}
+
+	accessDur, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
+	refreshDur, _ := time.ParseDuration(os.Getenv("JWT_REFRESH_TOKEN_DURATION"))
+
+	accessToken, err := GenerateToken(acc.ID.String(), usr.ID.String(), branchID.String(), companyID.String(), accessDur)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP %d: Lỗi tạo access token: %v", http.StatusInternalServerError, err)
 	}
 
-	refreshToken, err := GenerateToken(acc.ID.String(), refreshTokenDuration)
+	refreshToken, err := GenerateToken(acc.ID.String(), usr.ID.String(), branchID.String(), companyID.String(), refreshDur)
+	if err != nil {
+		return nil, fmt.Errorf("HTTP %d: Lỗi tạo refresh token: %v", http.StatusInternalServerError, err)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("HTTP %d: Lỗi tạo refresh token: %v", http.StatusInternalServerError, err)
 	}
@@ -186,14 +226,21 @@ func (s *UserService) DecodeToken(token string) (*ent.User, error) {
 	return usr, nil
 }
 
-func GenerateToken(accountID string, duration time.Duration) (string, error) {
+func GenerateToken(accountID, userID, branchID, companyID string, duration time.Duration) (string, error) {
 	claims := jwt.MapClaims{
 		"account_id": accountID,
+		"user_id":    userID,
+		"branch_id":  branchID,
+		"company_id": companyID,
 		"exp":        time.Now().Add(duration).Unix(),
 		"iss":        os.Getenv("ISS_KEY"),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return "", fmt.Errorf("JWT_SECRET is not set")
+	}
+	return token.SignedString([]byte(secret))
 }
 
 func (s *UserService) GetAllUsers(ctx context.Context) ([]*ent.User, error) {
@@ -256,4 +303,36 @@ func (s *UserService) GetUsersByIDs(ctx context.Context, params dto.UserParams) 
 	}
 
 	return users, totalCount, nil
+}
+
+func (s *UserService) CreateUser(ctx context.Context, input dto.CreateUserInput) (*ent.User, error) {
+	// Start a transaction
+	tx, err := s.client.Tx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start transaction: %w", err)
+	}
+
+	// Create a new user
+	user, err := tx.User.
+		Create().
+		SetFirstName(input.FirstName).
+		SetLastName(input.LastName).
+		SetGender(user.Gender(input.Gender)).
+		SetEmail(input.Email).
+		SetPhone(input.Phone).
+		SetWardCode(input.WardCode).
+		SetAddress(input.Address).
+		SetCompanyID(input.CompanyID).
+		Save(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	// Commit the transaction
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return user, nil
 }
