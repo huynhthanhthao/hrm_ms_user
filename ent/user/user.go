@@ -8,7 +8,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/google/uuid"
 )
 
 const (
@@ -24,6 +23,8 @@ const (
 	FieldGender = "gender"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
+	// FieldAvatar holds the string denoting the avatar field in the database.
+	FieldAvatar = "avatar"
 	// FieldPhone holds the string denoting the phone field in the database.
 	FieldPhone = "phone"
 	// FieldWardCode holds the string denoting the ward_code field in the database.
@@ -56,6 +57,7 @@ var Columns = []string{
 	FieldLastName,
 	FieldGender,
 	FieldEmail,
+	FieldAvatar,
 	FieldPhone,
 	FieldWardCode,
 	FieldAddress,
@@ -95,8 +97,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// CompanyIDValidator is a validator for the "company_id" field. It is called by the builders before save.
 	CompanyIDValidator func(string) error
-	// DefaultID holds the default value on creation for the "id" field.
-	DefaultID func() uuid.UUID
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(int) error
 )
 
 // Gender defines the type for the "gender" enum field.
@@ -152,6 +154,11 @@ func ByGender(opts ...sql.OrderTermOption) OrderOption {
 // ByEmail orders the results by the email field.
 func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEmail, opts...).ToFunc()
+}
+
+// ByAvatar orders the results by the avatar field.
+func ByAvatar(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAvatar, opts...).ToFunc()
 }
 
 // ByPhone orders the results by the phone field.

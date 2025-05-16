@@ -7,52 +7,51 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/google/uuid"
 	"github.com/huynhthanhthao/hrm_user_service/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uuid.UUID) predicate.User {
+func ID(id int) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uuid.UUID) predicate.User {
+func IDEQ(id int) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uuid.UUID) predicate.User {
+func IDNEQ(id int) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uuid.UUID) predicate.User {
+func IDIn(ids ...int) predicate.User {
 	return predicate.User(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uuid.UUID) predicate.User {
+func IDNotIn(ids ...int) predicate.User {
 	return predicate.User(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uuid.UUID) predicate.User {
+func IDGT(id int) predicate.User {
 	return predicate.User(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uuid.UUID) predicate.User {
+func IDGTE(id int) predicate.User {
 	return predicate.User(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uuid.UUID) predicate.User {
+func IDLT(id int) predicate.User {
 	return predicate.User(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uuid.UUID) predicate.User {
+func IDLTE(id int) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldID, id))
 }
 
@@ -69,6 +68,11 @@ func LastName(v string) predicate.User {
 // Email applies equality check predicate on the "email" field. It's identical to EmailEQ.
 func Email(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldEmail, v))
+}
+
+// Avatar applies equality check predicate on the "avatar" field. It's identical to AvatarEQ.
+func Avatar(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAvatar, v))
 }
 
 // Phone applies equality check predicate on the "phone" field. It's identical to PhoneEQ.
@@ -314,6 +318,81 @@ func EmailEqualFold(v string) predicate.User {
 // EmailContainsFold applies the ContainsFold predicate on the "email" field.
 func EmailContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldEmail, v))
+}
+
+// AvatarEQ applies the EQ predicate on the "avatar" field.
+func AvatarEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAvatar, v))
+}
+
+// AvatarNEQ applies the NEQ predicate on the "avatar" field.
+func AvatarNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldAvatar, v))
+}
+
+// AvatarIn applies the In predicate on the "avatar" field.
+func AvatarIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldAvatar, vs...))
+}
+
+// AvatarNotIn applies the NotIn predicate on the "avatar" field.
+func AvatarNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldAvatar, vs...))
+}
+
+// AvatarGT applies the GT predicate on the "avatar" field.
+func AvatarGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldAvatar, v))
+}
+
+// AvatarGTE applies the GTE predicate on the "avatar" field.
+func AvatarGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldAvatar, v))
+}
+
+// AvatarLT applies the LT predicate on the "avatar" field.
+func AvatarLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldAvatar, v))
+}
+
+// AvatarLTE applies the LTE predicate on the "avatar" field.
+func AvatarLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldAvatar, v))
+}
+
+// AvatarContains applies the Contains predicate on the "avatar" field.
+func AvatarContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldAvatar, v))
+}
+
+// AvatarHasPrefix applies the HasPrefix predicate on the "avatar" field.
+func AvatarHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldAvatar, v))
+}
+
+// AvatarHasSuffix applies the HasSuffix predicate on the "avatar" field.
+func AvatarHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldAvatar, v))
+}
+
+// AvatarIsNil applies the IsNil predicate on the "avatar" field.
+func AvatarIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldAvatar))
+}
+
+// AvatarNotNil applies the NotNil predicate on the "avatar" field.
+func AvatarNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldAvatar))
+}
+
+// AvatarEqualFold applies the EqualFold predicate on the "avatar" field.
+func AvatarEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldAvatar, v))
+}
+
+// AvatarContainsFold applies the ContainsFold predicate on the "avatar" field.
+func AvatarContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldAvatar, v))
 }
 
 // PhoneEQ applies the EQ predicate on the "phone" field.

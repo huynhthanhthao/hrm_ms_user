@@ -91,7 +91,7 @@ func (x *ListUsersRequest) GetCompanyId() string {
 
 type User struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // đổi từ string sang int32
 	FirstName     string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
 	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
 	Gender        string                 `protobuf:"bytes,4,opt,name=gender,proto3" json:"gender,omitempty"`
@@ -136,11 +136,11 @@ func (*User) Descriptor() ([]byte, []int) {
 	return file_proto_user_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *User) GetId() string {
+func (x *User) GetId() int32 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
 func (x *User) GetFirstName() string {
@@ -283,7 +283,7 @@ func (x *ListUsersResponse) GetCurrentPage() int32 {
 
 type GetUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // đổi sang int32
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -318,11 +318,11 @@ func (*GetUserRequest) Descriptor() ([]byte, []int) {
 	return file_proto_user_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetUserRequest) GetId() string {
+func (x *GetUserRequest) GetId() int32 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
 type GetUserResponse struct {
@@ -371,9 +371,9 @@ func (x *GetUserResponse) GetUser() *User {
 
 type GetUsersByIDsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Ids           []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
-	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`                         // Page number for pagination
-	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // Page size for pagination
+	Ids           []int32                `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -408,7 +408,7 @@ func (*GetUsersByIDsRequest) Descriptor() ([]byte, []int) {
 	return file_proto_user_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *GetUsersByIDsRequest) GetIds() []string {
+func (x *GetUsersByIDsRequest) GetIds() []int32 {
 	if x != nil {
 		return x.Ids
 	}
@@ -432,7 +432,7 @@ func (x *GetUsersByIDsRequest) GetPageSize() int32 {
 type GetUsersByIDsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
-	TotalCount    int32                  `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"` // Total number of users matching the query
+	TotalCount    int32                  `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -493,7 +493,7 @@ const file_proto_user_proto_rawDesc = "" +
 	"\n" +
 	"company_id\x18\x04 \x01(\tR\tcompanyId\"\xaa\x02\n" +
 	"\x04User\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
 	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x16\n" +
@@ -517,11 +517,11 @@ const file_proto_user_proto_rawDesc = "" +
 	"totalUsers\x12!\n" +
 	"\fcurrent_page\x18\x04 \x01(\x05R\vcurrentPage\" \n" +
 	"\x0eGetUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"2\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\"2\n" +
 	"\x0fGetUserResponse\x12\x1f\n" +
 	"\x04user\x18\x01 \x01(\v2\v.entpb.UserR\x04user\"Y\n" +
 	"\x14GetUsersByIDsRequest\x12\x10\n" +
-	"\x03ids\x18\x01 \x03(\tR\x03ids\x12\x12\n" +
+	"\x03ids\x18\x01 \x03(\x05R\x03ids\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"[\n" +
 	"\x15GetUsersByIDsResponse\x12!\n" +

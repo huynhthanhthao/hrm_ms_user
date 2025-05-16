@@ -10,6 +10,22 @@ message GetBranchByUserIdRequest {
   string user_id = 1;
 }
 
+message DeleteEmployeeByUserIdRequest {
+  string user_id = 1;
+}
+
+message DeleteEmployeeByUserIdResponse {
+  bool success = 1;
+}
+
+message GetEmployeeByUserIdRequest {
+  string user_id = 1;
+}
+
+
+// Service definition
 service ExtService {
   rpc GetBranchByUserId (GetBranchByUserIdRequest) returns (Branch);
+  rpc DeleteEmployeeByUserId (DeleteEmployeeByUserIdRequest) returns (DeleteEmployeeByUserIdResponse);
+  rpc GetEmployeeByUserId (GetEmployeeByUserIdRequest) returns (Employee);
 }

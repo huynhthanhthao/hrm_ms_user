@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	"github.com/huynhthanhthao/hrm_user_service/ent/predicate"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
@@ -93,7 +92,7 @@ func (au *AccountUpdate) SetUpdatedAt(t time.Time) *AccountUpdate {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (au *AccountUpdate) SetUserID(id uuid.UUID) *AccountUpdate {
+func (au *AccountUpdate) SetUserID(id int) *AccountUpdate {
 	au.mutation.SetUserID(id)
 	return au
 }
@@ -177,7 +176,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := au.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID))
+	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt))
 	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -208,7 +207,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -221,7 +220,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -312,7 +311,7 @@ func (auo *AccountUpdateOne) SetUpdatedAt(t time.Time) *AccountUpdateOne {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (auo *AccountUpdateOne) SetUserID(id uuid.UUID) *AccountUpdateOne {
+func (auo *AccountUpdateOne) SetUserID(id int) *AccountUpdateOne {
 	auo.mutation.SetUserID(id)
 	return auo
 }
@@ -409,7 +408,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 	if err := auo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID))
+	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt))
 	id, ok := auo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Account.id" for update`)}
@@ -457,7 +456,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -470,7 +469,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 			Columns: []string{account.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

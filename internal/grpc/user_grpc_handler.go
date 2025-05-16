@@ -18,9 +18,7 @@ func NewUserGRPCServer(us *service.UserService) *UserGRPCServer {
 		userService: us,
 	}
 }
-
 func (s *UserGRPCServer) ListUsers(ctx context.Context, req *userpb.ListUsersRequest) (*userpb.ListUsersResponse, error) {
-	// Fix the GetAllUsers call by passing context
 	users, err := s.userService.GetAllUsers(ctx)
 	if err != nil {
 		return nil, err
@@ -29,7 +27,7 @@ func (s *UserGRPCServer) ListUsers(ctx context.Context, req *userpb.ListUsersReq
 	var res []*userpb.User
 	for _, u := range users {
 		res = append(res, &userpb.User{
-			Id:        u.ID.String(),
+			Id:        int32(u.ID), // đổi từ string sang int32
 			FirstName: u.FirstName,
 			LastName:  u.LastName,
 			Gender:    string(u.Gender),
@@ -43,20 +41,20 @@ func (s *UserGRPCServer) ListUsers(ctx context.Context, req *userpb.ListUsersReq
 		})
 	}
 
-	return &userpb.ListUsersResponse{Users: res}, nil
+	return &userpb.ListUsersResponse{
+		Users: res,
+	}, nil
 }
 
 func (s *UserGRPCServer) GetUser(ctx context.Context, req *userpb.GetUserRequest) (*userpb.GetUserResponse, error) {
-	// Fetch the user by ID using the service
-	user, err := s.userService.GetUser(ctx, req.Id)
+	user, err := s.userService.GetUser(ctx, int(req.Id)) // Id là int32 trong proto
 	if err != nil {
 		return nil, err
 	}
 
-	// Map the user entity to the gRPC response
 	return &userpb.GetUserResponse{
 		User: &userpb.User{
-			Id:        user.ID.String(),
+			Id:        int32(user.ID),
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
 			Gender:    string(user.Gender),
@@ -72,25 +70,28 @@ func (s *UserGRPCServer) GetUser(ctx context.Context, req *userpb.GetUserRequest
 }
 
 func (s *UserGRPCServer) GetUsersByIDs(ctx context.Context, req *userpb.GetUsersByIDsRequest) (*userpb.GetUsersByIDsResponse, error) {
+	intIDs := make([]int, len(req.Ids))
+	for i, id := range req.Ids {
+		intIDs[i] = int(id)
+	}
+
 	params := dto.UserParams{
-		IDs: req.Ids,
+		IDs: intIDs,
 		PaginationParams: dto.PaginationParams{
 			Page:     int(req.Page),
 			PageSize: int(req.PageSize),
 		},
 	}
 
-	// Fetch the users by IDs using the service with pagination
 	users, totalCount, err := s.userService.GetUsersByIDs(ctx, params)
 	if err != nil {
 		return nil, err
 	}
 
-	// Map the user entities to the gRPC response
 	var res []*userpb.User
 	for _, u := range users {
 		res = append(res, &userpb.User{
-			Id:        u.ID.String(),
+			Id:        int32(u.ID),
 			FirstName: u.FirstName,
 			LastName:  u.LastName,
 			Gender:    string(u.Gender),

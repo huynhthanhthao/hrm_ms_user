@@ -65,16 +65,156 @@ func (x *GetBranchByUserIdRequest) GetUserId() string {
 	return ""
 }
 
+type DeleteEmployeeByUserIdRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteEmployeeByUserIdRequest) Reset() {
+	*x = DeleteEmployeeByUserIdRequest{}
+	mi := &file_proto_hr_ext_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteEmployeeByUserIdRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteEmployeeByUserIdRequest) ProtoMessage() {}
+
+func (x *DeleteEmployeeByUserIdRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_hr_ext_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteEmployeeByUserIdRequest.ProtoReflect.Descriptor instead.
+func (*DeleteEmployeeByUserIdRequest) Descriptor() ([]byte, []int) {
+	return file_proto_hr_ext_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *DeleteEmployeeByUserIdRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type DeleteEmployeeByUserIdResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteEmployeeByUserIdResponse) Reset() {
+	*x = DeleteEmployeeByUserIdResponse{}
+	mi := &file_proto_hr_ext_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteEmployeeByUserIdResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteEmployeeByUserIdResponse) ProtoMessage() {}
+
+func (x *DeleteEmployeeByUserIdResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_hr_ext_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteEmployeeByUserIdResponse.ProtoReflect.Descriptor instead.
+func (*DeleteEmployeeByUserIdResponse) Descriptor() ([]byte, []int) {
+	return file_proto_hr_ext_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *DeleteEmployeeByUserIdResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type GetEmployeeByUserIdRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetEmployeeByUserIdRequest) Reset() {
+	*x = GetEmployeeByUserIdRequest{}
+	mi := &file_proto_hr_ext_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetEmployeeByUserIdRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetEmployeeByUserIdRequest) ProtoMessage() {}
+
+func (x *GetEmployeeByUserIdRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_hr_ext_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetEmployeeByUserIdRequest.ProtoReflect.Descriptor instead.
+func (*GetEmployeeByUserIdRequest) Descriptor() ([]byte, []int) {
+	return file_proto_hr_ext_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetEmployeeByUserIdRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 var File_proto_hr_ext_proto protoreflect.FileDescriptor
 
 const file_proto_hr_ext_proto_rawDesc = "" +
 	"\n" +
 	"\x12proto/hr_ext.proto\x12\x05entpb\x1a\x0eproto/hr.proto\"3\n" +
 	"\x18GetBranchByUserIdRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId2Q\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"8\n" +
+	"\x1dDeleteEmployeeByUserIdRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\":\n" +
+	"\x1eDeleteEmployeeByUserIdResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"5\n" +
+	"\x1aGetEmployeeByUserIdRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId2\x83\x02\n" +
 	"\n" +
 	"ExtService\x12C\n" +
-	"\x11GetBranchByUserId\x12\x1f.entpb.GetBranchByUserIdRequest\x1a\r.entpb.BranchB\rZ\v./generatedb\x06proto3"
+	"\x11GetBranchByUserId\x12\x1f.entpb.GetBranchByUserIdRequest\x1a\r.entpb.Branch\x12e\n" +
+	"\x16DeleteEmployeeByUserId\x12$.entpb.DeleteEmployeeByUserIdRequest\x1a%.entpb.DeleteEmployeeByUserIdResponse\x12I\n" +
+	"\x13GetEmployeeByUserId\x12!.entpb.GetEmployeeByUserIdRequest\x1a\x0f.entpb.EmployeeB\rZ\v./generatedb\x06proto3"
 
 var (
 	file_proto_hr_ext_proto_rawDescOnce sync.Once
@@ -88,16 +228,24 @@ func file_proto_hr_ext_proto_rawDescGZIP() []byte {
 	return file_proto_hr_ext_proto_rawDescData
 }
 
-var file_proto_hr_ext_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_proto_hr_ext_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_proto_hr_ext_proto_goTypes = []any{
-	(*GetBranchByUserIdRequest)(nil), // 0: entpb.GetBranchByUserIdRequest
-	(*Branch)(nil),                   // 1: entpb.Branch
+	(*GetBranchByUserIdRequest)(nil),       // 0: entpb.GetBranchByUserIdRequest
+	(*DeleteEmployeeByUserIdRequest)(nil),  // 1: entpb.DeleteEmployeeByUserIdRequest
+	(*DeleteEmployeeByUserIdResponse)(nil), // 2: entpb.DeleteEmployeeByUserIdResponse
+	(*GetEmployeeByUserIdRequest)(nil),     // 3: entpb.GetEmployeeByUserIdRequest
+	(*Branch)(nil),                         // 4: entpb.Branch
+	(*Employee)(nil),                       // 5: entpb.Employee
 }
 var file_proto_hr_ext_proto_depIdxs = []int32{
 	0, // 0: entpb.ExtService.GetBranchByUserId:input_type -> entpb.GetBranchByUserIdRequest
-	1, // 1: entpb.ExtService.GetBranchByUserId:output_type -> entpb.Branch
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	1, // 1: entpb.ExtService.DeleteEmployeeByUserId:input_type -> entpb.DeleteEmployeeByUserIdRequest
+	3, // 2: entpb.ExtService.GetEmployeeByUserId:input_type -> entpb.GetEmployeeByUserIdRequest
+	4, // 3: entpb.ExtService.GetBranchByUserId:output_type -> entpb.Branch
+	2, // 4: entpb.ExtService.DeleteEmployeeByUserId:output_type -> entpb.DeleteEmployeeByUserIdResponse
+	5, // 5: entpb.ExtService.GetEmployeeByUserId:output_type -> entpb.Employee
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -115,7 +263,7 @@ func file_proto_hr_ext_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_hr_ext_proto_rawDesc), len(file_proto_hr_ext_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

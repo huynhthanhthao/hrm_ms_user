@@ -5,46 +5,53 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
-	hrpb "github.com/huynhthanhthao/hrm_user_service/generated"
+	grpcClient "github.com/huynhthanhthao/hrm_user_service/generated"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
 	"github.com/huynhthanhthao/hrm_user_service/internal/helper"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func NewUserService(client *ent.Client, hrClients *HRServiceClients) (*UserService, error) {
-	if client == nil || hrClients == nil || hrClients.Company == nil || hrClients.Branch == nil {
-		return nil, fmt.Errorf("client or hrClients cannot be nil")
-	}
-	return &UserService{
-		client:    client,
-		hrClients: hrClients,
+// service/auth_service.go
+type AuthService struct {
+	client    *ent.Client
+	hrClients *HRServiceClients
+}
+
+func NewAuthService(client *ent.Client, hrClients *HRServiceClients) (*AuthService, error) {
+	return &AuthService{
+		client: client,
 	}, nil
 }
 
-func (s *UserService) Register(ctx context.Context, c *gin.Context, input dto.RegisterInput) {
-	// Call gRPC to validate company_id
-	resp, err := s.hrClients.Company.Get(ctx, &hrpb.GetCompanyRequest{
-		Id: []byte(input.CompanyId),
-	})
+func (s *AuthService) Register(ctx context.Context, c *gin.Context, input dto.RegisterInput) {
+	// companyUUID, err := uuid.Parse(input.CompanyId)
+	// if err != nil {
+	// 	helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("invalid company ID: %w", err))
+	// 	return
+	// }
 
-	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
+	// resp, err := s.hrClients.Company.Get(ctx, &grpcClient.GetCompanyRequest{
+	// 	Id: companyUUID,
+	// })
 
-	if resp == nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
+	// if err != nil {
+	// 	helper.RespondWithError(c, http.StatusBadRequest, err)
+	// 	return
+	// }
+
+	// if resp == nil {
+	// 	helper.RespondWithError(c, http.StatusBadRequest, err)
+	// 	return
+	// }
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 
@@ -66,11 +73,11 @@ func (s *UserService) Register(ctx context.Context, c *gin.Context, input dto.Re
 		SetFirstName(input.FirstName).
 		SetLastName(input.LastName).
 		SetEmail(input.Email).
+		SetAvatar(input.Avatar).
 		SetPhone(input.Phone).
 		SetWardCode(input.WardCode).
 		SetAddress(input.Address).
 		SetGender(user.Gender(input.Gender)).
-		SetCompanyID(input.CompanyId).
 		Save(ctx)
 
 	if err != nil {
@@ -105,60 +112,53 @@ func (s *UserService) Register(ctx context.Context, c *gin.Context, input dto.Re
 	})
 }
 
-func (s *UserService) Login(ctx context.Context, c *gin.Context, input dto.LoginInput) {
+func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.LoginInput) {
 	// Tìm tài khoản theo tên đăng nhập
 	acc, err := s.client.Account.
 		Query().
 		Where(account.UsernameEQ(input.Username)).
 		Only(ctx)
-
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(input.Password))
-	if err != nil {
+	// So sánh mật khẩu
+	if err := bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(input.Password)); err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
+	// Lấy user từ account
 	usr, err := acc.QueryUser().Only(ctx)
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	branch, err := s.hrClients.HrExt.GetBranchByUserId(ctx, &hrpb.GetBranchByUserIdRequest{
-		UserId: usr.ID.String(),
+	// Gọi gRPC lấy branch theo user ID (int -> string)
+	branch, err := s.hrClients.HrExt.GetBranchByUserId(ctx, &grpcClient.GetBranchByUserIdRequest{
+		UserId: strconv.Itoa(usr.ID),
 	})
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	branchID, err := uuid.FromBytes(branch.Id)
-	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
+	branchID := string(branch.Id)
 
-	companyID, err := uuid.FromBytes(branch.CompanyId)
-	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
+	// Parse duration
 	accessDur, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
 	refreshDur, _ := time.ParseDuration(os.Getenv("JWT_REFRESH_TOKEN_DURATION"))
 
-	accessToken, err := GenerateToken(acc.ID.String(), usr.ID.String(), branchID.String(), companyID.String(), accessDur)
+	// Tạo token
+	accessToken, err := GenerateToken(strconv.Itoa(acc.ID), strconv.Itoa(usr.ID), branchID, accessDur)
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	refreshToken, err := GenerateToken(acc.ID.String(), usr.ID.String(), branchID.String(), companyID.String(), refreshDur)
+	refreshToken, err := GenerateToken(strconv.Itoa(acc.ID), strconv.Itoa(usr.ID), branchID, refreshDur)
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
@@ -173,7 +173,7 @@ func (s *UserService) Login(ctx context.Context, c *gin.Context, input dto.Login
 	})
 }
 
-func (s *UserService) DecodeToken(token string) (*ent.User, error) {
+func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Context) {
 	// Parse the token
 	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -183,49 +183,57 @@ func (s *UserService) DecodeToken(token string) (*ent.User, error) {
 	})
 
 	if err != nil || !parsedToken.Valid {
-		return nil, fmt.Errorf("invalid token: %v", err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	// Extract claims
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, fmt.Errorf("invalid token claims")
+		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("invalid token claims"))
+		return
 	}
 
 	accountIDStr, ok := claims["account_id"].(string)
 	if !ok {
-		return nil, fmt.Errorf("account_id not found in token claims")
+		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("account_id not found in token claims"))
+		return
 	}
 
-	// Convert accountID to uuid.UUID
-	accountID, err := uuid.Parse(accountIDStr)
+	// Convert accountID string to int
+	accountID, err := strconv.Atoi(accountIDStr)
 	if err != nil {
-		return nil, fmt.Errorf("invalid account_id format: %v", err)
+		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("invalid account_id format in token: %v", err))
+		return
 	}
 
-	// Query the user associated with the account ID
-	ctx := context.Background()
+	// Query the account by ID
 	acc, err := s.client.Account.Query().Where(account.IDEQ(accountID)).Only(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("account not found: %v", err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	usr, err := acc.QueryUser().Only(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("user not found: %v", err)
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
 	}
 
 	usr.Edges.Account = acc
 
-	return usr, nil
+	// (Nếu có phần lấy vị trí bằng grpc, thêm xử lý ở đây)
+
+	c.JSON(http.StatusOK, gin.H{
+		"user": usr,
+	})
 }
 
-func GenerateToken(accountID, userID, branchID, companyID string, duration time.Duration) (string, error) {
+func GenerateToken(accountID, userID, branchID string, duration time.Duration) (string, error) {
 	claims := jwt.MapClaims{
 		"account_id": accountID,
 		"user_id":    userID,
 		"branch_id":  branchID,
-		"company_id": companyID,
 		"exp":        time.Now().Add(duration).Unix(),
 		"iss":        os.Getenv("ISS_KEY"),
 	}

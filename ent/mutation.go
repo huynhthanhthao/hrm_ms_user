@@ -11,7 +11,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	"github.com/huynhthanhthao/hrm_user_service/ent/predicate"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
@@ -35,14 +34,14 @@ type AccountMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *uuid.UUID
+	id            *int
 	username      *string
 	password      *string
 	status        *account.Status
 	created_at    *time.Time
 	updated_at    *time.Time
 	clearedFields map[string]struct{}
-	user          *uuid.UUID
+	user          *int
 	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*Account, error)
@@ -69,7 +68,7 @@ func newAccountMutation(c config, op Op, opts ...accountOption) *AccountMutation
 }
 
 // withAccountID sets the ID field of the mutation.
-func withAccountID(id uuid.UUID) accountOption {
+func withAccountID(id int) accountOption {
 	return func(m *AccountMutation) {
 		var (
 			err   error
@@ -121,13 +120,13 @@ func (m AccountMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Account entities.
-func (m *AccountMutation) SetID(id uuid.UUID) {
+func (m *AccountMutation) SetID(id int) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *AccountMutation) ID() (id uuid.UUID, exists bool) {
+func (m *AccountMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -138,12 +137,12 @@ func (m *AccountMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *AccountMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *AccountMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []uuid.UUID{id}, nil
+			return []int{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -334,7 +333,7 @@ func (m *AccountMutation) ResetUpdatedAt() {
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
-func (m *AccountMutation) SetUserID(id uuid.UUID) {
+func (m *AccountMutation) SetUserID(id int) {
 	m.user = &id
 }
 
@@ -349,7 +348,7 @@ func (m *AccountMutation) UserCleared() bool {
 }
 
 // UserID returns the "user" edge ID in the mutation.
-func (m *AccountMutation) UserID() (id uuid.UUID, exists bool) {
+func (m *AccountMutation) UserID() (id int, exists bool) {
 	if m.user != nil {
 		return *m.user, true
 	}
@@ -359,7 +358,7 @@ func (m *AccountMutation) UserID() (id uuid.UUID, exists bool) {
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *AccountMutation) UserIDs() (ids []uuid.UUID) {
+func (m *AccountMutation) UserIDs() (ids []int) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -650,11 +649,12 @@ type UserMutation struct {
 	config
 	op             Op
 	typ            string
-	id             *uuid.UUID
+	id             *int
 	first_name     *string
 	last_name      *string
 	gender         *user.Gender
 	email          *string
+	avatar         *string
 	phone          *string
 	ward_code      *string
 	address        *string
@@ -662,7 +662,7 @@ type UserMutation struct {
 	updated_at     *time.Time
 	company_id     *string
 	clearedFields  map[string]struct{}
-	account        *uuid.UUID
+	account        *int
 	clearedaccount bool
 	done           bool
 	oldValue       func(context.Context) (*User, error)
@@ -689,7 +689,7 @@ func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 }
 
 // withUserID sets the ID field of the mutation.
-func withUserID(id uuid.UUID) userOption {
+func withUserID(id int) userOption {
 	return func(m *UserMutation) {
 		var (
 			err   error
@@ -741,13 +741,13 @@ func (m UserMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of User entities.
-func (m *UserMutation) SetID(id uuid.UUID) {
+func (m *UserMutation) SetID(id int) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *UserMutation) ID() (id uuid.UUID, exists bool) {
+func (m *UserMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -758,12 +758,12 @@ func (m *UserMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *UserMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []uuid.UUID{id}, nil
+			return []int{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -915,6 +915,55 @@ func (m *UserMutation) OldEmail(ctx context.Context) (v string, err error) {
 // ResetEmail resets all changes to the "email" field.
 func (m *UserMutation) ResetEmail() {
 	m.email = nil
+}
+
+// SetAvatar sets the "avatar" field.
+func (m *UserMutation) SetAvatar(s string) {
+	m.avatar = &s
+}
+
+// Avatar returns the value of the "avatar" field in the mutation.
+func (m *UserMutation) Avatar() (r string, exists bool) {
+	v := m.avatar
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAvatar returns the old "avatar" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldAvatar(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAvatar is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAvatar requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAvatar: %w", err)
+	}
+	return oldValue.Avatar, nil
+}
+
+// ClearAvatar clears the value of the "avatar" field.
+func (m *UserMutation) ClearAvatar() {
+	m.avatar = nil
+	m.clearedFields[user.FieldAvatar] = struct{}{}
+}
+
+// AvatarCleared returns if the "avatar" field was cleared in this mutation.
+func (m *UserMutation) AvatarCleared() bool {
+	_, ok := m.clearedFields[user.FieldAvatar]
+	return ok
+}
+
+// ResetAvatar resets all changes to the "avatar" field.
+func (m *UserMutation) ResetAvatar() {
+	m.avatar = nil
+	delete(m.clearedFields, user.FieldAvatar)
 }
 
 // SetPhone sets the "phone" field.
@@ -1134,7 +1183,7 @@ func (m *UserMutation) ResetCompanyID() {
 }
 
 // SetAccountID sets the "account" edge to the Account entity by id.
-func (m *UserMutation) SetAccountID(id uuid.UUID) {
+func (m *UserMutation) SetAccountID(id int) {
 	m.account = &id
 }
 
@@ -1149,7 +1198,7 @@ func (m *UserMutation) AccountCleared() bool {
 }
 
 // AccountID returns the "account" edge ID in the mutation.
-func (m *UserMutation) AccountID() (id uuid.UUID, exists bool) {
+func (m *UserMutation) AccountID() (id int, exists bool) {
 	if m.account != nil {
 		return *m.account, true
 	}
@@ -1159,7 +1208,7 @@ func (m *UserMutation) AccountID() (id uuid.UUID, exists bool) {
 // AccountIDs returns the "account" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // AccountID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) AccountIDs() (ids []uuid.UUID) {
+func (m *UserMutation) AccountIDs() (ids []int) {
 	if id := m.account; id != nil {
 		ids = append(ids, *id)
 	}
@@ -1206,7 +1255,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.first_name != nil {
 		fields = append(fields, user.FieldFirstName)
 	}
@@ -1218,6 +1267,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.email != nil {
 		fields = append(fields, user.FieldEmail)
+	}
+	if m.avatar != nil {
+		fields = append(fields, user.FieldAvatar)
 	}
 	if m.phone != nil {
 		fields = append(fields, user.FieldPhone)
@@ -1253,6 +1305,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Gender()
 	case user.FieldEmail:
 		return m.Email()
+	case user.FieldAvatar:
+		return m.Avatar()
 	case user.FieldPhone:
 		return m.Phone()
 	case user.FieldWardCode:
@@ -1282,6 +1336,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldGender(ctx)
 	case user.FieldEmail:
 		return m.OldEmail(ctx)
+	case user.FieldAvatar:
+		return m.OldAvatar(ctx)
 	case user.FieldPhone:
 		return m.OldPhone(ctx)
 	case user.FieldWardCode:
@@ -1330,6 +1386,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetEmail(v)
+		return nil
+	case user.FieldAvatar:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAvatar(v)
 		return nil
 	case user.FieldPhone:
 		v, ok := value.(string)
@@ -1402,7 +1465,11 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(user.FieldAvatar) {
+		fields = append(fields, user.FieldAvatar)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1415,6 +1482,11 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
+	switch name {
+	case user.FieldAvatar:
+		m.ClearAvatar()
+		return nil
+	}
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
 
@@ -1433,6 +1505,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldEmail:
 		m.ResetEmail()
+		return nil
+	case user.FieldAvatar:
+		m.ResetAvatar()
 		return nil
 	case user.FieldPhone:
 		m.ResetPhone()

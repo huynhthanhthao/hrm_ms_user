@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 )
@@ -51,6 +50,20 @@ func (uc *UserCreate) SetNillableGender(u *user.Gender) *UserCreate {
 // SetEmail sets the "email" field.
 func (uc *UserCreate) SetEmail(s string) *UserCreate {
 	uc.mutation.SetEmail(s)
+	return uc
+}
+
+// SetAvatar sets the "avatar" field.
+func (uc *UserCreate) SetAvatar(s string) *UserCreate {
+	uc.mutation.SetAvatar(s)
+	return uc
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (uc *UserCreate) SetNillableAvatar(s *string) *UserCreate {
+	if s != nil {
+		uc.SetAvatar(*s)
+	}
 	return uc
 }
 
@@ -107,27 +120,19 @@ func (uc *UserCreate) SetCompanyID(s string) *UserCreate {
 }
 
 // SetID sets the "id" field.
-func (uc *UserCreate) SetID(u uuid.UUID) *UserCreate {
-	uc.mutation.SetID(u)
-	return uc
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (uc *UserCreate) SetNillableID(u *uuid.UUID) *UserCreate {
-	if u != nil {
-		uc.SetID(*u)
-	}
+func (uc *UserCreate) SetID(i int) *UserCreate {
+	uc.mutation.SetID(i)
 	return uc
 }
 
 // SetAccountID sets the "account" edge to the Account entity by ID.
-func (uc *UserCreate) SetAccountID(id uuid.UUID) *UserCreate {
+func (uc *UserCreate) SetAccountID(id int) *UserCreate {
 	uc.mutation.SetAccountID(id)
 	return uc
 }
 
 // SetNillableAccountID sets the "account" edge to the Account entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableAccountID(id *uuid.UUID) *UserCreate {
+func (uc *UserCreate) SetNillableAccountID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetAccountID(*id)
 	}
@@ -185,10 +190,6 @@ func (uc *UserCreate) defaults() {
 	if _, ok := uc.mutation.UpdatedAt(); !ok {
 		v := user.DefaultUpdatedAt()
 		uc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := uc.mutation.ID(); !ok {
-		v := user.DefaultID()
-		uc.mutation.SetID(v)
 	}
 }
 
@@ -264,6 +265,11 @@ func (uc *UserCreate) check() error {
 			return &ValidationError{Name: "company_id", err: fmt.Errorf(`ent: validator failed for field "User.company_id": %w`, err)}
 		}
 	}
+	if v, ok := uc.mutation.ID(); ok {
+		if err := user.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "User.id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -278,12 +284,9 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = int(id)
 	}
 	uc.mutation.id = &_node.ID
 	uc.mutation.done = true
@@ -293,11 +296,11 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
 		_node = &User{config: uc.config}
-		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
+		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	)
 	if id, ok := uc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = &id
+		_spec.ID.Value = id
 	}
 	if value, ok := uc.mutation.FirstName(); ok {
 		_spec.SetField(user.FieldFirstName, field.TypeString, value)
@@ -314,6 +317,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
 		_node.Email = value
+	}
+	if value, ok := uc.mutation.Avatar(); ok {
+		_spec.SetField(user.FieldAvatar, field.TypeString, value)
+		_node.Avatar = &value
 	}
 	if value, ok := uc.mutation.Phone(); ok {
 		_spec.SetField(user.FieldPhone, field.TypeString, value)
@@ -347,7 +354,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -403,6 +410,10 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})

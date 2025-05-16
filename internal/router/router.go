@@ -8,13 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(client *ent.Client, userService *service.UserService) *gin.Engine {
+func SetupRouter(client *ent.Client, hrClients *service.HRServiceClients) *gin.Engine {
 	r := gin.Default()
 
-	userHandler := handler.NewUserHandler(userService)
+	authService, err := service.NewAuthService(client, hrClients)
+	if err != nil {
+		panic("failed to create auth service: " + err.Error())
+	}
+	authHandler := handler.NewAuthHandler(authService)
 
-	r.POST("/login", userHandler.LoginHandler)
-	r.GET("/me", userHandler.GetMe)
+	// Đăng ký route
+	r.POST("/login", authHandler.LoginHandler)
+	r.GET("/me", authHandler.GetMe)
+	r.POST("/register", authHandler.RegisterHandler)
 
 	return r
 }

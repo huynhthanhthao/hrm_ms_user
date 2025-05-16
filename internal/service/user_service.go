@@ -3,31 +3,25 @@ package service
 import (
 	"context"
 	"fmt"
+	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
-	hrpb "github.com/huynhthanhthao/hrm_user_service/generated"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
-	"google.golang.org/grpc"
-
-	"github.com/google/uuid"
+	"github.com/huynhthanhthao/hrm_user_service/internal/helper"
 )
 
-type HRServiceClients struct {
-	Company hrpb.CompanyServiceClient
-	Branch  hrpb.BranchServiceClient
-	HrExt   hrpb.ExtServiceClient
-	Conn    *grpc.ClientConn
-}
 type UserService struct {
 	client    *ent.Client
 	hrClients *HRServiceClients
 }
 
-func (c *HRServiceClients) Close() {
-	if c.Conn != nil {
-		c.Conn.Close()
-	}
+func NewUserService(client *ent.Client, hrClients *HRServiceClients) (*UserService, error) {
+	return &UserService{
+		client:    client,
+		hrClients: hrClients,
+	}, nil
 }
 
 func (s *UserService) GetAllUsers(ctx context.Context) ([]*ent.User, error) {
@@ -38,15 +32,9 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]*ent.User, error) {
 	return users, nil
 }
 
-func (s *UserService) GetUser(ctx context.Context, id string) (*ent.User, error) {
-	// Convert the string ID to uuid.UUID
-	userID, err := uuid.Parse(id)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user ID format: %w", err)
-	}
-
+func (s *UserService) GetUser(ctx context.Context, id int) (*ent.User, error) {
 	// Use the converted UUID
-	user, err := s.client.User.Get(ctx, userID)
+	user, err := s.client.User.Get(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve user: %w", err)
 	}
@@ -63,19 +51,15 @@ func (s *UserService) GetUsersByIDs(ctx context.Context, params dto.UserParams) 
 
 	offset := (params.Page - 1) * params.PageSize
 
-	// Convert string IDs to uuid.UUID
-	uuidIDs := make([]uuid.UUID, len(params.IDs))
+	// Convert string IDs to int
+	intIDs := make([]int, len(params.IDs))
 	for i, id := range params.IDs {
-		uuidID, err := uuid.Parse(id)
-		if err != nil {
-			return nil, 0, fmt.Errorf("invalid user ID format for ID %s: %w", id, err)
-		}
-		uuidIDs[i] = uuidID
+		intIDs[i] = int(id)
 	}
 
 	// Query users by IDs with pagination
 	users, err := s.client.User.Query().
-		Where(user.IDIn(uuidIDs...)).
+		Where(user.IDIn(intIDs...)).
 		Offset(offset).
 		Limit(params.PageSize).
 		All(ctx)
@@ -83,11 +67,79 @@ func (s *UserService) GetUsersByIDs(ctx context.Context, params dto.UserParams) 
 		return nil, 0, fmt.Errorf("failed to retrieve users: %w", err)
 	}
 
-	// Get total count of users matching the IDs
-	totalCount, err := s.client.User.Query().Where(user.IDIn(uuidIDs...)).Count(ctx)
+	// Get total count
+	totalCount, err := s.client.User.Query().
+		Where(user.IDIn(intIDs...)).
+		Count(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to count users: %w", err)
 	}
 
 	return users, totalCount, nil
+}
+
+func (s *UserService) CreateUser(ctx context.Context, c *gin.Context, input *dto.CreateUserDTO) {
+	tx, err := s.client.Tx(ctx)
+	if err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+	defer tx.Rollback()
+
+	user, err := tx.User.Create().
+		SetFirstName(input.FirstName).
+		SetLastName(input.LastName).
+		SetGender(user.Gender(input.Gender)).
+		SetEmail(input.Email).
+		SetPhone(input.Phone).
+		SetWardCode(input.WardCode).
+		SetAddress(input.Address).
+		Save(ctx)
+	if err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": user})
+}
+
+func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int, input *dto.CreateUserDTO) (*ent.User, error) {
+	return tx.User.UpdateOneID(userID).
+		SetFirstName(input.FirstName).
+		SetLastName(input.LastName).
+		SetGender(user.Gender(input.Gender)).
+		SetEmail(input.Email).
+		SetPhone(input.Phone).
+		SetWardCode(input.WardCode).
+		SetAddress(input.Address).
+		Save(ctx)
+}
+
+func (s *UserService) DeleteUserByID(ctx context.Context, c *gin.Context, id int) {
+
+	tx, err := s.client.Tx(ctx)
+
+	if err != nil {
+		helper.RespondWithError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer tx.Rollback()
+
+	if err := tx.User.DeleteOneID(id).Exec(ctx); err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := tx.Account.DeleteOneID(id).Exec(ctx); err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		helper.RespondWithError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user_id": id})
 }

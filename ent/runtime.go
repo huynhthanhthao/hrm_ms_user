@@ -5,7 +5,6 @@ package ent
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	"github.com/huynhthanhthao/hrm_user_service/ent/schema"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
@@ -37,8 +36,8 @@ func init() {
 	account.UpdateDefaultUpdatedAt = accountDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// accountDescID is the schema descriptor for id field.
 	accountDescID := accountFields[0].Descriptor()
-	// account.DefaultID holds the default value on creation for the id field.
-	account.DefaultID = accountDescID.Default.(func() uuid.UUID)
+	// account.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	account.IDValidator = accountDescID.Validators[0].(func(int) error)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescFirstName is the schema descriptor for first_name field.
@@ -54,33 +53,33 @@ func init() {
 	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	user.EmailValidator = userDescEmail.Validators[0].(func(string) error)
 	// userDescPhone is the schema descriptor for phone field.
-	userDescPhone := userFields[5].Descriptor()
+	userDescPhone := userFields[6].Descriptor()
 	// user.PhoneValidator is a validator for the "phone" field. It is called by the builders before save.
 	user.PhoneValidator = userDescPhone.Validators[0].(func(string) error)
 	// userDescWardCode is the schema descriptor for ward_code field.
-	userDescWardCode := userFields[6].Descriptor()
+	userDescWardCode := userFields[7].Descriptor()
 	// user.WardCodeValidator is a validator for the "ward_code" field. It is called by the builders before save.
 	user.WardCodeValidator = userDescWardCode.Validators[0].(func(string) error)
 	// userDescAddress is the schema descriptor for address field.
-	userDescAddress := userFields[7].Descriptor()
+	userDescAddress := userFields[8].Descriptor()
 	// user.AddressValidator is a validator for the "address" field. It is called by the builders before save.
 	user.AddressValidator = userDescAddress.Validators[0].(func(string) error)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[8].Descriptor()
+	userDescCreatedAt := userFields[9].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescUpdatedAt is the schema descriptor for updated_at field.
-	userDescUpdatedAt := userFields[9].Descriptor()
+	userDescUpdatedAt := userFields[10].Descriptor()
 	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userDescCompanyID is the schema descriptor for company_id field.
-	userDescCompanyID := userFields[10].Descriptor()
+	userDescCompanyID := userFields[11].Descriptor()
 	// user.CompanyIDValidator is a validator for the "company_id" field. It is called by the builders before save.
 	user.CompanyIDValidator = userDescCompanyID.Validators[0].(func(string) error)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
-	// user.DefaultID holds the default value on creation for the id field.
-	user.DefaultID = userDescID.Default.(func() uuid.UUID)
+	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	user.IDValidator = userDescID.Validators[0].(func(int) error)
 }

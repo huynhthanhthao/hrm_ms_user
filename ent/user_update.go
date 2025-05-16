@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	"github.com/huynhthanhthao/hrm_user_service/ent/predicate"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
@@ -83,6 +82,26 @@ func (uu *UserUpdate) SetNillableEmail(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetEmail(*s)
 	}
+	return uu
+}
+
+// SetAvatar sets the "avatar" field.
+func (uu *UserUpdate) SetAvatar(s string) *UserUpdate {
+	uu.mutation.SetAvatar(s)
+	return uu
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableAvatar(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetAvatar(*s)
+	}
+	return uu
+}
+
+// ClearAvatar clears the value of the "avatar" field.
+func (uu *UserUpdate) ClearAvatar() *UserUpdate {
+	uu.mutation.ClearAvatar()
 	return uu
 }
 
@@ -163,13 +182,13 @@ func (uu *UserUpdate) SetNillableCompanyID(s *string) *UserUpdate {
 }
 
 // SetAccountID sets the "account" edge to the Account entity by ID.
-func (uu *UserUpdate) SetAccountID(id uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) SetAccountID(id int) *UserUpdate {
 	uu.mutation.SetAccountID(id)
 	return uu
 }
 
 // SetNillableAccountID sets the "account" edge to the Account entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableAccountID(id *uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) SetNillableAccountID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetAccountID(*id)
 	}
@@ -277,7 +296,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := uu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := uu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -296,6 +315,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	}
+	if value, ok := uu.mutation.Avatar(); ok {
+		_spec.SetField(user.FieldAvatar, field.TypeString, value)
+	}
+	if uu.mutation.AvatarCleared() {
+		_spec.ClearField(user.FieldAvatar, field.TypeString)
 	}
 	if value, ok := uu.mutation.Phone(); ok {
 		_spec.SetField(user.FieldPhone, field.TypeString, value)
@@ -323,7 +348,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -336,7 +361,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{user.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -420,6 +445,26 @@ func (uuo *UserUpdateOne) SetNillableEmail(s *string) *UserUpdateOne {
 	return uuo
 }
 
+// SetAvatar sets the "avatar" field.
+func (uuo *UserUpdateOne) SetAvatar(s string) *UserUpdateOne {
+	uuo.mutation.SetAvatar(s)
+	return uuo
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableAvatar(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetAvatar(*s)
+	}
+	return uuo
+}
+
+// ClearAvatar clears the value of the "avatar" field.
+func (uuo *UserUpdateOne) ClearAvatar() *UserUpdateOne {
+	uuo.mutation.ClearAvatar()
+	return uuo
+}
+
 // SetPhone sets the "phone" field.
 func (uuo *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
 	uuo.mutation.SetPhone(s)
@@ -497,13 +542,13 @@ func (uuo *UserUpdateOne) SetNillableCompanyID(s *string) *UserUpdateOne {
 }
 
 // SetAccountID sets the "account" edge to the Account entity by ID.
-func (uuo *UserUpdateOne) SetAccountID(id uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetAccountID(id int) *UserUpdateOne {
 	uuo.mutation.SetAccountID(id)
 	return uuo
 }
 
 // SetNillableAccountID sets the "account" edge to the Account entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAccountID(id *uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetNillableAccountID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetAccountID(*id)
 	}
@@ -624,7 +669,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if err := uuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	id, ok := uuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
@@ -661,6 +706,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
 	}
+	if value, ok := uuo.mutation.Avatar(); ok {
+		_spec.SetField(user.FieldAvatar, field.TypeString, value)
+	}
+	if uuo.mutation.AvatarCleared() {
+		_spec.ClearField(user.FieldAvatar, field.TypeString)
+	}
 	if value, ok := uuo.mutation.Phone(); ok {
 		_spec.SetField(user.FieldPhone, field.TypeString, value)
 	}
@@ -687,7 +738,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -700,7 +751,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: []string{user.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -6,7 +6,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 type Account struct {
@@ -15,7 +14,9 @@ type Account struct {
 
 func (Account) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.New()).Default(uuid.New),
+		field.Int("id").
+			Positive().
+			Unique(),
 		field.String("username").Unique().NotEmpty(),
 		field.String("password").Sensitive().NotEmpty(),
 		field.Enum("status").Values("active", "inactive").Default("active"),

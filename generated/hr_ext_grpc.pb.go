@@ -19,14 +19,20 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ExtService_GetBranchByUserId_FullMethodName = "/entpb.ExtService/GetBranchByUserId"
+	ExtService_GetBranchByUserId_FullMethodName      = "/entpb.ExtService/GetBranchByUserId"
+	ExtService_DeleteEmployeeByUserId_FullMethodName = "/entpb.ExtService/DeleteEmployeeByUserId"
+	ExtService_GetEmployeeByUserId_FullMethodName    = "/entpb.ExtService/GetEmployeeByUserId"
 )
 
 // ExtServiceClient is the client API for ExtService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Service definition
 type ExtServiceClient interface {
 	GetBranchByUserId(ctx context.Context, in *GetBranchByUserIdRequest, opts ...grpc.CallOption) (*Branch, error)
+	DeleteEmployeeByUserId(ctx context.Context, in *DeleteEmployeeByUserIdRequest, opts ...grpc.CallOption) (*DeleteEmployeeByUserIdResponse, error)
+	GetEmployeeByUserId(ctx context.Context, in *GetEmployeeByUserIdRequest, opts ...grpc.CallOption) (*Employee, error)
 }
 
 type extServiceClient struct {
@@ -47,11 +53,35 @@ func (c *extServiceClient) GetBranchByUserId(ctx context.Context, in *GetBranchB
 	return out, nil
 }
 
+func (c *extServiceClient) DeleteEmployeeByUserId(ctx context.Context, in *DeleteEmployeeByUserIdRequest, opts ...grpc.CallOption) (*DeleteEmployeeByUserIdResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteEmployeeByUserIdResponse)
+	err := c.cc.Invoke(ctx, ExtService_DeleteEmployeeByUserId_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *extServiceClient) GetEmployeeByUserId(ctx context.Context, in *GetEmployeeByUserIdRequest, opts ...grpc.CallOption) (*Employee, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Employee)
+	err := c.cc.Invoke(ctx, ExtService_GetEmployeeByUserId_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExtServiceServer is the server API for ExtService service.
 // All implementations must embed UnimplementedExtServiceServer
 // for forward compatibility.
+//
+// Service definition
 type ExtServiceServer interface {
 	GetBranchByUserId(context.Context, *GetBranchByUserIdRequest) (*Branch, error)
+	DeleteEmployeeByUserId(context.Context, *DeleteEmployeeByUserIdRequest) (*DeleteEmployeeByUserIdResponse, error)
+	GetEmployeeByUserId(context.Context, *GetEmployeeByUserIdRequest) (*Employee, error)
 	mustEmbedUnimplementedExtServiceServer()
 }
 
@@ -64,6 +94,12 @@ type UnimplementedExtServiceServer struct{}
 
 func (UnimplementedExtServiceServer) GetBranchByUserId(context.Context, *GetBranchByUserIdRequest) (*Branch, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBranchByUserId not implemented")
+}
+func (UnimplementedExtServiceServer) DeleteEmployeeByUserId(context.Context, *DeleteEmployeeByUserIdRequest) (*DeleteEmployeeByUserIdResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteEmployeeByUserId not implemented")
+}
+func (UnimplementedExtServiceServer) GetEmployeeByUserId(context.Context, *GetEmployeeByUserIdRequest) (*Employee, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEmployeeByUserId not implemented")
 }
 func (UnimplementedExtServiceServer) mustEmbedUnimplementedExtServiceServer() {}
 func (UnimplementedExtServiceServer) testEmbeddedByValue()                    {}
@@ -104,6 +140,42 @@ func _ExtService_GetBranchByUserId_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExtService_DeleteEmployeeByUserId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteEmployeeByUserIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExtServiceServer).DeleteEmployeeByUserId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExtService_DeleteEmployeeByUserId_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExtServiceServer).DeleteEmployeeByUserId(ctx, req.(*DeleteEmployeeByUserIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExtService_GetEmployeeByUserId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEmployeeByUserIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExtServiceServer).GetEmployeeByUserId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExtService_GetEmployeeByUserId_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExtServiceServer).GetEmployeeByUserId(ctx, req.(*GetEmployeeByUserIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ExtService_ServiceDesc is the grpc.ServiceDesc for ExtService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +186,14 @@ var ExtService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetBranchByUserId",
 			Handler:    _ExtService_GetBranchByUserId_Handler,
+		},
+		{
+			MethodName: "DeleteEmployeeByUserId",
+			Handler:    _ExtService_DeleteEmployeeByUserId_Handler,
+		},
+		{
+			MethodName: "GetEmployeeByUserId",
+			Handler:    _ExtService_GetEmployeeByUserId_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

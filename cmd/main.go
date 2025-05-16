@@ -9,7 +9,8 @@ import (
 
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/migrate"
-	hrpb "github.com/huynhthanhthao/hrm_user_service/generated"
+	clientGrpc "github.com/huynhthanhthao/hrm_user_service/generated"
+
 	userpb "github.com/huynhthanhthao/hrm_user_service/generated"
 	userGrpc "github.com/huynhthanhthao/hrm_user_service/internal/grpc"
 	"github.com/huynhthanhthao/hrm_user_service/internal/handler"
@@ -36,10 +37,18 @@ func main() {
 	runMigration(client)
 
 	hrClients, err := NewHRServiceClients()
+
 	if err != nil {
 		log.Fatalf("❌ failed to initialize HR service clients: %v", err)
 	}
 	defer hrClients.Close()
+
+	permissionClients, err := NewPermissionServiceClients()
+
+	if err != nil {
+		log.Fatalf("❌ failed to initialize Permission service clients: %v", err)
+	}
+	defer permissionClients.Close()
 
 	userService, err := service.NewUserService(client, hrClients)
 
@@ -49,7 +58,7 @@ func main() {
 
 	// Pass userService to gRPC and HTTP servers
 	go startGRPCServer(client, userService)
-	startHTTPServer(client, userService)
+	startHTTPServer(client, hrClients)
 }
 
 // Initialize Ent client
@@ -121,8 +130,8 @@ func startGRPCServer(client *ent.Client, userService *service.UserService) {
 }
 
 // Start HTTP server
-func startHTTPServer(client *ent.Client, userService *service.UserService) {
-	r := router.SetupRouter(client, userService)
+func startHTTPServer(client *ent.Client, hrClients *service.HRServiceClients) {
+	r := router.SetupRouter(client, hrClients)
 
 	r.Use(handler.Logger())
 
@@ -133,7 +142,6 @@ func startHTTPServer(client *ent.Client, userService *service.UserService) {
 	}
 }
 
-// NewHRServiceClients khởi tạo các client cho HR service
 func NewHRServiceClients() (*service.HRServiceClients, error) {
 	url := os.Getenv("HR_SERVICE_URL")
 	if url == "" {
@@ -146,9 +154,27 @@ func NewHRServiceClients() (*service.HRServiceClients, error) {
 	}
 
 	return &service.HRServiceClients{
-		Conn:    conn,
-		Company: hrpb.NewCompanyServiceClient(conn),
-		Branch:  hrpb.NewBranchServiceClient(conn),
-		HrExt:   hrpb.NewExtServiceClient(conn),
+		Conn:         conn,
+		Organization: clientGrpc.NewOrganizationServiceClient(conn),
+		HrExt:        clientGrpc.NewExtServiceClient(conn),
+	}, nil
+}
+
+func NewPermissionServiceClients() (*service.PermissionServiceClients, error) {
+	url := os.Getenv("PERMISSION_SERVICE_URL")
+	if url == "" {
+		return nil, fmt.Errorf("PERMISSION_SERVICE_URL is not set")
+	}
+
+	conn, err := grpc.NewClient(url, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to Permission service: %v", err)
+	}
+
+	return &service.PermissionServiceClients{
+		Conn:     conn,
+		UserRole: clientGrpc.NewUserRoleServiceClient(conn),
+		UserPerm: clientGrpc.NewUserPermServiceClient(conn),
 	}, nil
 }
