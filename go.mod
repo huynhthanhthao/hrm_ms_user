@@ -14,8 +14,6 @@ require (
 	google.golang.org/protobuf v1.36.6
 )
 
-require entgo.io/contrib v0.6.0 // indirect
-
 require (
 	ariga.io/atlas v0.32.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect

@@ -8,6 +8,10 @@ service UserService {
   rpc ListUsers (ListUsersRequest) returns (ListUsersResponse);
   rpc GetUser (GetUserRequest) returns (GetUserResponse);
   rpc GetUsersByIDs (GetUsersByIDsRequest) returns (GetUsersByIDsResponse);
+
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
 }
 
 message ListUsersRequest {
@@ -18,7 +22,7 @@ message ListUsersRequest {
 }
 
 message User {
-  int32 id = 1; // đổi từ string sang int32
+  int32 id = 1;
   string first_name = 2;
   string last_name = 3;
   string gender = 4;
@@ -26,7 +30,7 @@ message User {
   string phone = 6;
   string ward_code = 7;
   string address = 8;
-  string company_id = 9;
+  string avatar = 9;
   string created_at = 10;
   string updated_at = 11;
 }
@@ -39,7 +43,7 @@ message ListUsersResponse {
 }
 
 message GetUserRequest {
-  int32 id = 1; // đổi sang int32
+  int32 id = 1;
 }
 
 message GetUserResponse {
@@ -55,4 +59,48 @@ message GetUsersByIDsRequest {
 message GetUsersByIDsResponse {
   repeated User users = 1;
   int32 total_count = 2;
+}
+
+message CreateUserRequest {
+  string first_name = 1;
+  string last_name = 2;
+  string gender = 3;
+  string email = 4;
+  string phone = 5;
+  string ward_code = 6;
+  string address = 7;
+  string avatar = 8;
+  repeated int32 perm_ids = 9;
+  repeated int32 role_ids = 10;
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+message UpdateUserRequest {
+  int32 id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string gender = 4;
+  string email = 5;
+  string phone = 6;
+  string ward_code = 7;
+  string address = 8;
+  int32 company_id = 9;
+  string avatar = 10;
+  repeated int32 perm_ids = 11;
+  repeated int32 role_ids = 12;
+}
+
+message UpdateUserResponse {
+  User user = 1;
+}
+
+message DeleteUserRequest {
+  int32 id = 1;
+}
+
+message DeleteUserResponse {
+  bool success = 1;
 }

@@ -3,18 +3,16 @@ package service
 import (
 	"context"
 	"fmt"
-	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
-	"github.com/huynhthanhthao/hrm_user_service/internal/helper"
 )
 
 type UserService struct {
 	client    *ent.Client
 	hrClients *HRServiceClients
+	perClients *PermissionServiceClients
 }
 
 func NewUserService(client *ent.Client, hrClients *HRServiceClients) (*UserService, error) {
@@ -22,6 +20,10 @@ func NewUserService(client *ent.Client, hrClients *HRServiceClients) (*UserServi
 		client:    client,
 		hrClients: hrClients,
 	}, nil
+}
+
+func (s *UserService) BeginTx(ctx context.Context) (*ent.Tx, error) {
+	return s.client.Tx(ctx)
 }
 
 func (s *UserService) GetAllUsers(ctx context.Context) ([]*ent.User, error) {
@@ -77,12 +79,10 @@ func (s *UserService) GetUsersByIDs(ctx context.Context, params dto.UserParams) 
 
 	return users, totalCount, nil
 }
-
-func (s *UserService) CreateUser(ctx context.Context, c *gin.Context, input *dto.CreateUserDTO) {
+func (s *UserService) CreateUser(ctx context.Context, input *dto.CreateUserDTO) (*ent.User, error) {
 	tx, err := s.client.Tx(ctx)
 	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
+		return nil, err
 	}
 	defer tx.Rollback()
 
@@ -94,17 +94,30 @@ func (s *UserService) CreateUser(ctx context.Context, c *gin.Context, input *dto
 		SetPhone(input.Phone).
 		SetWardCode(input.WardCode).
 		SetAddress(input.Address).
+		SetAvatar(input.Avatar).
 		Save(ctx)
+
 	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
+		return nil, err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": user})
+	/*
+		Call grpc to permission service here 
+	*/
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int, input *dto.CreateUserDTO) (*ent.User, error) {
-	return tx.User.UpdateOneID(userID).
+	/* 
+		Call grpc to permission service  
+	*/
+
+	user, err := tx.User.UpdateOneID(userID).
 		SetFirstName(input.FirstName).
 		SetLastName(input.LastName).
 		SetGender(user.Gender(input.Gender)).
@@ -112,34 +125,38 @@ func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int
 		SetPhone(input.Phone).
 		SetWardCode(input.WardCode).
 		SetAddress(input.Address).
+		SetAvatar(input.Avatar).
 		Save(ctx)
-}
-
-func (s *UserService) DeleteUserByID(ctx context.Context, c *gin.Context, id int) {
-
-	tx, err := s.client.Tx(ctx)
 
 	if err != nil {
-		helper.RespondWithError(c, http.StatusInternalServerError, err)
-		return
+		return nil, err
 	}
 
+	return user, nil
+}
+
+func (s *UserService) DeleteUserByID(ctx context.Context, id int) error {
+	tx, err := s.client.Tx(ctx)
+	if err != nil {
+		return err
+	}
 	defer tx.Rollback()
 
 	if err := tx.User.DeleteOneID(id).Exec(ctx); err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
+		return err
 	}
 
 	if err := tx.Account.DeleteOneID(id).Exec(ctx); err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
+		return err
 	}
 
 	if err := tx.Commit(); err != nil {
-		helper.RespondWithError(c, http.StatusInternalServerError, err)
-		return
+		return err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user_id": id})
+	/* 
+		Call grpc to permission service 
+	*/
+
+	return nil
 }
