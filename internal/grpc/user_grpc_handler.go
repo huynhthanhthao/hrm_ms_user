@@ -54,6 +54,7 @@ func (s *UserGRPCServer) ListUsers(ctx context.Context, req *userpb.ListUsersReq
 
 func (s *UserGRPCServer) GetUser(ctx context.Context, req *userpb.GetUserRequest) (*userpb.GetUserResponse, error) {
 	user, err := s.userService.GetUser(ctx, int(req.Id))
+	
 	if err != nil {
 		return nil, err
 	}

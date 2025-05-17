@@ -15,10 +15,15 @@ type UserService struct {
 	perClients *PermissionServiceClients
 }
 
-func NewUserService(client *ent.Client, hrClients *HRServiceClients) (*UserService, error) {
+func NewUserService(
+	client *ent.Client,
+	hrClients *HRServiceClients,
+	perClients *PermissionServiceClients,
+) (*UserService, error) {
 	return &UserService{
-		client:    client,
-		hrClients: hrClients,
+		client:     client,
+		hrClients:  hrClients,
+		perClients: perClients,
 	}, nil
 }
 

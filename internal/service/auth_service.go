@@ -20,15 +20,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// service/auth_service.go
 type AuthService struct {
 	client    *ent.Client
 	hrClients *HRServiceClients
+	perClients *PermissionServiceClients
 }
 
-func NewAuthService(client *ent.Client, hrClients *HRServiceClients) (*AuthService, error) {
+func NewAuthService(
+	client *ent.Client, 
+	hrClients *HRServiceClients, 
+	perClients *PermissionServiceClients,
+) (*AuthService, error) {
 	return &AuthService{
 		client: client,
+		hrClients:  hrClients,
+		perClients: perClients,
 	}, nil
 }
 

@@ -8,10 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(client *ent.Client, hrClients *service.HRServiceClients) *gin.Engine {
+func SetupRouter(
+	client *ent.Client, 
+	hrClients *service.HRServiceClients, 
+	perClients *service.PermissionServiceClients,
+) *gin.Engine {
+		
 	r := gin.Default()
 
-	authService, err := service.NewAuthService(client, hrClients)
+	authService, err := service.NewAuthService(client, hrClients, perClients)
 	if err != nil {
 		panic("failed to create auth service: " + err.Error())
 	}

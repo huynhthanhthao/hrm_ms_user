@@ -39,26 +39,25 @@ func main() {
 	hrClients, err := NewHRServiceClients()
 
 	if err != nil {
-		log.Fatalf("❌ failed to initialize HR service clients: %v", err)
+		log.Fatalf("failed to initialize HR service clients: %v", err)
 	}
 	defer hrClients.Close()
 
 	permissionClients, err := NewPermissionServiceClients()
 
 	if err != nil {
-		log.Fatalf("❌ failed to initialize Permission service clients: %v", err)
+		log.Fatalf("failed to initialize Permission service clients: %v", err)
 	}
 	defer permissionClients.Close()
 
-	userService, err := service.NewUserService(client, hrClients)
+	userService, err := service.NewUserService(client, hrClients, permissionClients)
 
 	if err != nil {
-		log.Fatalf("❌ failed to initialize UserService: %v", err)
+		log.Fatalf("failed to initialize UserService: %v", err)
 	}
 
-	// Pass userService to gRPC and HTTP servers
 	go startGRPCServer(client, userService)
-	startHTTPServer(client, hrClients)
+	startHTTPServer(client, hrClients, permissionClients)
 }
 
 // Initialize Ent client
@@ -72,7 +71,7 @@ func initEntClient() *ent.Client {
 
 	// Kiểm tra thiếu biến
 	if host == "" || port == "" || user == "" || dbname == "" {
-		log.Fatal("❌ One or more required DB environment variables are not set")
+		log.Fatal("One or more required DB environment variables are not set")
 	}
 
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
@@ -80,10 +79,10 @@ func initEntClient() *ent.Client {
 
 	client, err := ent.Open("postgres", dsn)
 	if err != nil {
-		log.Fatalf("❌ failed opening connection to postgres: %v", err)
+		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
 
-	log.Println("✅ Connected to PostgreSQL")
+	log.Println("Connected to PostgreSQL")
 	return client
 }
 
@@ -119,26 +118,26 @@ func startGRPCServer(client *ent.Client, userService *service.UserService) {
 
 	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {
-		logger.Fatalf("❌ failed to listen for gRPC: %v", err)
+		logger.Fatalf("failed to listen for gRPC: %v", err)
 	}
 
-	logger.Printf("✅ gRPC server listening on %s", grpcPort)
+	logger.Printf("gRPC server listening on %s", grpcPort)
 
 	if err := grpcServer.Serve(lis); err != nil {
-		logger.Fatalf("❌ gRPC server stopped: %v", err)
+		logger.Fatalf("gRPC server stopped: %v", err)
 	}
 }
 
 // Start HTTP server
-func startHTTPServer(client *ent.Client, hrClients *service.HRServiceClients) {
-	r := router.SetupRouter(client, hrClients)
+func startHTTPServer(client *ent.Client, hrClients *service.HRServiceClients, perClients *service.PermissionServiceClients,) {
+	r := router.SetupRouter(client, hrClients, perClients)
 
 	r.Use(handler.Logger())
 
-	logger.Printf("✅ HTTP server listening on %s", httpPort)
+	logger.Printf("HTTP server listening on %s", httpPort)
 
 	if err := r.Run(httpPort); err != nil {
-		logger.Fatalf("❌ HTTP server stopped: %v", err)
+		logger.Fatalf("HTTP server stopped: %v", err)
 	}
 }
 
