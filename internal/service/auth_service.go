@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,9 +12,10 @@ import (
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
-	grpcClient "github.com/huynhthanhthao/hrm_user_service/generated"
+	"github.com/huynhthanhthao/hrm_user_service/generated"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
 	"github.com/huynhthanhthao/hrm_user_service/internal/helper"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -21,18 +23,18 @@ import (
 )
 
 type AuthService struct {
-	client    *ent.Client
-	hrClients *HRServiceClients
+	client     *ent.Client
+	hrClients  *HRServiceClients
 	perClients *PermissionServiceClients
 }
 
 func NewAuthService(
-	client *ent.Client, 
-	hrClients *HRServiceClients, 
+	client *ent.Client,
+	hrClients *HRServiceClients,
 	perClients *PermissionServiceClients,
 ) (*AuthService, error) {
 	return &AuthService{
-		client: client,
+		client:     client,
 		hrClients:  hrClients,
 		perClients: perClients,
 	}, nil
@@ -142,8 +144,8 @@ func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.Login
 		return
 	}
 
-	// Gọi gRPC lấy branch theo user ID (int -> string)
-	branch, err := s.hrClients.HrExt.GetBranchByUserId(ctx, &grpcClient.GetBranchByUserIdRequest{
+	// Gọi gRPC lấy employee theo user ID (int -> string)
+	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &generated.GetEmployeeByUserIdRequest{
 		UserId: strconv.Itoa(usr.ID),
 	})
 	if err != nil {
@@ -151,22 +153,32 @@ func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.Login
 		return
 	}
 
-	branchID := string(branch.Id)
-
 	// Parse duration
 	accessDur, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
 	refreshDur, _ := time.ParseDuration(os.Getenv("JWT_REFRESH_TOKEN_DURATION"))
 
 	// Tạo token
-	accessToken, err := GenerateToken(strconv.Itoa(acc.ID), strconv.Itoa(usr.ID), branchID, accessDur)
+	accessToken, err := GenerateToken(usr.ID, employee.Id, employee.OrgId, accessDur)
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	refreshToken, err := GenerateToken(strconv.Itoa(acc.ID), strconv.Itoa(usr.ID), branchID, refreshDur)
+	refreshToken, err := GenerateToken(usr.ID, employee.Id, employee.OrgId, refreshDur)
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	jsonEmployee, err := protojson.Marshal(employee)
+	if err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("failed to marshal employee: %v", err))
+		return
+	}
+
+	var employeeMap map[string]interface{}
+	if err := json.Unmarshal(jsonEmployee, &employeeMap); err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("failed to unmarshal employee JSON: %v", err))
 		return
 	}
 
@@ -176,6 +188,7 @@ func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.Login
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 		"user":          usr,
+		"employee":      employeeMap,
 	})
 }
 
@@ -183,7 +196,7 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 	// Parse the token
 	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("#1 DecodeToken: unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
@@ -196,31 +209,27 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 	// Extract claims
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("invalid token claims"))
+		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("#2 DecodeToken: invalid token claims"))
 		return
 	}
 
-	accountIDStr, ok := claims["account_id"].(string)
+	userIDFloat, ok := claims["user_id"].(float64)
 	if !ok {
-		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("account_id not found in token claims"))
+		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("#3 DecodeToken: user_id not found in token claims"))
 		return
 	}
 
-	// Convert accountID string to int
-	accountID, err := strconv.Atoi(accountIDStr)
-	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("invalid account_id format in token: %v", err))
-		return
-	}
+	userID := int(userIDFloat)
 
-	// Query the account by ID
-	acc, err := s.client.Account.Query().Where(account.IDEQ(accountID)).Only(ctx)
+	// Query the user by ID
+	usr, err := s.client.User.Query().Where(user.IDEQ(userID)).Only(ctx)
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	usr, err := acc.QueryUser().Only(ctx)
+	// Query the account by user
+	acc, err := usr.QueryAccount().Only(ctx)
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
@@ -228,20 +237,40 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 
 	usr.Edges.Account = acc
 
-	// (Nếu có phần lấy vị trí bằng grpc, thêm xử lý ở đây)
+	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &generated.GetEmployeeByUserIdRequest{
+		UserId: strconv.Itoa(usr.ID),
+	})
+	if err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	jsonEmployee, err := protojson.Marshal(employee)
+	if err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("#4 DecodeToken: failed to marshal employee: %v", err))
+		return
+	}
+
+	var employeeMap map[string]interface{}
+	if err := json.Unmarshal(jsonEmployee, &employeeMap); err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest,
+			fmt.Errorf("#5 DecodeToken: failed to unmarshal employee JSON: %v", err))
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"user": usr,
+		"user":     usr,
+		"employee": employeeMap,
 	})
 }
 
-func GenerateToken(accountID, userID, branchID string, duration time.Duration) (string, error) {
+func GenerateToken(userID int, employeeID int64, orgID int64, duration time.Duration) (string, error) {
 	claims := jwt.MapClaims{
-		"account_id": accountID,
-		"user_id":    userID,
-		"branch_id":  branchID,
-		"exp":        time.Now().Add(duration).Unix(),
-		"iss":        os.Getenv("ISS_KEY"),
+		"user_id":     userID,
+		"org_id":      orgID,
+		"employee_id": employeeID,
+		"exp":         time.Now().Add(duration).Unix(),
+		"iss":         os.Getenv("ISS_KEY"),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	secret := os.Getenv("JWT_SECRET")

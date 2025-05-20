@@ -11,7 +11,6 @@ type RegisterDto struct {
 	WardCode  string `json:"ward_code" binding:"required,numeric,min=3,max=10"`
 	Address   string `json:"address" binding:"required,max=200"`
 	Gender    string `json:"gender" binding:"required,oneof=other female male"`
-	CompanyId int    `json:"company_id" binding:"required"`
 }
 
 type RegisterInput struct {
@@ -25,5 +24,4 @@ type RegisterInput struct {
 	WardCode  string
 	Address   string
 	Gender    string
-	CompanyId int
 }

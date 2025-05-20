@@ -129,7 +129,7 @@ func startGRPCServer(client *ent.Client, userService *service.UserService) {
 }
 
 // Start HTTP server
-func startHTTPServer(client *ent.Client, hrClients *service.HRServiceClients, perClients *service.PermissionServiceClients,) {
+func startHTTPServer(client *ent.Client, hrClients *service.HRServiceClients, perClients *service.PermissionServiceClients) {
 	r := router.SetupRouter(client, hrClients, perClients)
 
 	r.Use(handler.Logger())
@@ -175,5 +175,6 @@ func NewPermissionServiceClients() (*service.PermissionServiceClients, error) {
 		Conn:     conn,
 		UserRole: clientGrpc.NewUserRoleServiceClient(conn),
 		UserPerm: clientGrpc.NewUserPermServiceClient(conn),
+		PermExt:  clientGrpc.NewPermissionExtServiceClient(conn),
 	}, nil
 }

@@ -660,7 +660,6 @@ type UserMutation struct {
 	address        *string
 	created_at     *time.Time
 	updated_at     *time.Time
-	company_id     *string
 	clearedFields  map[string]struct{}
 	account        *int
 	clearedaccount bool
@@ -1146,42 +1145,6 @@ func (m *UserMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetCompanyID sets the "company_id" field.
-func (m *UserMutation) SetCompanyID(s string) {
-	m.company_id = &s
-}
-
-// CompanyID returns the value of the "company_id" field in the mutation.
-func (m *UserMutation) CompanyID() (r string, exists bool) {
-	v := m.company_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCompanyID returns the old "company_id" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldCompanyID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCompanyID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCompanyID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCompanyID: %w", err)
-	}
-	return oldValue.CompanyID, nil
-}
-
-// ResetCompanyID resets all changes to the "company_id" field.
-func (m *UserMutation) ResetCompanyID() {
-	m.company_id = nil
-}
-
 // SetAccountID sets the "account" edge to the Account entity by id.
 func (m *UserMutation) SetAccountID(id int) {
 	m.account = &id
@@ -1255,7 +1218,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 10)
 	if m.first_name != nil {
 		fields = append(fields, user.FieldFirstName)
 	}
@@ -1286,9 +1249,6 @@ func (m *UserMutation) Fields() []string {
 	if m.updated_at != nil {
 		fields = append(fields, user.FieldUpdatedAt)
 	}
-	if m.company_id != nil {
-		fields = append(fields, user.FieldCompanyID)
-	}
 	return fields
 }
 
@@ -1317,8 +1277,6 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case user.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case user.FieldCompanyID:
-		return m.CompanyID()
 	}
 	return nil, false
 }
@@ -1348,8 +1306,6 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreatedAt(ctx)
 	case user.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case user.FieldCompanyID:
-		return m.OldCompanyID(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -1428,13 +1384,6 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
-		return nil
-	case user.FieldCompanyID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCompanyID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -1523,9 +1472,6 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldUpdatedAt:
 		m.ResetUpdatedAt()
-		return nil
-	case user.FieldCompanyID:
-		m.ResetCompanyID()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

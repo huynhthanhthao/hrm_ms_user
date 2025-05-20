@@ -113,12 +113,6 @@ func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
 	return uc
 }
 
-// SetCompanyID sets the "company_id" field.
-func (uc *UserCreate) SetCompanyID(s string) *UserCreate {
-	uc.mutation.SetCompanyID(s)
-	return uc
-}
-
 // SetID sets the "id" field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
@@ -257,14 +251,6 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "User.updated_at"`)}
 	}
-	if _, ok := uc.mutation.CompanyID(); !ok {
-		return &ValidationError{Name: "company_id", err: errors.New(`ent: missing required field "User.company_id"`)}
-	}
-	if v, ok := uc.mutation.CompanyID(); ok {
-		if err := user.CompanyIDValidator(v); err != nil {
-			return &ValidationError{Name: "company_id", err: fmt.Errorf(`ent: validator failed for field "User.company_id": %w`, err)}
-		}
-	}
 	if v, ok := uc.mutation.ID(); ok {
 		if err := user.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "User.id": %w`, err)}
@@ -341,10 +327,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
-	}
-	if value, ok := uc.mutation.CompanyID(); ok {
-		_spec.SetField(user.FieldCompanyID, field.TypeString, value)
-		_node.CompanyID = value
 	}
 	if nodes := uc.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

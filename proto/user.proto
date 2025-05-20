@@ -10,15 +10,14 @@ service UserService {
   rpc GetUsersByIDs (GetUsersByIDsRequest) returns (GetUsersByIDsResponse);
 
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
-  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
-  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
+  rpc UpdateUserByID (UpdateUserRequest) returns (UpdateUserResponse);
+  rpc DeleteUserByID (DeleteUserRequest) returns (DeleteUserResponse);
 }
 
 message ListUsersRequest {
   int32 page = 1;
   int32 page_size = 2;
   string search = 3;
-  string company_id = 4; 
 }
 
 message User {
@@ -58,7 +57,6 @@ message GetUsersByIDsRequest {
 
 message GetUsersByIDsResponse {
   repeated User users = 1;
-  int32 total_count = 2;
 }
 
 message CreateUserRequest {
@@ -70,8 +68,8 @@ message CreateUserRequest {
   string ward_code = 6;
   string address = 7;
   string avatar = 8;
-  repeated int32 perm_ids = 9;
-  repeated int32 role_ids = 10;
+  repeated string perm_ids = 9;
+  repeated string role_ids = 10;
 }
 
 message CreateUserResponse {
@@ -87,10 +85,9 @@ message UpdateUserRequest {
   string phone = 6;
   string ward_code = 7;
   string address = 8;
-  int32 company_id = 9;
-  string avatar = 10;
-  repeated int32 perm_ids = 11;
-  repeated int32 role_ids = 12;
+  string avatar = 9;
+  repeated string perm_ids = 10;
+  repeated string role_ids = 11;
 }
 
 message UpdateUserResponse {

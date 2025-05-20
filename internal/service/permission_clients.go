@@ -9,6 +9,7 @@ type PermissionServiceClients struct {
 	Conn     *grpc.ClientConn
 	UserRole clientGrpc.UserRoleServiceClient
 	UserPerm clientGrpc.UserPermServiceClient
+	PermExt  clientGrpc.PermissionExtServiceClient
 }
 
 func (c *PermissionServiceClients) Close() {

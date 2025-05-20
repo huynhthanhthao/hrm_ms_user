@@ -5,7 +5,6 @@ import (
 
 	userpb "github.com/huynhthanhthao/hrm_user_service/generated"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
-	"github.com/huynhthanhthao/hrm_user_service/internal/helper"
 	"github.com/huynhthanhthao/hrm_user_service/internal/service"
 )
 
@@ -37,7 +36,7 @@ func (s *UserGRPCServer) ListUsers(ctx context.Context, req *userpb.ListUsersReq
 			Phone:     u.Phone,
 			WardCode:  u.WardCode,
 			Address:   u.Address,
-			Avatar:   *u.Avatar,
+			Avatar:    *u.Avatar,
 			CreatedAt: u.CreatedAt.String(),
 			UpdatedAt: u.UpdatedAt.String(),
 		})
@@ -54,7 +53,7 @@ func (s *UserGRPCServer) ListUsers(ctx context.Context, req *userpb.ListUsersReq
 
 func (s *UserGRPCServer) GetUser(ctx context.Context, req *userpb.GetUserRequest) (*userpb.GetUserResponse, error) {
 	user, err := s.userService.GetUser(ctx, int(req.Id))
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +93,7 @@ func (s *UserGRPCServer) GetUsersByIDs(ctx context.Context, req *userpb.GetUsers
 		},
 	}
 
-	users, totalCount, err := s.userService.GetUsersByIDs(ctx, params)
+	users, err := s.userService.GetUsersByIDs(ctx, params)
 	if err != nil {
 		return nil, err
 	}
@@ -110,19 +109,14 @@ func (s *UserGRPCServer) GetUsersByIDs(ctx context.Context, req *userpb.GetUsers
 			Phone:     u.Phone,
 			WardCode:  u.WardCode,
 			Address:   u.Address,
-			Avatar:   *u.Avatar,
+			Avatar:    *u.Avatar,
 			CreatedAt: u.CreatedAt.String(),
 			UpdatedAt: u.UpdatedAt.String(),
 		})
 	}
 
-	/*
-		Gọi qua lấy permission và map res
-	*/
-
 	return &userpb.GetUsersByIDsResponse{
-		Users:      res,
-		TotalCount: int32(totalCount),
+		Users: res,
 	}, nil
 }
 
@@ -134,10 +128,10 @@ func (s *UserGRPCServer) CreateUser(ctx context.Context, req *userpb.CreateUserR
 		Email:     req.Email,
 		Phone:     req.Phone,
 		WardCode:  req.WardCode,
-		Avatar:  	 req.Avatar,
+		Avatar:    req.Avatar,
 		Address:   req.Address,
-		PermIDs:   helper.ConvertInt32SliceToInt(req.PermIds),
-		RoleIDs:   helper.ConvertInt32SliceToInt(req.RoleIds),
+		PermIDs:   req.PermIds,
+		RoleIDs:   req.RoleIds,
 	}
 
 	user, err := s.userService.CreateUser(ctx, input)
@@ -164,7 +158,7 @@ func (s *UserGRPCServer) CreateUser(ctx context.Context, req *userpb.CreateUserR
 }
 
 func (s *UserGRPCServer) UpdateUserByID(ctx context.Context, req *userpb.UpdateUserRequest) (*userpb.UpdateUserResponse, error) {
-	input := &dto.CreateUserDTO{
+	input := &dto.UpdateUserDTO{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Gender:    req.Gender,
@@ -172,9 +166,9 @@ func (s *UserGRPCServer) UpdateUserByID(ctx context.Context, req *userpb.UpdateU
 		Phone:     req.Phone,
 		WardCode:  req.WardCode,
 		Address:   req.Address,
-		CompanyID: int(req.CompanyId),
-		PermIDs:   helper.ConvertInt32SliceToInt(req.PermIds),
-		RoleIDs:   helper.ConvertInt32SliceToInt(req.RoleIds),
+		Avatar:    req.Avatar,
+		PermIDs:   req.PermIds,
+		RoleIDs:   req.RoleIds,
 	}
 
 	tx, err := s.userService.BeginTx(ctx)
@@ -219,6 +213,3 @@ func (s *UserGRPCServer) DeleteUserByID(ctx context.Context, req *userpb.DeleteU
 		Success: true,
 	}, nil
 }
-
-
-
