@@ -187,13 +187,13 @@ func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int
 		return nil, fmt.Errorf("#1 UpdateUserByID: failed to update user: %w", err)
 	}
 
-	// if err := s.UpdateUserPerms(ctx, userID, input.PermIDs); err != nil {
-	// 	return nil, fmt.Errorf("#2 UpdateUserByID: failed to update user perms: %w", err)
-	// }
+	if err := s.UpdateUserPerms(ctx, userID, input.PermIDs); err != nil {
+		return nil, fmt.Errorf("#2 UpdateUserByID: failed to update user perms: %w", err)
+	}
 
-	// if err := s.UpdateUserRoles(ctx, userID, input.RoleIDs); err != nil {
-	// 	return nil, fmt.Errorf("#3 UpdateUserByID: failed to update user roles: %w", err)
-	// }
+	if err := s.UpdateUserRoles(ctx, userID, input.RoleIDs); err != nil {
+		return nil, fmt.Errorf("#3 UpdateUserByID: failed to update user roles: %w", err)
+	}
 
 	return user, nil
 }
@@ -224,13 +224,13 @@ func (s *UserService) DeleteUserByID(ctx context.Context, id int) error {
 			UserId: userIDStr,
 		})
 		if err != nil {
-			return fmt.Errorf("failed to delete user permissions: %w", err)
+			return fmt.Errorf("#1 DeleteUserByID: failed to delete user permissions: %w", err)
 		}
 		_, err = s.perClients.PermExt.DeleteUserRolesByUserID(ctx, &generated.DeleteUserRolesByUserIDRequest{
 			UserId: userIDStr,
 		})
 		if err != nil {
-			return fmt.Errorf("failed to delete user roles: %w", err)
+			return fmt.Errorf("#2 DeleteUserByID: failed to delete user roles: %w", err)
 		}
 	}
 
