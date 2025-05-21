@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/google/uuid"
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
+	userpb "github.com/huynhthanhthao/hrm_user_service/generated"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
 	permissionPb "github.com/longgggwwww/hrm-ms-permission/ent/proto/entpb"
 )
@@ -68,7 +71,7 @@ func (s *UserService) GetUsersByIDs(ctx context.Context, params dto.UserParams) 
 	return users, nil
 }
 
-func (s *UserService) CreateUser(ctx context.Context, input *dto.CreateUserDTO) (*ent.User, error) {
+func (s *UserService) CreateUser(ctx context.Context, input *userpb.CreateUserRequest) (*ent.User, error) {
 	tx, err := s.client.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -90,13 +93,30 @@ func (s *UserService) CreateUser(ctx context.Context, input *dto.CreateUserDTO) 
 		return nil, fmt.Errorf("#1 CreateUser: failed when create user: %w", err)
 	}
 
-	// Call grpc to permission service here
-	if len(input.PermIDs) > 0 {
-		userPermRequests := make([]*permissionPb.CreateUserPermRequest, len(input.PermIDs))
-		for i, permID := range input.PermIDs {
+	// Hash password before saving account
+	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(input.Account.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("#2 CreateUser: failed to hash password: %w", err)
+	}
+
+	fmt.Println(user)
+
+	_, err = tx.Account.Create().
+		SetUsername(input.Account.Username).
+		SetPassword(string(hashedPwd)).
+		SetUser(user).
+		Save(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("#3 CreateUser: failed to create account: %w", err)
+	}
+
+	// // Call grpc to permission service here
+	if len(input.PermIds) > 0 {
+		userPermRequests := make([]*permissionPb.CreateUserPermRequest, len(input.PermIds))
+		for i, permID := range input.PermIds {
 			parsedUUID, err := uuid.Parse(permID)
 			if err != nil {
-				return nil, fmt.Errorf("#2 CreateUser: invalid permID %s: %w", permID, err)
+				return nil, fmt.Errorf("#4 CreateUser: invalid permID %s: %w", permID, err)
 			}
 
 			userPermRequests[i] = &permissionPb.CreateUserPermRequest{
@@ -110,16 +130,16 @@ func (s *UserService) CreateUser(ctx context.Context, input *dto.CreateUserDTO) 
 			Requests: userPermRequests,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("#3 CreateUser: failed to create user permissions: %w", err)
+			return nil, fmt.Errorf("#5 CreateUser: failed to create user permissions: %w", err)
 		}
 	}
 
-	if len(input.RoleIDs) > 0 {
-		userRoleRequests := make([]*permissionPb.CreateUserRoleRequest, len(input.RoleIDs))
-		for i, roleID := range input.RoleIDs {
+	if len(input.RoleIds) > 0 {
+		userRoleRequests := make([]*permissionPb.CreateUserRoleRequest, len(input.RoleIds))
+		for i, roleID := range input.RoleIds {
 			parsedUUID, err := uuid.Parse(roleID)
 			if err != nil {
-				return nil, fmt.Errorf("#4 CreateUser: invalid roleID %s: %w", roleID, err)
+				return nil, fmt.Errorf("#6 CreateUser: invalid roleID %s: %w", roleID, err)
 			}
 			userRoleRequests[i] = &permissionPb.CreateUserRoleRequest{
 				UserRole: &permissionPb.UserRole{
@@ -132,7 +152,7 @@ func (s *UserService) CreateUser(ctx context.Context, input *dto.CreateUserDTO) 
 			Requests: userRoleRequests,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("#5 CreateUser: failed to create user roles: %w", err)
+			return nil, fmt.Errorf("#7 CreateUser: failed to create user roles: %w", err)
 		}
 	}
 
@@ -187,12 +207,26 @@ func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int
 		return nil, fmt.Errorf("#1 UpdateUserByID: failed to update user: %w", err)
 	}
 
+	// Hash password before updating account
+	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(input.Account.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("#2 UpdateUserByID: failed to hash password: %w", err)
+	}
+
+	_, err = tx.Account.UpdateOneID(userID).
+		SetUsername(input.Account.Username).
+		SetPassword(string(hashedPwd)).
+		Save(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("#3 UpdateUserByID: failed to update account: %w", err)
+	}
+
 	if err := s.UpdateUserPerms(ctx, userID, input.PermIDs); err != nil {
-		return nil, fmt.Errorf("#2 UpdateUserByID: failed to update user perms: %w", err)
+		return nil, fmt.Errorf("#4 UpdateUserByID: failed to update user perms: %w", err)
 	}
 
 	if err := s.UpdateUserRoles(ctx, userID, input.RoleIDs); err != nil {
-		return nil, fmt.Errorf("#3 UpdateUserByID: failed to update user roles: %w", err)
+		return nil, fmt.Errorf("#5 UpdateUserByID: failed to update user roles: %w", err)
 	}
 
 	return user, nil

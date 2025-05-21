@@ -59,6 +59,11 @@ message GetUsersByIDsResponse {
   repeated User users = 1;
 }
 
+message Account {
+  string username = 1;
+  string password = 2;
+}
+
 message CreateUserRequest {
   string first_name = 1;
   string last_name = 2;
@@ -68,8 +73,9 @@ message CreateUserRequest {
   string ward_code = 6;
   string address = 7;
   string avatar = 8;
-  repeated string perm_ids = 9;
-  repeated string role_ids = 10;
+  Account account = 9;
+  repeated string perm_ids = 10;
+  repeated string role_ids = 11;
 }
 
 message CreateUserResponse {
@@ -86,8 +92,9 @@ message UpdateUserRequest {
   string ward_code = 7;
   string address = 8;
   string avatar = 9;
-  repeated string perm_ids = 10;
-  repeated string role_ids = 11;
+  Account account = 10;
+  repeated string perm_ids = 11;
+  repeated string role_ids = 12;
 }
 
 message UpdateUserResponse {

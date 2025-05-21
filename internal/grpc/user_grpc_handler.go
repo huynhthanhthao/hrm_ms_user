@@ -121,20 +121,7 @@ func (s *UserGRPCServer) GetUsersByIDs(ctx context.Context, req *userpb.GetUsers
 }
 
 func (s *UserGRPCServer) CreateUser(ctx context.Context, req *userpb.CreateUserRequest) (*userpb.CreateUserResponse, error) {
-	input := &dto.CreateUserDTO{
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		Gender:    req.Gender,
-		Email:     req.Email,
-		Phone:     req.Phone,
-		WardCode:  req.WardCode,
-		Avatar:    req.Avatar,
-		Address:   req.Address,
-		PermIDs:   req.PermIds,
-		RoleIDs:   req.RoleIds,
-	}
-
-	user, err := s.userService.CreateUser(ctx, input)
+	user, err := s.userService.CreateUser(ctx, req)
 
 	if err != nil {
 		return nil, err

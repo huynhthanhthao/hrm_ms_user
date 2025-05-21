@@ -42,26 +42,6 @@ func NewAuthService(
 }
 
 func (s *AuthService) Register(ctx context.Context, c *gin.Context, input dto.RegisterInput) {
-	// companyUUID, err := uuid.Parse(input.CompanyId)
-	// if err != nil {
-	// 	helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("invalid company ID: %w", err))
-	// 	return
-	// }
-
-	// resp, err := s.hrClients.Company.Get(ctx, &grpcClient.GetCompanyRequest{
-	// 	Id: companyUUID,
-	// })
-
-	// if err != nil {
-	// 	helper.RespondWithError(c, http.StatusBadRequest, err)
-	// 	return
-	// }
-
-	// if resp == nil {
-	// 	helper.RespondWithError(c, http.StatusBadRequest, err)
-	// 	return
-	// }
-
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 
 	if err != nil {
@@ -103,6 +83,7 @@ func (s *AuthService) Register(ctx context.Context, c *gin.Context, input dto.Re
 		SetStatus(account.StatusActive).
 		SetUser(usr).
 		Save(ctx)
+
 	if err != nil {
 		_ = tx.Rollback()
 		helper.RespondWithError(c, http.StatusBadRequest, err)
