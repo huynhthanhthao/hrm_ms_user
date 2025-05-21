@@ -71,6 +71,20 @@ func (uu *UserUpdate) SetNillableGender(u *user.Gender) *UserUpdate {
 	return uu
 }
 
+// SetPhone sets the "phone" field.
+func (uu *UserUpdate) SetPhone(s string) *UserUpdate {
+	uu.mutation.SetPhone(s)
+	return uu
+}
+
+// SetNillablePhone sets the "phone" field if the given value is not nil.
+func (uu *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetPhone(*s)
+	}
+	return uu
+}
+
 // SetEmail sets the "email" field.
 func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
 	uu.mutation.SetEmail(s)
@@ -82,6 +96,12 @@ func (uu *UserUpdate) SetNillableEmail(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetEmail(*s)
 	}
+	return uu
+}
+
+// ClearEmail clears the value of the "email" field.
+func (uu *UserUpdate) ClearEmail() *UserUpdate {
+	uu.mutation.ClearEmail()
 	return uu
 }
 
@@ -105,20 +125,6 @@ func (uu *UserUpdate) ClearAvatar() *UserUpdate {
 	return uu
 }
 
-// SetPhone sets the "phone" field.
-func (uu *UserUpdate) SetPhone(s string) *UserUpdate {
-	uu.mutation.SetPhone(s)
-	return uu
-}
-
-// SetNillablePhone sets the "phone" field if the given value is not nil.
-func (uu *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetPhone(*s)
-	}
-	return uu
-}
-
 // SetWardCode sets the "ward_code" field.
 func (uu *UserUpdate) SetWardCode(s string) *UserUpdate {
 	uu.mutation.SetWardCode(s)
@@ -133,6 +139,12 @@ func (uu *UserUpdate) SetNillableWardCode(s *string) *UserUpdate {
 	return uu
 }
 
+// ClearWardCode clears the value of the "ward_code" field.
+func (uu *UserUpdate) ClearWardCode() *UserUpdate {
+	uu.mutation.ClearWardCode()
+	return uu
+}
+
 // SetAddress sets the "address" field.
 func (uu *UserUpdate) SetAddress(s string) *UserUpdate {
 	uu.mutation.SetAddress(s)
@@ -144,6 +156,12 @@ func (uu *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetAddress(*s)
 	}
+	return uu
+}
+
+// ClearAddress clears the value of the "address" field.
+func (uu *UserUpdate) ClearAddress() *UserUpdate {
+	uu.mutation.ClearAddress()
 	return uu
 }
 
@@ -250,24 +268,9 @@ func (uu *UserUpdate) check() error {
 			return &ValidationError{Name: "gender", err: fmt.Errorf(`ent: validator failed for field "User.gender": %w`, err)}
 		}
 	}
-	if v, ok := uu.mutation.Email(); ok {
-		if err := user.EmailValidator(v); err != nil {
-			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
-		}
-	}
 	if v, ok := uu.mutation.Phone(); ok {
 		if err := user.PhoneValidator(v); err != nil {
 			return &ValidationError{Name: "phone", err: fmt.Errorf(`ent: validator failed for field "User.phone": %w`, err)}
-		}
-	}
-	if v, ok := uu.mutation.WardCode(); ok {
-		if err := user.WardCodeValidator(v); err != nil {
-			return &ValidationError{Name: "ward_code", err: fmt.Errorf(`ent: validator failed for field "User.ward_code": %w`, err)}
-		}
-	}
-	if v, ok := uu.mutation.Address(); ok {
-		if err := user.AddressValidator(v); err != nil {
-			return &ValidationError{Name: "address", err: fmt.Errorf(`ent: validator failed for field "User.address": %w`, err)}
 		}
 	}
 	return nil
@@ -294,8 +297,14 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.Gender(); ok {
 		_spec.SetField(user.FieldGender, field.TypeEnum, value)
 	}
+	if value, ok := uu.mutation.Phone(); ok {
+		_spec.SetField(user.FieldPhone, field.TypeString, value)
+	}
 	if value, ok := uu.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	}
+	if uu.mutation.EmailCleared() {
+		_spec.ClearField(user.FieldEmail, field.TypeString)
 	}
 	if value, ok := uu.mutation.Avatar(); ok {
 		_spec.SetField(user.FieldAvatar, field.TypeString, value)
@@ -303,14 +312,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if uu.mutation.AvatarCleared() {
 		_spec.ClearField(user.FieldAvatar, field.TypeString)
 	}
-	if value, ok := uu.mutation.Phone(); ok {
-		_spec.SetField(user.FieldPhone, field.TypeString, value)
-	}
 	if value, ok := uu.mutation.WardCode(); ok {
 		_spec.SetField(user.FieldWardCode, field.TypeString, value)
 	}
+	if uu.mutation.WardCodeCleared() {
+		_spec.ClearField(user.FieldWardCode, field.TypeString)
+	}
 	if value, ok := uu.mutation.Address(); ok {
 		_spec.SetField(user.FieldAddress, field.TypeString, value)
+	}
+	if uu.mutation.AddressCleared() {
+		_spec.ClearField(user.FieldAddress, field.TypeString)
 	}
 	if value, ok := uu.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
@@ -409,6 +421,20 @@ func (uuo *UserUpdateOne) SetNillableGender(u *user.Gender) *UserUpdateOne {
 	return uuo
 }
 
+// SetPhone sets the "phone" field.
+func (uuo *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
+	uuo.mutation.SetPhone(s)
+	return uuo
+}
+
+// SetNillablePhone sets the "phone" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetPhone(*s)
+	}
+	return uuo
+}
+
 // SetEmail sets the "email" field.
 func (uuo *UserUpdateOne) SetEmail(s string) *UserUpdateOne {
 	uuo.mutation.SetEmail(s)
@@ -420,6 +446,12 @@ func (uuo *UserUpdateOne) SetNillableEmail(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetEmail(*s)
 	}
+	return uuo
+}
+
+// ClearEmail clears the value of the "email" field.
+func (uuo *UserUpdateOne) ClearEmail() *UserUpdateOne {
+	uuo.mutation.ClearEmail()
 	return uuo
 }
 
@@ -443,20 +475,6 @@ func (uuo *UserUpdateOne) ClearAvatar() *UserUpdateOne {
 	return uuo
 }
 
-// SetPhone sets the "phone" field.
-func (uuo *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
-	uuo.mutation.SetPhone(s)
-	return uuo
-}
-
-// SetNillablePhone sets the "phone" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetPhone(*s)
-	}
-	return uuo
-}
-
 // SetWardCode sets the "ward_code" field.
 func (uuo *UserUpdateOne) SetWardCode(s string) *UserUpdateOne {
 	uuo.mutation.SetWardCode(s)
@@ -471,6 +489,12 @@ func (uuo *UserUpdateOne) SetNillableWardCode(s *string) *UserUpdateOne {
 	return uuo
 }
 
+// ClearWardCode clears the value of the "ward_code" field.
+func (uuo *UserUpdateOne) ClearWardCode() *UserUpdateOne {
+	uuo.mutation.ClearWardCode()
+	return uuo
+}
+
 // SetAddress sets the "address" field.
 func (uuo *UserUpdateOne) SetAddress(s string) *UserUpdateOne {
 	uuo.mutation.SetAddress(s)
@@ -482,6 +506,12 @@ func (uuo *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetAddress(*s)
 	}
+	return uuo
+}
+
+// ClearAddress clears the value of the "address" field.
+func (uuo *UserUpdateOne) ClearAddress() *UserUpdateOne {
+	uuo.mutation.ClearAddress()
 	return uuo
 }
 
@@ -601,24 +631,9 @@ func (uuo *UserUpdateOne) check() error {
 			return &ValidationError{Name: "gender", err: fmt.Errorf(`ent: validator failed for field "User.gender": %w`, err)}
 		}
 	}
-	if v, ok := uuo.mutation.Email(); ok {
-		if err := user.EmailValidator(v); err != nil {
-			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
-		}
-	}
 	if v, ok := uuo.mutation.Phone(); ok {
 		if err := user.PhoneValidator(v); err != nil {
 			return &ValidationError{Name: "phone", err: fmt.Errorf(`ent: validator failed for field "User.phone": %w`, err)}
-		}
-	}
-	if v, ok := uuo.mutation.WardCode(); ok {
-		if err := user.WardCodeValidator(v); err != nil {
-			return &ValidationError{Name: "ward_code", err: fmt.Errorf(`ent: validator failed for field "User.ward_code": %w`, err)}
-		}
-	}
-	if v, ok := uuo.mutation.Address(); ok {
-		if err := user.AddressValidator(v); err != nil {
-			return &ValidationError{Name: "address", err: fmt.Errorf(`ent: validator failed for field "User.address": %w`, err)}
 		}
 	}
 	return nil
@@ -662,8 +677,14 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.Gender(); ok {
 		_spec.SetField(user.FieldGender, field.TypeEnum, value)
 	}
+	if value, ok := uuo.mutation.Phone(); ok {
+		_spec.SetField(user.FieldPhone, field.TypeString, value)
+	}
 	if value, ok := uuo.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	}
+	if uuo.mutation.EmailCleared() {
+		_spec.ClearField(user.FieldEmail, field.TypeString)
 	}
 	if value, ok := uuo.mutation.Avatar(); ok {
 		_spec.SetField(user.FieldAvatar, field.TypeString, value)
@@ -671,14 +692,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if uuo.mutation.AvatarCleared() {
 		_spec.ClearField(user.FieldAvatar, field.TypeString)
 	}
-	if value, ok := uuo.mutation.Phone(); ok {
-		_spec.SetField(user.FieldPhone, field.TypeString, value)
-	}
 	if value, ok := uuo.mutation.WardCode(); ok {
 		_spec.SetField(user.FieldWardCode, field.TypeString, value)
 	}
+	if uuo.mutation.WardCodeCleared() {
+		_spec.ClearField(user.FieldWardCode, field.TypeString)
+	}
 	if value, ok := uuo.mutation.Address(); ok {
 		_spec.SetField(user.FieldAddress, field.TypeString, value)
+	}
+	if uuo.mutation.AddressCleared() {
+		_spec.ClearField(user.FieldAddress, field.TypeString)
 	}
 	if value, ok := uuo.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)

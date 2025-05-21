@@ -47,9 +47,23 @@ func (uc *UserCreate) SetNillableGender(u *user.Gender) *UserCreate {
 	return uc
 }
 
+// SetPhone sets the "phone" field.
+func (uc *UserCreate) SetPhone(s string) *UserCreate {
+	uc.mutation.SetPhone(s)
+	return uc
+}
+
 // SetEmail sets the "email" field.
 func (uc *UserCreate) SetEmail(s string) *UserCreate {
 	uc.mutation.SetEmail(s)
+	return uc
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (uc *UserCreate) SetNillableEmail(s *string) *UserCreate {
+	if s != nil {
+		uc.SetEmail(*s)
+	}
 	return uc
 }
 
@@ -67,21 +81,31 @@ func (uc *UserCreate) SetNillableAvatar(s *string) *UserCreate {
 	return uc
 }
 
-// SetPhone sets the "phone" field.
-func (uc *UserCreate) SetPhone(s string) *UserCreate {
-	uc.mutation.SetPhone(s)
-	return uc
-}
-
 // SetWardCode sets the "ward_code" field.
 func (uc *UserCreate) SetWardCode(s string) *UserCreate {
 	uc.mutation.SetWardCode(s)
 	return uc
 }
 
+// SetNillableWardCode sets the "ward_code" field if the given value is not nil.
+func (uc *UserCreate) SetNillableWardCode(s *string) *UserCreate {
+	if s != nil {
+		uc.SetWardCode(*s)
+	}
+	return uc
+}
+
 // SetAddress sets the "address" field.
 func (uc *UserCreate) SetAddress(s string) *UserCreate {
 	uc.mutation.SetAddress(s)
+	return uc
+}
+
+// SetNillableAddress sets the "address" field if the given value is not nil.
+func (uc *UserCreate) SetNillableAddress(s *string) *UserCreate {
+	if s != nil {
+		uc.SetAddress(*s)
+	}
 	return uc
 }
 
@@ -213,36 +237,12 @@ func (uc *UserCreate) check() error {
 			return &ValidationError{Name: "gender", err: fmt.Errorf(`ent: validator failed for field "User.gender": %w`, err)}
 		}
 	}
-	if _, ok := uc.mutation.Email(); !ok {
-		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "User.email"`)}
-	}
-	if v, ok := uc.mutation.Email(); ok {
-		if err := user.EmailValidator(v); err != nil {
-			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
-		}
-	}
 	if _, ok := uc.mutation.Phone(); !ok {
 		return &ValidationError{Name: "phone", err: errors.New(`ent: missing required field "User.phone"`)}
 	}
 	if v, ok := uc.mutation.Phone(); ok {
 		if err := user.PhoneValidator(v); err != nil {
 			return &ValidationError{Name: "phone", err: fmt.Errorf(`ent: validator failed for field "User.phone": %w`, err)}
-		}
-	}
-	if _, ok := uc.mutation.WardCode(); !ok {
-		return &ValidationError{Name: "ward_code", err: errors.New(`ent: missing required field "User.ward_code"`)}
-	}
-	if v, ok := uc.mutation.WardCode(); ok {
-		if err := user.WardCodeValidator(v); err != nil {
-			return &ValidationError{Name: "ward_code", err: fmt.Errorf(`ent: validator failed for field "User.ward_code": %w`, err)}
-		}
-	}
-	if _, ok := uc.mutation.Address(); !ok {
-		return &ValidationError{Name: "address", err: errors.New(`ent: missing required field "User.address"`)}
-	}
-	if v, ok := uc.mutation.Address(); ok {
-		if err := user.AddressValidator(v); err != nil {
-			return &ValidationError{Name: "address", err: fmt.Errorf(`ent: validator failed for field "User.address": %w`, err)}
 		}
 	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
@@ -300,25 +300,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldGender, field.TypeEnum, value)
 		_node.Gender = value
 	}
+	if value, ok := uc.mutation.Phone(); ok {
+		_spec.SetField(user.FieldPhone, field.TypeString, value)
+		_node.Phone = value
+	}
 	if value, ok := uc.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
-		_node.Email = value
+		_node.Email = &value
 	}
 	if value, ok := uc.mutation.Avatar(); ok {
 		_spec.SetField(user.FieldAvatar, field.TypeString, value)
 		_node.Avatar = &value
 	}
-	if value, ok := uc.mutation.Phone(); ok {
-		_spec.SetField(user.FieldPhone, field.TypeString, value)
-		_node.Phone = value
-	}
 	if value, ok := uc.mutation.WardCode(); ok {
 		_spec.SetField(user.FieldWardCode, field.TypeString, value)
-		_node.WardCode = value
+		_node.WardCode = &value
 	}
 	if value, ok := uc.mutation.Address(); ok {
 		_spec.SetField(user.FieldAddress, field.TypeString, value)
-		_node.Address = value
+		_node.Address = &value
 	}
 	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)

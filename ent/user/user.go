@@ -21,12 +21,12 @@ const (
 	FieldLastName = "last_name"
 	// FieldGender holds the string denoting the gender field in the database.
 	FieldGender = "gender"
+	// FieldPhone holds the string denoting the phone field in the database.
+	FieldPhone = "phone"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
 	// FieldAvatar holds the string denoting the avatar field in the database.
 	FieldAvatar = "avatar"
-	// FieldPhone holds the string denoting the phone field in the database.
-	FieldPhone = "phone"
 	// FieldWardCode holds the string denoting the ward_code field in the database.
 	FieldWardCode = "ward_code"
 	// FieldAddress holds the string denoting the address field in the database.
@@ -54,9 +54,9 @@ var Columns = []string{
 	FieldFirstName,
 	FieldLastName,
 	FieldGender,
+	FieldPhone,
 	FieldEmail,
 	FieldAvatar,
-	FieldPhone,
 	FieldWardCode,
 	FieldAddress,
 	FieldCreatedAt,
@@ -78,14 +78,8 @@ var (
 	FirstNameValidator func(string) error
 	// LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	LastNameValidator func(string) error
-	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
-	EmailValidator func(string) error
 	// PhoneValidator is a validator for the "phone" field. It is called by the builders before save.
 	PhoneValidator func(string) error
-	// WardCodeValidator is a validator for the "ward_code" field. It is called by the builders before save.
-	WardCodeValidator func(string) error
-	// AddressValidator is a validator for the "address" field. It is called by the builders before save.
-	AddressValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -146,6 +140,11 @@ func ByGender(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGender, opts...).ToFunc()
 }
 
+// ByPhone orders the results by the phone field.
+func ByPhone(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPhone, opts...).ToFunc()
+}
+
 // ByEmail orders the results by the email field.
 func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEmail, opts...).ToFunc()
@@ -154,11 +153,6 @@ func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 // ByAvatar orders the results by the avatar field.
 func ByAvatar(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAvatar, opts...).ToFunc()
-}
-
-// ByPhone orders the results by the phone field.
-func ByPhone(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPhone, opts...).ToFunc()
 }
 
 // ByWardCode orders the results by the ward_code field.

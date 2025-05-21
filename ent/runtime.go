@@ -48,22 +48,10 @@ func init() {
 	userDescLastName := userFields[2].Descriptor()
 	// user.LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	user.LastNameValidator = userDescLastName.Validators[0].(func(string) error)
-	// userDescEmail is the schema descriptor for email field.
-	userDescEmail := userFields[4].Descriptor()
-	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
-	user.EmailValidator = userDescEmail.Validators[0].(func(string) error)
 	// userDescPhone is the schema descriptor for phone field.
-	userDescPhone := userFields[6].Descriptor()
+	userDescPhone := userFields[4].Descriptor()
 	// user.PhoneValidator is a validator for the "phone" field. It is called by the builders before save.
 	user.PhoneValidator = userDescPhone.Validators[0].(func(string) error)
-	// userDescWardCode is the schema descriptor for ward_code field.
-	userDescWardCode := userFields[7].Descriptor()
-	// user.WardCodeValidator is a validator for the "ward_code" field. It is called by the builders before save.
-	user.WardCodeValidator = userDescWardCode.Validators[0].(func(string) error)
-	// userDescAddress is the schema descriptor for address field.
-	userDescAddress := userFields[8].Descriptor()
-	// user.AddressValidator is a validator for the "address" field. It is called by the builders before save.
-	user.AddressValidator = userDescAddress.Validators[0].(func(string) error)
 	// userDescCreatedAt is the schema descriptor for created_at field.
 	userDescCreatedAt := userFields[9].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.

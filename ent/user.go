@@ -24,16 +24,16 @@ type User struct {
 	LastName string `json:"last_name,omitempty"`
 	// Gender holds the value of the "gender" field.
 	Gender user.Gender `json:"gender,omitempty"`
-	// Email holds the value of the "email" field.
-	Email string `json:"email,omitempty"`
-	// Avatar holds the value of the "avatar" field.
-	Avatar *string `json:"avatar,omitempty"`
 	// Phone holds the value of the "phone" field.
 	Phone string `json:"phone,omitempty"`
+	// Email holds the value of the "email" field.
+	Email *string `json:"email,omitempty"`
+	// Avatar holds the value of the "avatar" field.
+	Avatar *string `json:"avatar,omitempty"`
 	// WardCode holds the value of the "ward_code" field.
-	WardCode string `json:"ward_code,omitempty"`
+	WardCode *string `json:"ward_code,omitempty"`
 	// Address holds the value of the "address" field.
-	Address string `json:"address,omitempty"`
+	Address *string `json:"address,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -71,7 +71,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldID:
 			values[i] = new(sql.NullInt64)
-		case user.FieldFirstName, user.FieldLastName, user.FieldGender, user.FieldEmail, user.FieldAvatar, user.FieldPhone, user.FieldWardCode, user.FieldAddress:
+		case user.FieldFirstName, user.FieldLastName, user.FieldGender, user.FieldPhone, user.FieldEmail, user.FieldAvatar, user.FieldWardCode, user.FieldAddress:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -114,11 +114,18 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.Gender = user.Gender(value.String)
 			}
+		case user.FieldPhone:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field phone", values[i])
+			} else if value.Valid {
+				u.Phone = value.String
+			}
 		case user.FieldEmail:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field email", values[i])
 			} else if value.Valid {
-				u.Email = value.String
+				u.Email = new(string)
+				*u.Email = value.String
 			}
 		case user.FieldAvatar:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -127,23 +134,19 @@ func (u *User) assignValues(columns []string, values []any) error {
 				u.Avatar = new(string)
 				*u.Avatar = value.String
 			}
-		case user.FieldPhone:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field phone", values[i])
-			} else if value.Valid {
-				u.Phone = value.String
-			}
 		case user.FieldWardCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field ward_code", values[i])
 			} else if value.Valid {
-				u.WardCode = value.String
+				u.WardCode = new(string)
+				*u.WardCode = value.String
 			}
 		case user.FieldAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field address", values[i])
 			} else if value.Valid {
-				u.Address = value.String
+				u.Address = new(string)
+				*u.Address = value.String
 			}
 		case user.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -207,22 +210,28 @@ func (u *User) String() string {
 	builder.WriteString("gender=")
 	builder.WriteString(fmt.Sprintf("%v", u.Gender))
 	builder.WriteString(", ")
-	builder.WriteString("email=")
-	builder.WriteString(u.Email)
+	builder.WriteString("phone=")
+	builder.WriteString(u.Phone)
+	builder.WriteString(", ")
+	if v := u.Email; v != nil {
+		builder.WriteString("email=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	if v := u.Avatar; v != nil {
 		builder.WriteString("avatar=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	builder.WriteString("phone=")
-	builder.WriteString(u.Phone)
+	if v := u.WardCode; v != nil {
+		builder.WriteString("ward_code=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
-	builder.WriteString("ward_code=")
-	builder.WriteString(u.WardCode)
-	builder.WriteString(", ")
-	builder.WriteString("address=")
-	builder.WriteString(u.Address)
+	if v := u.Address; v != nil {
+		builder.WriteString("address=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(u.CreatedAt.Format(time.ANSIC))

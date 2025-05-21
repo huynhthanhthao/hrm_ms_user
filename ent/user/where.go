@@ -65,6 +65,11 @@ func LastName(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldLastName, v))
 }
 
+// Phone applies equality check predicate on the "phone" field. It's identical to PhoneEQ.
+func Phone(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldPhone, v))
+}
+
 // Email applies equality check predicate on the "email" field. It's identical to EmailEQ.
 func Email(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldEmail, v))
@@ -73,11 +78,6 @@ func Email(v string) predicate.User {
 // Avatar applies equality check predicate on the "avatar" field. It's identical to AvatarEQ.
 func Avatar(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldAvatar, v))
-}
-
-// Phone applies equality check predicate on the "phone" field. It's identical to PhoneEQ.
-func Phone(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldPhone, v))
 }
 
 // WardCode applies equality check predicate on the "ward_code" field. It's identical to WardCodeEQ.
@@ -250,6 +250,71 @@ func GenderNotIn(vs ...Gender) predicate.User {
 	return predicate.User(sql.FieldNotIn(FieldGender, vs...))
 }
 
+// PhoneEQ applies the EQ predicate on the "phone" field.
+func PhoneEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldPhone, v))
+}
+
+// PhoneNEQ applies the NEQ predicate on the "phone" field.
+func PhoneNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldPhone, v))
+}
+
+// PhoneIn applies the In predicate on the "phone" field.
+func PhoneIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldPhone, vs...))
+}
+
+// PhoneNotIn applies the NotIn predicate on the "phone" field.
+func PhoneNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldPhone, vs...))
+}
+
+// PhoneGT applies the GT predicate on the "phone" field.
+func PhoneGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldPhone, v))
+}
+
+// PhoneGTE applies the GTE predicate on the "phone" field.
+func PhoneGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldPhone, v))
+}
+
+// PhoneLT applies the LT predicate on the "phone" field.
+func PhoneLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldPhone, v))
+}
+
+// PhoneLTE applies the LTE predicate on the "phone" field.
+func PhoneLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldPhone, v))
+}
+
+// PhoneContains applies the Contains predicate on the "phone" field.
+func PhoneContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldPhone, v))
+}
+
+// PhoneHasPrefix applies the HasPrefix predicate on the "phone" field.
+func PhoneHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldPhone, v))
+}
+
+// PhoneHasSuffix applies the HasSuffix predicate on the "phone" field.
+func PhoneHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldPhone, v))
+}
+
+// PhoneEqualFold applies the EqualFold predicate on the "phone" field.
+func PhoneEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldPhone, v))
+}
+
+// PhoneContainsFold applies the ContainsFold predicate on the "phone" field.
+func PhoneContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldPhone, v))
+}
+
 // EmailEQ applies the EQ predicate on the "email" field.
 func EmailEQ(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldEmail, v))
@@ -303,6 +368,16 @@ func EmailHasPrefix(v string) predicate.User {
 // EmailHasSuffix applies the HasSuffix predicate on the "email" field.
 func EmailHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldEmail, v))
+}
+
+// EmailIsNil applies the IsNil predicate on the "email" field.
+func EmailIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldEmail))
+}
+
+// EmailNotNil applies the NotNil predicate on the "email" field.
+func EmailNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldEmail))
 }
 
 // EmailEqualFold applies the EqualFold predicate on the "email" field.
@@ -390,71 +465,6 @@ func AvatarContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldAvatar, v))
 }
 
-// PhoneEQ applies the EQ predicate on the "phone" field.
-func PhoneEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldPhone, v))
-}
-
-// PhoneNEQ applies the NEQ predicate on the "phone" field.
-func PhoneNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldPhone, v))
-}
-
-// PhoneIn applies the In predicate on the "phone" field.
-func PhoneIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldPhone, vs...))
-}
-
-// PhoneNotIn applies the NotIn predicate on the "phone" field.
-func PhoneNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldPhone, vs...))
-}
-
-// PhoneGT applies the GT predicate on the "phone" field.
-func PhoneGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldPhone, v))
-}
-
-// PhoneGTE applies the GTE predicate on the "phone" field.
-func PhoneGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldPhone, v))
-}
-
-// PhoneLT applies the LT predicate on the "phone" field.
-func PhoneLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldPhone, v))
-}
-
-// PhoneLTE applies the LTE predicate on the "phone" field.
-func PhoneLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldPhone, v))
-}
-
-// PhoneContains applies the Contains predicate on the "phone" field.
-func PhoneContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldPhone, v))
-}
-
-// PhoneHasPrefix applies the HasPrefix predicate on the "phone" field.
-func PhoneHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldPhone, v))
-}
-
-// PhoneHasSuffix applies the HasSuffix predicate on the "phone" field.
-func PhoneHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldPhone, v))
-}
-
-// PhoneEqualFold applies the EqualFold predicate on the "phone" field.
-func PhoneEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldPhone, v))
-}
-
-// PhoneContainsFold applies the ContainsFold predicate on the "phone" field.
-func PhoneContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldPhone, v))
-}
-
 // WardCodeEQ applies the EQ predicate on the "ward_code" field.
 func WardCodeEQ(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldWardCode, v))
@@ -508,6 +518,16 @@ func WardCodeHasPrefix(v string) predicate.User {
 // WardCodeHasSuffix applies the HasSuffix predicate on the "ward_code" field.
 func WardCodeHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldWardCode, v))
+}
+
+// WardCodeIsNil applies the IsNil predicate on the "ward_code" field.
+func WardCodeIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldWardCode))
+}
+
+// WardCodeNotNil applies the NotNil predicate on the "ward_code" field.
+func WardCodeNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldWardCode))
 }
 
 // WardCodeEqualFold applies the EqualFold predicate on the "ward_code" field.
@@ -573,6 +593,16 @@ func AddressHasPrefix(v string) predicate.User {
 // AddressHasSuffix applies the HasSuffix predicate on the "address" field.
 func AddressHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldAddress, v))
+}
+
+// AddressIsNil applies the IsNil predicate on the "address" field.
+func AddressIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldAddress))
+}
+
+// AddressNotNil applies the NotNil predicate on the "address" field.
+func AddressNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldAddress))
 }
 
 // AddressEqualFold applies the EqualFold predicate on the "address" field.
