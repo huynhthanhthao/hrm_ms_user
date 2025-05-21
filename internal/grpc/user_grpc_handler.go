@@ -145,26 +145,13 @@ func (s *UserGRPCServer) CreateUser(ctx context.Context, req *userpb.CreateUserR
 }
 
 func (s *UserGRPCServer) UpdateUserByID(ctx context.Context, req *userpb.UpdateUserRequest) (*userpb.UpdateUserResponse, error) {
-	input := &dto.UpdateUserDTO{
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		Gender:    req.Gender,
-		Email:     req.Email,
-		Phone:     req.Phone,
-		WardCode:  req.WardCode,
-		Address:   req.Address,
-		Avatar:    req.Avatar,
-		PermIDs:   req.PermIds,
-		RoleIDs:   req.RoleIds,
-	}
-
 	tx, err := s.userService.BeginTx(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer tx.Rollback()
 
-	user, err := s.userService.UpdateUserByID(ctx, tx, int(req.Id), input)
+	user, err := s.userService.UpdateUserByID(ctx, tx, int(req.Id), req)
 	if err != nil {
 		return nil, err
 	}
