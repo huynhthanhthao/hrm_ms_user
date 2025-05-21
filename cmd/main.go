@@ -9,9 +9,8 @@ import (
 
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/migrate"
-	clientGrpc "github.com/huynhthanhthao/hrm_user_service/generated"
+	grpcClient "github.com/huynhthanhthao/hrm_user_service/generated"
 
-	userpb "github.com/huynhthanhthao/hrm_user_service/generated"
 	userGrpc "github.com/huynhthanhthao/hrm_user_service/internal/grpc"
 	"github.com/huynhthanhthao/hrm_user_service/internal/handler"
 	"github.com/huynhthanhthao/hrm_user_service/internal/router"
@@ -36,28 +35,25 @@ func main() {
 
 	runMigration(client)
 
-	hrClients, err := NewHRServiceClients()
-
+	hrServiceClients, err := NewHRServiceClients()
 	if err != nil {
 		log.Fatalf("failed to initialize HR service clients: %v", err)
 	}
-	defer hrClients.Close()
+	defer hrServiceClients.Close()
 
-	permissionClients, err := NewPermissionServiceClients()
-
+	permissionServiceClients, err := NewPermissionServiceClients()
 	if err != nil {
 		log.Fatalf("failed to initialize Permission service clients: %v", err)
 	}
-	defer permissionClients.Close()
+	defer permissionServiceClients.Close()
 
-	userService, err := service.NewUserService(client, hrClients, permissionClients)
-
+	userService, err := service.NewUserService(client, hrServiceClients, permissionServiceClients)
 	if err != nil {
 		log.Fatalf("failed to initialize UserService: %v", err)
 	}
 
 	go startGRPCServer(client, userService)
-	startHTTPServer(client, hrClients, permissionClients)
+	startHTTPServer(client, hrServiceClients, permissionServiceClients)
 }
 
 // Initialize Ent client
@@ -112,7 +108,7 @@ func startGRPCServer(client *ent.Client, userService *service.UserService) {
 	grpcServer := grpc.NewServer()
 
 	userGrpcServer := userGrpc.NewUserGRPCServer(userService)
-	userpb.RegisterUserServiceServer(grpcServer, userGrpcServer)
+	grpcClient.RegisterUserServiceServer(grpcServer, userGrpcServer)
 
 	reflection.Register(grpcServer)
 
@@ -129,8 +125,8 @@ func startGRPCServer(client *ent.Client, userService *service.UserService) {
 }
 
 // Start HTTP server
-func startHTTPServer(client *ent.Client, hrClients *service.HRServiceClients, perClients *service.PermissionServiceClients) {
-	r := router.SetupRouter(client, hrClients, perClients)
+func startHTTPServer(client *ent.Client, hrServiceClients *service.HRServiceClients, permissionServiceClients *service.PermissionServiceClients) {
+	r := router.SetupRouter(client, hrServiceClients, permissionServiceClients)
 
 	r.Use(handler.Logger())
 
@@ -154,8 +150,8 @@ func NewHRServiceClients() (*service.HRServiceClients, error) {
 
 	return &service.HRServiceClients{
 		Conn:         conn,
-		Organization: clientGrpc.NewOrganizationServiceClient(conn),
-		HrExt:        clientGrpc.NewExtServiceClient(conn),
+		Organization: grpcClient.NewOrganizationServiceClient(conn),
+		HrExt:        grpcClient.NewExtServiceClient(conn),
 	}, nil
 }
 
@@ -173,8 +169,8 @@ func NewPermissionServiceClients() (*service.PermissionServiceClients, error) {
 
 	return &service.PermissionServiceClients{
 		Conn:     conn,
-		UserRole: clientGrpc.NewUserRoleServiceClient(conn),
-		UserPerm: clientGrpc.NewUserPermServiceClient(conn),
-		PermExt:  clientGrpc.NewPermissionExtServiceClient(conn),
+		UserRole: grpcClient.NewUserRoleServiceClient(conn),
+		UserPerm: grpcClient.NewUserPermServiceClient(conn),
+		PermExt:  grpcClient.NewPermissionExtServiceClient(conn),
 	}, nil
 }
