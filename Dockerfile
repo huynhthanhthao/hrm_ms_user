@@ -21,4 +21,4 @@ COPY --from=builder /app/main /app/main
 
 EXPOSE 5000 8080
 
-CMD ["/app/main"]
+CMD ["GOLANG_PROTOBUF_REGISTRATION_CONFLICT=ignore /app/main"]

@@ -10,11 +10,12 @@ import (
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/migrate"
 	grpcClient "github.com/huynhthanhthao/hrm_user_service/generated"
-
 	userGrpc "github.com/huynhthanhthao/hrm_user_service/internal/grpc"
 	"github.com/huynhthanhthao/hrm_user_service/internal/handler"
 	"github.com/huynhthanhthao/hrm_user_service/internal/router"
 	"github.com/huynhthanhthao/hrm_user_service/internal/service"
+	hrPb "github.com/longgggwwww/hrm-ms-hr/ent/proto/entpb"
+	permissionPb "github.com/longgggwwww/hrm-ms-permission/ent/proto/entpb"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -150,8 +151,8 @@ func NewHRServiceClients() (*service.HRServiceClients, error) {
 
 	return &service.HRServiceClients{
 		Conn:         conn,
-		Organization: grpcClient.NewOrganizationServiceClient(conn),
-		HrExt:        grpcClient.NewExtServiceClient(conn),
+		Organization: hrPb.NewOrganizationServiceClient(conn),
+		HrExt:        hrPb.NewExtServiceClient(conn),
 	}, nil
 }
 
@@ -169,8 +170,8 @@ func NewPermissionServiceClients() (*service.PermissionServiceClients, error) {
 
 	return &service.PermissionServiceClients{
 		Conn:     conn,
-		UserRole: grpcClient.NewUserRoleServiceClient(conn),
-		UserPerm: grpcClient.NewUserPermServiceClient(conn),
-		PermExt:  grpcClient.NewPermissionExtServiceClient(conn),
+		UserRole: permissionPb.NewUserRoleServiceClient(conn),
+		UserPerm: permissionPb.NewUserPermServiceClient(conn),
+		PermExt:  permissionPb.NewExtServiceClient(conn),
 	}, nil
 }

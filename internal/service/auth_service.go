@@ -12,7 +12,6 @@ import (
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
-	"github.com/huynhthanhthao/hrm_user_service/generated"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
 	"github.com/huynhthanhthao/hrm_user_service/internal/helper"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -20,6 +19,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+
+	hrPb "github.com/longgggwwww/hrm-ms-hr/ent/proto/entpb"
 )
 
 type AuthService struct {
@@ -145,7 +146,7 @@ func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.Login
 	}
 
 	// Gọi gRPC lấy employee theo user ID (int -> string)
-	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &generated.GetEmployeeByUserIdRequest{
+	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &hrPb.GetEmployeeByUserIdRequest{
 		UserId: strconv.Itoa(usr.ID),
 	})
 	if err != nil {
@@ -237,7 +238,7 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 
 	usr.Edges.Account = acc
 
-	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &generated.GetEmployeeByUserIdRequest{
+	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &hrPb.GetEmployeeByUserIdRequest{
 		UserId: strconv.Itoa(usr.ID),
 	})
 	if err != nil {

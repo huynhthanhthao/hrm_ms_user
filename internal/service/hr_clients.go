@@ -1,13 +1,13 @@
 package service
 
 import (
-	clientGrpc "github.com/huynhthanhthao/hrm_user_service/generated"
+	hrPb "github.com/longgggwwww/hrm-ms-hr/ent/proto/entpb"
 	"google.golang.org/grpc"
 )
 
 type HRServiceClients struct {
-	Organization clientGrpc.OrganizationServiceClient
-	HrExt        clientGrpc.ExtServiceClient
+	Organization hrPb.OrganizationServiceClient
+	HrExt        hrPb.ExtServiceClient
 	Conn         *grpc.ClientConn
 }
 
