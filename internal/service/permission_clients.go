@@ -1,15 +1,15 @@
 package service
 
 import (
-	permissionPb "github.com/longgggwwww/hrm-ms-permission/ent/proto/entpb"
+	permPb "github.com/huynhthanhthao/hrm_user_service/proto/permission"
 	"google.golang.org/grpc"
 )
 
 type PermissionServiceClients struct {
 	Conn     *grpc.ClientConn
-	UserRole permissionPb.UserRoleServiceClient
-	UserPerm permissionPb.UserPermServiceClient
-	PermExt  permissionPb.ExtServiceClient
+	UserRole permPb.UserRoleServiceClient
+	UserPerm permPb.UserPermServiceClient
+	PermExt  permPb.ExtServiceClient
 }
 
 func (c *PermissionServiceClients) Close() {

@@ -1,12 +1,16 @@
 syntax = "proto3";
 
-package entpb;
+package user;
 
-option go_package = "./generated";
+option go_package = "proto/user";
+
+import "google/protobuf/timestamp.proto";
+
+import "google/protobuf/wrappers.proto";
 
 service UserService {
   rpc ListUsers (ListUsersRequest) returns (ListUsersResponse);
-  rpc GetUser (GetUserRequest) returns (GetUserResponse);
+  rpc GetUserById (GetUserByIdRequest) returns (GetUserByIdResponse);
   rpc GetUsersByIDs (GetUsersByIDsRequest) returns (GetUsersByIDsResponse);
 
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
@@ -34,6 +38,33 @@ message User {
   string updated_at = 11;
 }
 
+
+message RoleExt {
+  bytes id = 1;
+
+  string code = 2;
+
+  string name = 3;
+
+  google.protobuf.StringValue color = 4;
+
+  google.protobuf.StringValue description = 5;
+
+  google.protobuf.Timestamp created_at = 6;
+
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message PermExt {
+  bytes id = 1;
+
+  string code = 2;
+
+  string name = 3;
+
+  google.protobuf.StringValue description = 4;
+}
+
 message ListUsersResponse {
   repeated User users = 1;
   int32 total_pages = 2;
@@ -41,12 +72,14 @@ message ListUsersResponse {
   int32 current_page = 4;
 }
 
-message GetUserRequest {
+message GetUserByIdRequest {
   int32 id = 1;
 }
 
-message GetUserResponse {
+message GetUserByIdResponse {
   User user = 1;
+  repeated RoleExt roles = 2;
+  repeated PermExt perms = 3;
 }
 
 message GetUsersByIDsRequest {

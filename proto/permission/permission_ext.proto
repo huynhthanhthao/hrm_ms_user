@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package permission;
+
+import "google/protobuf/empty.proto";
+
+import "google/protobuf/timestamp.proto";
+
+import "google/protobuf/wrappers.proto";
+
+option go_package = "proto/permission";
+
+service ExtService {
+  rpc DeleteUserPermsByUserID ( DeleteUserPermsByUserIDRequest ) returns ( google.protobuf.Empty );
+
+  rpc DeleteUserRolesByUserID ( DeleteUserRolesByUserIDRequest ) returns ( google.protobuf.Empty );
+
+  rpc UpdateUserPerms ( UpdateUserPermsRequest ) returns ( UpdateUserPermsResponse );
+
+  rpc UpdateUserRoles ( UpdateUserRolesRequest ) returns ( UpdateUserRolesResponse );
+
+  rpc GetUserPerms ( GetUserPermsRequest ) returns ( GetUserPermsResponse );
+
+  rpc GetUserRoles ( GetUserRolesRequest ) returns ( GetUserRolesResponse );
+}
+
+message DeleteUserPermsByUserIDRequest {
+  string user_id = 1;
+}
+
+message DeleteUserRolesByUserIDRequest {
+  string user_id = 1;
+}
+
+message UpdateUserPermsRequest {
+  string user_id = 1;
+  repeated string perm_ids = 2;
+}
+
+message UpdateUserPermsResponse {
+  bool success = 1;
+}
+
+message UpdateUserRolesRequest {
+  string user_id = 1;
+  repeated string role_ids = 2;
+}
+
+message UpdateUserRolesResponse {
+  bool success = 1;
+}
+
+message GetUserPermsRequest {
+  string user_id = 1;
+}
+
+
+message GetUserRolesRequest {
+  string user_id = 1;
+}
+
+message GetUserPermsResponse {
+  repeated PermExt perms = 1;
+}
+
+message GetUserRolesResponse {
+  repeated RoleExt roles = 1;
+}
+
+message RoleExt {
+  bytes id = 1;
+
+  string code = 2;
+
+  string name = 3;
+
+  google.protobuf.StringValue color = 4;
+
+  google.protobuf.StringValue description = 5;
+
+  google.protobuf.Timestamp created_at = 6;
+
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message PermExt {
+  bytes id = 1;
+
+  string code = 2;
+
+  string name = 3;
+
+  google.protobuf.StringValue description = 4;
+}

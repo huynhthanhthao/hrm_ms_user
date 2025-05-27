@@ -7,20 +7,9 @@ require (
 	github.com/gin-gonic/gin v1.10.1
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/lib/pq v1.10.9
-	github.com/longgggwwww/hrm-ms-hr v0.0.0-20250521044607-47022cd705d6
-	github.com/longgggwwww/hrm-ms-permission v0.0.0-20250521050302-ff8765ccf3f2
 	golang.org/x/crypto v0.38.0
 	google.golang.org/grpc v1.72.1
 	google.golang.org/protobuf v1.36.6
-)
-
-require (
-	entgo.io/contrib v0.6.0 // indirect
-	github.com/bufbuild/protocompile v0.14.1 // indirect
-	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/jhump/protoreflect v1.17.0 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	go.uber.org/multierr v1.11.0 // indirect
 )
 
 require (
@@ -39,7 +28,7 @@ require (
 	github.com/go-playground/validator/v10 v10.26.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
+	github.com/google/uuid v1.6.0
 	github.com/hashicorp/hcl/v2 v2.23.0 // indirect
 	github.com/joho/godotenv v1.5.1
 	github.com/json-iterator/go v1.1.12 // indirect

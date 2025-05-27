@@ -9,19 +9,20 @@ import (
 
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/migrate"
-	grpcClient "github.com/huynhthanhthao/hrm_user_service/generated"
 	userGrpc "github.com/huynhthanhthao/hrm_user_service/internal/grpc"
 	"github.com/huynhthanhthao/hrm_user_service/internal/handler"
 	"github.com/huynhthanhthao/hrm_user_service/internal/router"
 	"github.com/huynhthanhthao/hrm_user_service/internal/service"
-	hrPb "github.com/longgggwwww/hrm-ms-hr/ent/proto/entpb"
-	permissionPb "github.com/longgggwwww/hrm-ms-permission/ent/proto/entpb"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
+
+	hrPb "github.com/huynhthanhthao/hrm_user_service/proto/hr"
+	permPb "github.com/huynhthanhthao/hrm_user_service/proto/permission"
+	userPb "github.com/huynhthanhthao/hrm_user_service/proto/user"
 )
 
 var (
@@ -109,7 +110,7 @@ func startGRPCServer(client *ent.Client, userService *service.UserService) {
 	grpcServer := grpc.NewServer()
 
 	userGrpcServer := userGrpc.NewUserGRPCServer(userService)
-	grpcClient.RegisterUserServiceServer(grpcServer, userGrpcServer)
+	userPb.RegisterUserServiceServer(grpcServer, userGrpcServer)
 
 	reflection.Register(grpcServer)
 
@@ -170,8 +171,8 @@ func NewPermissionServiceClients() (*service.PermissionServiceClients, error) {
 
 	return &service.PermissionServiceClients{
 		Conn:     conn,
-		UserRole: permissionPb.NewUserRoleServiceClient(conn),
-		UserPerm: permissionPb.NewUserPermServiceClient(conn),
-		PermExt:  permissionPb.NewExtServiceClient(conn),
+		UserRole: permPb.NewUserRoleServiceClient(conn),
+		UserPerm: permPb.NewUserPermServiceClient(conn),
+		PermExt:  permPb.NewExtServiceClient(conn),
 	}, nil
 }

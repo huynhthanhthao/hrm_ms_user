@@ -1,0 +1,781 @@
+syntax = "proto3";
+
+package hr;
+
+import "google/protobuf/empty.proto";
+
+import "google/protobuf/timestamp.proto";
+
+import "google/protobuf/wrappers.proto";
+
+option go_package = "proto/hr";
+
+message Department {
+  int64 id = 1;
+
+  string name = 2;
+
+  string code = 3;
+
+  int64 org_id = 4;
+
+  google.protobuf.Timestamp created_at = 5;
+
+  google.protobuf.Timestamp updated_at = 6;
+
+  repeated Position positions = 7;
+
+  Organization organization = 8;
+}
+
+message CreateDepartmentRequest {
+  Department department = 1;
+}
+
+message GetDepartmentRequest {
+  int64 id = 1;
+
+  View view = 2;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message UpdateDepartmentRequest {
+  Department department = 1;
+}
+
+message DeleteDepartmentRequest {
+  int64 id = 1;
+}
+
+message ListDepartmentRequest {
+  int32 page_size = 1;
+
+  string page_token = 2;
+
+  View view = 3;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message ListDepartmentResponse {
+  repeated Department department_list = 1;
+
+  string next_page_token = 2;
+}
+
+message BatchCreateDepartmentsRequest {
+  repeated CreateDepartmentRequest requests = 1;
+}
+
+message BatchCreateDepartmentsResponse {
+  repeated Department departments = 1;
+}
+
+message Employee {
+  int64 id = 1;
+
+  google.protobuf.StringValue user_id = 2;
+
+  string code = 3;
+
+  Status status = 4;
+
+  int64 position_id = 5;
+
+  google.protobuf.Timestamp joining_at = 6;
+
+  int64 org_id = 7;
+
+  google.protobuf.Timestamp created_at = 8;
+
+  google.protobuf.Timestamp updated_at = 9;
+
+  Position position = 10;
+
+  enum Status {
+    STATUS_ACTIVE = 0;
+
+    STATUS_INACTIVE = 1;
+  }
+}
+
+message CreateEmployeeRequest {
+  Employee employee = 1;
+}
+
+message GetEmployeeRequest {
+  int64 id = 1;
+
+  View view = 2;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message UpdateEmployeeRequest {
+  Employee employee = 1;
+}
+
+message DeleteEmployeeRequest {
+  int64 id = 1;
+}
+
+message ListEmployeeRequest {
+  int32 page_size = 1;
+
+  string page_token = 2;
+
+  View view = 3;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message ListEmployeeResponse {
+  repeated Employee employee_list = 1;
+
+  string next_page_token = 2;
+}
+
+message BatchCreateEmployeesRequest {
+  repeated CreateEmployeeRequest requests = 1;
+}
+
+message BatchCreateEmployeesResponse {
+  repeated Employee employees = 1;
+}
+
+message LeaveApproval {
+  int64 id = 1;
+
+  google.protobuf.StringValue comment = 2;
+
+  google.protobuf.Timestamp created_at = 3;
+
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message CreateLeaveApprovalRequest {
+  LeaveApproval leave_approval = 1;
+}
+
+message GetLeaveApprovalRequest {
+  int64 id = 1;
+
+  View view = 2;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message UpdateLeaveApprovalRequest {
+  LeaveApproval leave_approval = 1;
+}
+
+message DeleteLeaveApprovalRequest {
+  int64 id = 1;
+}
+
+message ListLeaveApprovalRequest {
+  int32 page_size = 1;
+
+  string page_token = 2;
+
+  View view = 3;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message ListLeaveApprovalResponse {
+  repeated LeaveApproval leave_approval_list = 1;
+
+  string next_page_token = 2;
+}
+
+message BatchCreateLeaveApprovalsRequest {
+  repeated CreateLeaveApprovalRequest requests = 1;
+}
+
+message BatchCreateLeaveApprovalsResponse {
+  repeated LeaveApproval leave_approvals = 1;
+}
+
+message LeaveRequest {
+  int64 id = 1;
+
+  double total_days = 2;
+
+  google.protobuf.Timestamp start_at = 3;
+
+  google.protobuf.Timestamp end_at = 4;
+
+  google.protobuf.StringValue reason = 5;
+
+  Type type = 6;
+
+  Status status = 7;
+
+  google.protobuf.Timestamp created_at = 8;
+
+  google.protobuf.Timestamp updated_at = 9;
+
+  LeaveApproval leaveapprove = 10;
+
+  enum Type {
+    TYPE_ANNUAL = 0;
+
+    TYPE_UNPAID = 1;
+  }
+
+  enum Status {
+    STATUS_PENDING = 0;
+
+    STATUS_REJECTED = 1;
+
+    STATUS_APPROVED = 2;
+  }
+}
+
+message CreateLeaveRequestRequest {
+  LeaveRequest leave_request = 1;
+}
+
+message GetLeaveRequestRequest {
+  int64 id = 1;
+
+  View view = 2;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message UpdateLeaveRequestRequest {
+  LeaveRequest leave_request = 1;
+}
+
+message DeleteLeaveRequestRequest {
+  int64 id = 1;
+}
+
+message ListLeaveRequestRequest {
+  int32 page_size = 1;
+
+  string page_token = 2;
+
+  View view = 3;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message ListLeaveRequestResponse {
+  repeated LeaveRequest leave_request_list = 1;
+
+  string next_page_token = 2;
+}
+
+message BatchCreateLeaveRequestsRequest {
+  repeated CreateLeaveRequestRequest requests = 1;
+}
+
+message BatchCreateLeaveRequestsResponse {
+  repeated LeaveRequest leave_requests = 1;
+}
+
+message Organization {
+  int64 id = 1;
+
+  string name = 2;
+
+  string code = 3;
+
+  google.protobuf.StringValue logo_url = 4;
+
+  google.protobuf.StringValue address = 5;
+
+  google.protobuf.StringValue phone = 6;
+
+  google.protobuf.StringValue email = 7;
+
+  google.protobuf.StringValue website = 8;
+
+  google.protobuf.Timestamp created_at = 9;
+
+  google.protobuf.Timestamp updated_at = 10;
+
+  google.protobuf.Int64Value parent_id = 11;
+
+  Organization parent = 12;
+
+  repeated Organization children = 13;
+
+  repeated Department departments = 14;
+}
+
+message CreateOrganizationRequest {
+  Organization organization = 1;
+}
+
+message GetOrganizationRequest {
+  int64 id = 1;
+
+  View view = 2;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message UpdateOrganizationRequest {
+  Organization organization = 1;
+}
+
+message DeleteOrganizationRequest {
+  int64 id = 1;
+}
+
+message ListOrganizationRequest {
+  int32 page_size = 1;
+
+  string page_token = 2;
+
+  View view = 3;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message ListOrganizationResponse {
+  repeated Organization organization_list = 1;
+
+  string next_page_token = 2;
+}
+
+message BatchCreateOrganizationsRequest {
+  repeated CreateOrganizationRequest requests = 1;
+}
+
+message BatchCreateOrganizationsResponse {
+  repeated Organization organizations = 1;
+}
+
+message Position {
+  int64 id = 1;
+
+  string name = 2;
+
+  string code = 3;
+
+  int64 department_id = 4;
+
+  google.protobuf.Int64Value parent_id = 5;
+
+  google.protobuf.Timestamp created_at = 6;
+
+  google.protobuf.Timestamp updated_at = 7;
+
+  repeated Employee employees = 8;
+
+  Department departments = 9;
+
+  repeated Position children = 10;
+
+  Position parent = 11;
+}
+
+message CreatePositionRequest {
+  Position position = 1;
+}
+
+message GetPositionRequest {
+  int64 id = 1;
+
+  View view = 2;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message UpdatePositionRequest {
+  Position position = 1;
+}
+
+message DeletePositionRequest {
+  int64 id = 1;
+}
+
+message ListPositionRequest {
+  int32 page_size = 1;
+
+  string page_token = 2;
+
+  View view = 3;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message ListPositionResponse {
+  repeated Position position_list = 1;
+
+  string next_page_token = 2;
+}
+
+message BatchCreatePositionsRequest {
+  repeated CreatePositionRequest requests = 1;
+}
+
+message BatchCreatePositionsResponse {
+  repeated Position positions = 1;
+}
+
+message Project {
+  bytes id = 1;
+
+  string name = 2;
+
+  google.protobuf.StringValue description = 3;
+
+  google.protobuf.Timestamp start_at = 4;
+
+  google.protobuf.Timestamp end_at = 5;
+
+  bytes creator_id = 6;
+
+  bytes updater_id = 7;
+
+  google.protobuf.Timestamp created_at = 8;
+
+  google.protobuf.Timestamp updated_at = 9;
+
+  bytes branch_id = 10;
+
+  int64 process = 11;
+
+  Status status = 12;
+
+  repeated Task tasks = 13;
+
+  enum Status {
+    STATUS_NOT_STARTED = 0;
+
+    STATUS_IN_PROGRESS = 1;
+
+    STATUS_COMPLETED = 2;
+  }
+}
+
+message CreateProjectRequest {
+  Project project = 1;
+}
+
+message GetProjectRequest {
+  bytes id = 1;
+
+  View view = 2;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message UpdateProjectRequest {
+  Project project = 1;
+}
+
+message DeleteProjectRequest {
+  bytes id = 1;
+}
+
+message ListProjectRequest {
+  int32 page_size = 1;
+
+  string page_token = 2;
+
+  View view = 3;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message ListProjectResponse {
+  repeated Project project_list = 1;
+
+  string next_page_token = 2;
+}
+
+message BatchCreateProjectsRequest {
+  repeated CreateProjectRequest requests = 1;
+}
+
+message BatchCreateProjectsResponse {
+  repeated Project projects = 1;
+}
+
+message Task {
+  bytes id = 1;
+
+  string title = 2;
+
+  google.protobuf.StringValue description = 3;
+
+  int64 process = 4;
+
+  bool status = 5;
+
+  google.protobuf.Timestamp start_at = 6;
+
+  bytes project_id = 7;
+
+  bytes branch_id = 8;
+
+  bytes creator_id = 9;
+
+  bytes updater_id = 10;
+
+  google.protobuf.Timestamp created_at = 11;
+
+  google.protobuf.Timestamp updated_at = 12;
+
+  Project project = 13;
+}
+
+message CreateTaskRequest {
+  Task task = 1;
+}
+
+message GetTaskRequest {
+  bytes id = 1;
+
+  View view = 2;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message UpdateTaskRequest {
+  Task task = 1;
+}
+
+message DeleteTaskRequest {
+  bytes id = 1;
+}
+
+message ListTaskRequest {
+  int32 page_size = 1;
+
+  string page_token = 2;
+
+  View view = 3;
+
+  enum View {
+    VIEW_UNSPECIFIED = 0;
+
+    BASIC = 1;
+
+    WITH_EDGE_IDS = 2;
+  }
+}
+
+message ListTaskResponse {
+  repeated Task task_list = 1;
+
+  string next_page_token = 2;
+}
+
+message BatchCreateTasksRequest {
+  repeated CreateTaskRequest requests = 1;
+}
+
+message BatchCreateTasksResponse {
+  repeated Task tasks = 1;
+}
+
+service DepartmentService {
+  rpc Create ( CreateDepartmentRequest ) returns ( Department );
+
+  rpc Get ( GetDepartmentRequest ) returns ( Department );
+
+  rpc Update ( UpdateDepartmentRequest ) returns ( Department );
+
+  rpc Delete ( DeleteDepartmentRequest ) returns ( google.protobuf.Empty );
+
+  rpc List ( ListDepartmentRequest ) returns ( ListDepartmentResponse );
+
+  rpc BatchCreate ( BatchCreateDepartmentsRequest ) returns ( BatchCreateDepartmentsResponse );
+}
+
+service EmployeeService {
+  rpc Create ( CreateEmployeeRequest ) returns ( Employee );
+
+  rpc Get ( GetEmployeeRequest ) returns ( Employee );
+
+  rpc Update ( UpdateEmployeeRequest ) returns ( Employee );
+
+  rpc Delete ( DeleteEmployeeRequest ) returns ( google.protobuf.Empty );
+
+  rpc List ( ListEmployeeRequest ) returns ( ListEmployeeResponse );
+
+  rpc BatchCreate ( BatchCreateEmployeesRequest ) returns ( BatchCreateEmployeesResponse );
+}
+
+service LeaveApprovalService {
+  rpc Create ( CreateLeaveApprovalRequest ) returns ( LeaveApproval );
+
+  rpc Get ( GetLeaveApprovalRequest ) returns ( LeaveApproval );
+
+  rpc Update ( UpdateLeaveApprovalRequest ) returns ( LeaveApproval );
+
+  rpc Delete ( DeleteLeaveApprovalRequest ) returns ( google.protobuf.Empty );
+
+  rpc List ( ListLeaveApprovalRequest ) returns ( ListLeaveApprovalResponse );
+
+  rpc BatchCreate ( BatchCreateLeaveApprovalsRequest ) returns ( BatchCreateLeaveApprovalsResponse );
+}
+
+service LeaveRequestService {
+  rpc Create ( CreateLeaveRequestRequest ) returns ( LeaveRequest );
+
+  rpc Get ( GetLeaveRequestRequest ) returns ( LeaveRequest );
+
+  rpc Update ( UpdateLeaveRequestRequest ) returns ( LeaveRequest );
+
+  rpc Delete ( DeleteLeaveRequestRequest ) returns ( google.protobuf.Empty );
+
+  rpc List ( ListLeaveRequestRequest ) returns ( ListLeaveRequestResponse );
+
+  rpc BatchCreate ( BatchCreateLeaveRequestsRequest ) returns ( BatchCreateLeaveRequestsResponse );
+}
+
+service OrganizationService {
+  rpc Create ( CreateOrganizationRequest ) returns ( Organization );
+
+  rpc Get ( GetOrganizationRequest ) returns ( Organization );
+
+  rpc Update ( UpdateOrganizationRequest ) returns ( Organization );
+
+  rpc Delete ( DeleteOrganizationRequest ) returns ( google.protobuf.Empty );
+
+  rpc List ( ListOrganizationRequest ) returns ( ListOrganizationResponse );
+
+  rpc BatchCreate ( BatchCreateOrganizationsRequest ) returns ( BatchCreateOrganizationsResponse );
+}
+
+service PositionService {
+  rpc Create ( CreatePositionRequest ) returns ( Position );
+
+  rpc Get ( GetPositionRequest ) returns ( Position );
+
+  rpc Update ( UpdatePositionRequest ) returns ( Position );
+
+  rpc Delete ( DeletePositionRequest ) returns ( google.protobuf.Empty );
+
+  rpc List ( ListPositionRequest ) returns ( ListPositionResponse );
+
+  rpc BatchCreate ( BatchCreatePositionsRequest ) returns ( BatchCreatePositionsResponse );
+}
+
+service ProjectService {
+  rpc Create ( CreateProjectRequest ) returns ( Project );
+
+  rpc Get ( GetProjectRequest ) returns ( Project );
+
+  rpc Update ( UpdateProjectRequest ) returns ( Project );
+
+  rpc Delete ( DeleteProjectRequest ) returns ( google.protobuf.Empty );
+
+  rpc List ( ListProjectRequest ) returns ( ListProjectResponse );
+
+  rpc BatchCreate ( BatchCreateProjectsRequest ) returns ( BatchCreateProjectsResponse );
+}
+
+service TaskService {
+  rpc Create ( CreateTaskRequest ) returns ( Task );
+
+  rpc Get ( GetTaskRequest ) returns ( Task );
+
+  rpc Update ( UpdateTaskRequest ) returns ( Task );
+
+  rpc Delete ( DeleteTaskRequest ) returns ( google.protobuf.Empty );
+
+  rpc List ( ListTaskRequest ) returns ( ListTaskResponse );
+
+  rpc BatchCreate ( BatchCreateTasksRequest ) returns ( BatchCreateTasksResponse );
+}

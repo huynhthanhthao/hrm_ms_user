@@ -20,7 +20,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
-	hrPb "github.com/longgggwwww/hrm-ms-hr/ent/proto/entpb"
+	hrPb "github.com/huynhthanhthao/hrm_user_service/proto/hr"
 )
 
 type AuthService struct {
@@ -103,7 +103,7 @@ func (s *AuthService) Register(ctx context.Context, c *gin.Context, input dto.Re
 }
 
 func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.LoginInput) {
-	// Tìm tài khoản theo tên đăng nhập
+	// Find account by username
 	acc, err := s.client.Account.
 		Query().
 		Where(account.UsernameEQ(input.Username)).
@@ -113,54 +113,58 @@ func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.Login
 		return
 	}
 
-	// So sánh mật khẩu
+	// Compare password
 	if err := bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(input.Password)); err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	// Lấy user từ account
+	// Get user from account
 	usr, err := acc.QueryUser().Only(ctx)
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	// Gọi gRPC lấy employee theo user ID (int -> string)
-	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &hrPb.GetEmployeeByUserIdRequest{
-		UserId: strconv.Itoa(usr.ID),
-	})
-	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	// Parse duration
+	// Parse durations
 	accessDur, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
 	refreshDur, _ := time.ParseDuration(os.Getenv("JWT_REFRESH_TOKEN_DURATION"))
 
-	// Tạo token
-	accessToken, err := GenerateToken(usr.ID, employee.Id, employee.OrgId, accessDur)
-	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	refreshToken, err := GenerateToken(usr.ID, employee.Id, employee.OrgId, refreshDur)
-	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	jsonEmployee, err := protojson.Marshal(employee)
-	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("failed to marshal employee: %v", err))
-		return
-	}
-
+	// Initialize variables for employee data
 	var employeeMap map[string]interface{}
-	if err := json.Unmarshal(jsonEmployee, &employeeMap); err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("failed to unmarshal employee JSON: %v", err))
+	var employeeID, orgID *int64
+
+	// Try to get employee data
+	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &hrPb.GetEmployeeByUserIdRequest{
+		UserId: strconv.Itoa(usr.ID),
+	})
+	if err == nil && employee != nil {
+		// Employee exists, marshal to JSON
+		jsonEmployee, err := protojson.Marshal(employee)
+		if err != nil {
+			helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("failed to marshal employee: %v", err))
+			return
+		}
+		if err := json.Unmarshal(jsonEmployee, &employeeMap); err != nil {
+			helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("failed to unmarshal employee JSON: %v", err))
+			return
+		}
+
+		employeeID = &employee.Id
+		orgID = &employee.OrgId
+	}
+
+	fmt.Println(employeeID, orgID, 9999)
+	// Generate tokens with possibly zero employeeID and orgID
+	accessToken, err := GenerateToken(usr.ID, employeeID, orgID, accessDur)
+	if err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	refreshToken, err := GenerateToken(usr.ID, employeeID, orgID, refreshDur)
+	if err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -246,7 +250,7 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 	})
 }
 
-func GenerateToken(userID int, employeeID int64, orgID int64, duration time.Duration) (string, error) {
+func GenerateToken(userID int, employeeID *int64, orgID *int64, duration time.Duration) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id":     userID,
 		"org_id":      orgID,

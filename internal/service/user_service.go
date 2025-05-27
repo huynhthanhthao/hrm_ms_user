@@ -2,23 +2,31 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/google/uuid"
 	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	user "github.com/huynhthanhthao/hrm_user_service/ent/user"
-	userpb "github.com/huynhthanhthao/hrm_user_service/generated"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
-	permissionPb "github.com/longgggwwww/hrm-ms-permission/ent/proto/entpb"
+	permPb "github.com/huynhthanhthao/hrm_user_service/proto/permission"
+	userPb "github.com/huynhthanhthao/hrm_user_service/proto/user"
 )
 
 type UserService struct {
 	client     *ent.Client
 	hrClients  *HRServiceClients
 	perClients *PermissionServiceClients
+}
+
+type UserResponse struct {
+	User        *ent.User
+	Permissions []*permPb.GetUserPermsResponse
+	Roles       []*permPb.GetUserRolesResponse
 }
 
 func NewUserService(
@@ -45,13 +53,44 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]*ent.User, error) {
 	return users, nil
 }
 
-func (s *UserService) GetUser(ctx context.Context, id int) (*ent.User, error) {
-	// Use the converted UUID
+func (s *UserService) GetUserById(ctx context.Context, id int) (*ent.User, error) {
+	if id <= 0 {
+		return nil, errors.New("#1 GetUserById: invalid user ID")
+	}
+
+	if s.perClients.PermExt == nil {
+		return nil, errors.New("#2 GetUserById: permission client is not initialized")
+	}
+
+	// Retrieve user by ID
 	user, err := s.client.User.Get(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("#1 GetUser: failed to retrieve user: %w", err)
+		return nil, fmt.Errorf("#3 GetUserById: failed to retrieve user: %w", err)
 	}
+
 	return user, nil
+}
+
+func (s *UserService) GetUserPermsByUserId(ctx context.Context, user_id string) (*permPb.GetUserPermsResponse, error) {
+	userPerms, err := s.perClients.PermExt.GetUserPerms(ctx, &permPb.GetUserPermsRequest{
+		UserId: user_id,
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("#1 GetUserPermsByUserId: failed to get user perms: %w", err)
+	}
+
+	return userPerms, nil
+}
+
+func (s *UserService) GetUserRolesByUserId(ctx context.Context, user_id string) (*permPb.GetUserRolesResponse, error) {
+	userRoles, err := s.perClients.PermExt.GetUserRoles(ctx, &permPb.GetUserRolesRequest{UserId: user_id})
+
+	if err != nil {
+		return nil, fmt.Errorf("#1 GetUserRolesByUserId: failed to get user roles: %w", err)
+	}
+
+	return userRoles, nil
 }
 
 func (s *UserService) GetUsersByIDs(ctx context.Context, params dto.UserParams) ([]*ent.User, error) {
@@ -65,6 +104,7 @@ func (s *UserService) GetUsersByIDs(ctx context.Context, params dto.UserParams) 
 	users, err := s.client.User.Query().
 		Where(user.IDIn(intIDs...)).
 		All(ctx)
+
 	if err != nil {
 		return nil, fmt.Errorf("#1 GetUsersByIDs: failed to retrieve users: %w", err)
 	}
@@ -72,7 +112,7 @@ func (s *UserService) GetUsersByIDs(ctx context.Context, params dto.UserParams) 
 	return users, nil
 }
 
-func (s *UserService) CreateUser(ctx context.Context, input *userpb.CreateUserRequest) (*ent.User, error) {
+func (s *UserService) CreateUser(ctx context.Context, input *userPb.CreateUserRequest) (*ent.User, error) {
 	tx, err := s.client.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -114,21 +154,22 @@ func (s *UserService) CreateUser(ctx context.Context, input *userpb.CreateUserRe
 
 	// Call grpc to permission service here
 	if len(input.PermIds) > 0 {
-		userPermRequests := make([]*permissionPb.CreateUserPermRequest, len(input.PermIds))
+		userPermRequests := make([]*permPb.CreateUserPermRequest, len(input.PermIds))
 		for i, permID := range input.PermIds {
 			parsedUUID, err := uuid.Parse(permID)
 			if err != nil {
 				return nil, fmt.Errorf("#4 CreateUser: invalid permID %s: %w", permID, err)
 			}
 
-			userPermRequests[i] = &permissionPb.CreateUserPermRequest{
-				UserPerm: &permissionPb.UserPerm{
-					UserId: fmt.Sprintf("%d", user.ID),
-					PermId: parsedUUID[:],
+			userPermRequests[i] = &permPb.CreateUserPermRequest{
+				UserPerm: &permPb.UserPerm{
+					UserId:    fmt.Sprintf("%d", user.ID),
+					PermId:    parsedUUID[:],
+					CreatedAt: timestamppb.Now(),
 				},
 			}
 		}
-		_, err := s.perClients.UserPerm.BatchCreate(ctx, &permissionPb.BatchCreateUserPermsRequest{
+		_, err := s.perClients.UserPerm.BatchCreate(ctx, &permPb.BatchCreateUserPermsRequest{
 			Requests: userPermRequests,
 		})
 		if err != nil {
@@ -137,20 +178,21 @@ func (s *UserService) CreateUser(ctx context.Context, input *userpb.CreateUserRe
 	}
 
 	if len(input.RoleIds) > 0 {
-		userRoleRequests := make([]*permissionPb.CreateUserRoleRequest, len(input.RoleIds))
+		userRoleRequests := make([]*permPb.CreateUserRoleRequest, len(input.RoleIds))
 		for i, roleID := range input.RoleIds {
 			parsedUUID, err := uuid.Parse(roleID)
 			if err != nil {
 				return nil, fmt.Errorf("#6 CreateUser: invalid roleID %s: %w", roleID, err)
 			}
-			userRoleRequests[i] = &permissionPb.CreateUserRoleRequest{
-				UserRole: &permissionPb.UserRole{
-					UserId: fmt.Sprintf("%d", user.ID),
-					RoleId: parsedUUID[:],
+			userRoleRequests[i] = &permPb.CreateUserRoleRequest{
+				UserRole: &permPb.UserRole{
+					UserId:    fmt.Sprintf("%d", user.ID),
+					RoleId:    parsedUUID[:],
+					CreatedAt: timestamppb.Now(),
 				},
 			}
 		}
-		_, err := s.perClients.UserRole.BatchCreate(ctx, &permissionPb.BatchCreateUserRolesRequest{
+		_, err := s.perClients.UserRole.BatchCreate(ctx, &permPb.BatchCreateUserRolesRequest{
 			Requests: userRoleRequests,
 		})
 		if err != nil {
@@ -166,23 +208,19 @@ func (s *UserService) CreateUser(ctx context.Context, input *userpb.CreateUserRe
 }
 
 func (s *UserService) UpdateUserPerms(ctx context.Context, userID int, permIDs []string) error {
-	if len(permIDs) == 0 {
-		return fmt.Errorf("#1 UpdateUserPerms: permIDs is empty")
-	}
-
-	req := &permissionPb.UpdateUserPermsRequest{
+	req := &permPb.UpdateUserPermsRequest{
 		UserId: fmt.Sprintf("%d", userID),
 	}
 	req.PermIds = append(req.PermIds, permIDs...)
 	_, err := s.perClients.PermExt.UpdateUserPerms(ctx, req)
 	if err != nil {
-		return fmt.Errorf("#2 UpdateUserPerms: failed to update user permissions: %w", err)
+		return fmt.Errorf("#1 UpdateUserPerms: failed to update user permissions: %w", err)
 	}
 	return nil
 }
 
 func (s *UserService) UpdateUserRoles(ctx context.Context, userID int, roleIDs []string) error {
-	req := &permissionPb.UpdateUserRolesRequest{
+	req := &permPb.UpdateUserRolesRequest{
 		UserId: fmt.Sprintf("%d", userID),
 	}
 	req.RoleIds = append(req.RoleIds, roleIDs...)
@@ -193,7 +231,7 @@ func (s *UserService) UpdateUserRoles(ctx context.Context, userID int, roleIDs [
 	return nil
 }
 
-func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int, input *userpb.UpdateUserRequest) (*ent.User, error) {
+func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int, input *userPb.UpdateUserRequest) (*ent.User, error) {
 	userCreated, err := tx.User.UpdateOneID(userID).
 		SetFirstName(input.FirstName).
 		SetLastName(input.LastName).
@@ -271,13 +309,13 @@ func (s *UserService) DeleteUserByID(ctx context.Context, id int) error {
 	// Call grpc to permission service
 	if s.perClients.PermExt != nil {
 		userIDStr := fmt.Sprintf("%d", id)
-		_, err := s.perClients.PermExt.DeleteUserPermsByUserID(ctx, &permissionPb.DeleteUserPermsByUserIDRequest{
+		_, err := s.perClients.PermExt.DeleteUserPermsByUserID(ctx, &permPb.DeleteUserPermsByUserIDRequest{
 			UserId: userIDStr,
 		})
 		if err != nil {
 			return fmt.Errorf("#3 DeleteUserByID: failed to delete user permissions: %w", err)
 		}
-		_, err = s.perClients.PermExt.DeleteUserRolesByUserID(ctx, &permissionPb.DeleteUserRolesByUserIDRequest{
+		_, err = s.perClients.PermExt.DeleteUserRolesByUserID(ctx, &permPb.DeleteUserRolesByUserIDRequest{
 			UserId: userIDStr,
 		})
 		if err != nil {

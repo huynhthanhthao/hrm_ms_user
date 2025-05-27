@@ -2,10 +2,11 @@ package userGrpc
 
 import (
 	"context"
+	"strconv"
 
-	userpb "github.com/huynhthanhthao/hrm_user_service/generated"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
 	"github.com/huynhthanhthao/hrm_user_service/internal/service"
+	userpb "github.com/huynhthanhthao/hrm_user_service/proto/user"
 )
 
 type UserGRPCServer struct {
@@ -51,18 +52,50 @@ func (s *UserGRPCServer) ListUsers(ctx context.Context, req *userpb.ListUsersReq
 	}, nil
 }
 
-func (s *UserGRPCServer) GetUser(ctx context.Context, req *userpb.GetUserRequest) (*userpb.GetUserResponse, error) {
-	user, err := s.userService.GetUser(ctx, int(req.Id))
-
+func (s *UserGRPCServer) GetUserById(ctx context.Context, req *userpb.GetUserByIdRequest) (*userpb.GetUserByIdResponse, error) {
+	user, err := s.userService.GetUserById(ctx, int(req.Id))
 	if err != nil {
 		return nil, err
 	}
 
-	/*
-		Gọi qua lấy permission và map res
-	*/
+	// Lấy vai trò
+	rolesResp, err := s.userService.GetUserRolesByUserId(ctx, strconv.Itoa(int(req.Id)))
+	if err != nil {
+		return nil, err
+	}
 
-	return &userpb.GetUserResponse{
+	// Lấy quyền
+	permsResp, err := s.userService.GetUserPermsByUserId(ctx, strconv.Itoa(int(req.Id)))
+	if err != nil {
+		return nil, err
+	}
+
+	// Map roles
+	var roles []*userpb.RoleExt
+	for _, r := range rolesResp.Roles {
+		roles = append(roles, &userpb.RoleExt{
+			Id:          r.Id,
+			Code:        r.Code,
+			Name:        r.Name,
+			Color:       r.Color,
+			Description: r.Description,
+			CreatedAt:   r.CreatedAt,
+			UpdatedAt:   r.UpdatedAt,
+		})
+	}
+
+	// Map permissions
+	var perms []*userpb.PermExt
+	for _, p := range permsResp.Perms {
+		perms = append(perms, &userpb.PermExt{
+			Id:          p.Id,
+			Code:        p.Code,
+			Name:        p.Name,
+			Description: p.Description,
+		})
+	}
+
+	return &userpb.GetUserByIdResponse{
 		User: &userpb.User{
 			Id:        int32(user.ID),
 			FirstName: user.FirstName,
@@ -76,6 +109,8 @@ func (s *UserGRPCServer) GetUser(ctx context.Context, req *userpb.GetUserRequest
 			CreatedAt: user.CreatedAt.String(),
 			UpdatedAt: user.UpdatedAt.String(),
 		},
+		Roles: roles,
+		Perms: perms,
 	}, nil
 }
 
