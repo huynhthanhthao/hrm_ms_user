@@ -13,8 +13,8 @@ import (
 	"github.com/huynhthanhthao/hrm_user_service/ent/account"
 	user "github.com/huynhthanhthao/hrm_user_service/ent/user"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
-	permPb "github.com/huynhthanhthao/hrm_user_service/proto/permission"
 	userPb "github.com/huynhthanhthao/hrm_user_service/proto/user"
+	permPb "github.com/longgggwwww/hrm-ms-permission/ent/proto/entpb"
 )
 
 type UserService struct {

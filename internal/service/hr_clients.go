@@ -1,7 +1,7 @@
 package service
 
 import (
-	hrPb "github.com/huynhthanhthao/hrm_user_service/proto/hr"
+	hrPb "github.com/longgggwwww/hrm-ms-hr/ent/proto/entpb"
 
 	"google.golang.org/grpc"
 )

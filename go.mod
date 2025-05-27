@@ -13,6 +13,17 @@ require (
 )
 
 require (
+	entgo.io/contrib v0.6.0 // indirect
+	github.com/bufbuild/protocompile v0.14.1 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/jhump/protoreflect v1.17.0 // indirect
+	github.com/longgggwwww/hrm-ms-hr v0.0.0-20250527041614-14a7eb6a7e91 // indirect
+	github.com/longgggwwww/hrm-ms-permission v0.0.0-20250526043248-1f35d4a97269 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
+)
+
+require (
 	ariga.io/atlas v0.33.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect

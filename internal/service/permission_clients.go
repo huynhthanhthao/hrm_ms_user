@@ -1,7 +1,8 @@
 package service
 
 import (
-	permPb "github.com/huynhthanhthao/hrm_user_service/proto/permission"
+	permPb "github.com/longgggwwww/hrm-ms-permission/ent/proto/entpb"
+
 	"google.golang.org/grpc"
 )
 

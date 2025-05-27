@@ -20,9 +20,9 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 
-	hrPb "github.com/huynhthanhthao/hrm_user_service/proto/hr"
-	permPb "github.com/huynhthanhthao/hrm_user_service/proto/permission"
 	userPb "github.com/huynhthanhthao/hrm_user_service/proto/user"
+	hrPb "github.com/longgggwwww/hrm-ms-hr/ent/proto/entpb"
+	permPb "github.com/longgggwwww/hrm-ms-permission/ent/proto/entpb"
 )
 
 var (
@@ -54,7 +54,7 @@ func main() {
 		log.Fatalf("failed to initialize UserService: %v", err)
 	}
 
-	go startGRPCServer(client, userService)
+	go startGRPCServer(userService)
 	startHTTPServer(client, hrServiceClients, permissionServiceClients)
 }
 
@@ -106,7 +106,7 @@ func runMigration(client *ent.Client) {
 }
 
 // Start gRPC server
-func startGRPCServer(client *ent.Client, userService *service.UserService) {
+func startGRPCServer(userService *service.UserService) {
 	grpcServer := grpc.NewServer()
 
 	userGrpcServer := userGrpc.NewUserGRPCServer(userService)

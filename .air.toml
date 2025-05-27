@@ -4,8 +4,8 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main ./cmd/main.go"
+  bin = ""
+  cmd = "GOLANG_PROTOBUF_REGISTRATION_CONFLICT=ignore go run ./cmd/main.go"
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   exclude_file = []
@@ -51,5 +51,3 @@ tmp_dir = "tmp"
   clear_on_rebuild = false
   keep_scroll = true
 
-# Add a custom run section to use the environment variable for protobuf conflict
-'test' = 'GOLANG_PROTOBUF_REGISTRATION_CONFLICT=ignore go run cmd/main.go'

@@ -20,7 +20,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
-	hrPb "github.com/huynhthanhthao/hrm_user_service/proto/hr"
+	hrPb "github.com/longgggwwww/hrm-ms-hr/ent/proto/entpb"
 )
 
 type AuthService struct {
@@ -154,7 +154,6 @@ func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.Login
 		orgID = &employee.OrgId
 	}
 
-	fmt.Println(employeeID, orgID, 9999)
 	// Generate tokens with possibly zero employeeID and orgID
 	accessToken, err := GenerateToken(usr.ID, employeeID, orgID, accessDur)
 	if err != nil {
