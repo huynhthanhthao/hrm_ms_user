@@ -222,25 +222,17 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 
 	usr.Edges.Account = acc
 
+	var employeeMap map[string]interface{}
 	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &hrPb.GetEmployeeByUserIdRequest{
 		UserId: strconv.Itoa(usr.ID),
 	})
-	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	jsonEmployee, err := protojson.Marshal(employee)
-	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("#4 DecodeToken: failed to marshal employee: %v", err))
-		return
-	}
-
-	var employeeMap map[string]interface{}
-	if err := json.Unmarshal(jsonEmployee, &employeeMap); err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest,
-			fmt.Errorf("#5 DecodeToken: failed to unmarshal employee JSON: %v", err))
-		return
+	if err == nil && employee != nil {
+		jsonEmployee, err := protojson.Marshal(employee)
+		if err == nil {
+			_ = json.Unmarshal(jsonEmployee, &employeeMap)
+		}
+	} else {
+		employeeMap = nil
 	}
 
 	c.JSON(http.StatusOK, gin.H{
