@@ -9,11 +9,11 @@ import (
 )
 
 func SetupRouter(
-	client *ent.Client, 
-	hrClients *service.HRServiceClients, 
+	client *ent.Client,
+	hrClients *service.HRServiceClients,
 	perClients *service.PermissionServiceClients,
 ) *gin.Engine {
-		
+
 	r := gin.Default()
 
 	authService, err := service.NewAuthService(client, hrClients, perClients)
@@ -22,10 +22,9 @@ func SetupRouter(
 	}
 	authHandler := handler.NewAuthHandler(authService)
 
-	// Đăng ký route
 	r.POST("/login", authHandler.LoginHandler)
 	r.GET("/me", authHandler.GetMe)
-	r.POST("/register", authHandler.RegisterHandler)
+	r.POST("/refresh-token", authHandler.RefreshTokenHandler)
 
 	return r
 }

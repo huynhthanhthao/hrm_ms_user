@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
@@ -52,18 +51,6 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 	h.authService.DecodeToken(c.Request.Context(), tokenString, c)
 }
 
-func (h *AuthHandler) RegisterHandler(c *gin.Context) {
-	var req dto.RegisterDto
-
-	// Kiểm tra dữ liệu đầu vào
-	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Printf("Error binding JSON: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	input := dto.RegisterInput(req)
-
-	// Gọi service để đăng ký người dùng
-	h.authService.Register(c.Request.Context(), c, input)
+func (h *AuthHandler) RefreshTokenHandler(c *gin.Context) {
+	h.authService.RefreshToken(c.Request.Context(), c)
 }

@@ -8,7 +8,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/lib/pq v1.10.9
 	golang.org/x/crypto v0.38.0
-	google.golang.org/grpc v1.72.1
+	google.golang.org/grpc v1.72.2
 	google.golang.org/protobuf v1.36.6
 )
 
@@ -18,7 +18,7 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/jhump/protoreflect v1.17.0 // indirect
 	github.com/longgggwwww/hrm-ms-hr v0.0.0-20250527041614-14a7eb6a7e91 // indirect
-	github.com/longgggwwww/hrm-ms-permission v0.0.0-20250526043248-1f35d4a97269 // indirect
+	github.com/longgggwwww/hrm-ms-permission v0.0.0-20250529082245-f763c30393ac // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 )
@@ -61,6 +61,6 @@ require (
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.25.0 // indirect
 	golang.org/x/tools v0.33.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250519155744-55703ea1f237 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250528174236-200df99c418a // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

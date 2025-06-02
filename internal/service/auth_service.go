@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -21,6 +22,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	hrPb "github.com/longgggwwww/hrm-ms-hr/ent/proto/entpb"
+	permPb "github.com/longgggwwww/hrm-ms-permission/ent/proto/entpb"
 )
 
 type AuthService struct {
@@ -102,78 +104,134 @@ func (s *AuthService) Register(ctx context.Context, c *gin.Context, input dto.Re
 	})
 }
 
-func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.LoginInput) {
-	// Find account by username
-	acc, err := s.client.Account.
+// Struct kết quả trả về cho login
+type LoginResult struct {
+	User       *ent.User
+	Account    *ent.Account
+	Employee   map[string]interface{}
+	Roles      []map[string]interface{}
+	Perms      []map[string]interface{}
+	PermCodes  []string
+	EmployeeID *int64
+	OrgID      *int64
+}
+
+// Lấy account theo username
+func (s *AuthService) getAccountByUsername(ctx context.Context, username string) (*ent.Account, error) {
+	return s.client.Account.
 		Query().
-		Where(account.UsernameEQ(input.Username)).
+		Where(account.UsernameEQ(username)).
 		Only(ctx)
+}
+
+// Kiểm tra password
+func checkPassword(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+
+// Lấy user từ account
+func getUserFromAccount(ctx context.Context, acc *ent.Account) (*ent.User, error) {
+	return acc.QueryUser().Only(ctx)
+}
+
+// Lấy roles, perms, permCodes
+func (s *AuthService) getUserRolesPerms(ctx context.Context, userID int) ([]map[string]interface{}, []map[string]interface{}, []string, error) {
+	userIDStr := strconv.Itoa(userID)
+	permsResp, err := s.perClients.PermExt.GetUserPerms(ctx, &permPb.GetUserPermsRequest{UserId: userIDStr})
 	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
+		return nil, nil, nil, fmt.Errorf("failed to get user perms: %w", err)
 	}
-
-	// Compare password
-	if err := bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(input.Password)); err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	// Get user from account
-	usr, err := acc.QueryUser().Only(ctx)
+	rolesResp, err := s.perClients.PermExt.GetUserRoles(ctx, &permPb.GetUserRolesRequest{UserId: userIDStr})
 	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
+		return nil, nil, nil, fmt.Errorf("failed to get user roles: %w", err)
 	}
+	permCodeSet := make(map[string]struct{})
+	for _, r := range rolesResp.Roles {
+		for _, p := range r.Perms {
+			permCodeSet[p.Code] = struct{}{}
+		}
+	}
+	permCodes := make([]string, 0, len(permCodeSet))
+	for code := range permCodeSet {
+		permCodes = append(permCodes, code)
+	}
+	return helper.ToRoleArr(rolesResp.Roles), helper.ToPermArr(permsResp.Perms), permCodes, nil
+}
 
-	// Parse durations
-	accessDur, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
-	refreshDur, _ := time.ParseDuration(os.Getenv("JWT_REFRESH_TOKEN_DURATION"))
-
-	// Initialize variables for employee data
+// Lấy employee, employeeID, orgID
+func (s *AuthService) getEmployeeInfo(ctx context.Context, userID int) (map[string]interface{}, *int64, *int64) {
 	var employeeMap map[string]interface{}
 	var employeeID, orgID *int64
-
-	// Try to get employee data
 	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &hrPb.GetEmployeeByUserIdRequest{
-		UserId: strconv.Itoa(usr.ID),
+		UserId: strconv.Itoa(userID),
 	})
 	if err == nil && employee != nil {
-		// Employee exists, marshal to JSON
 		jsonEmployee, err := protojson.Marshal(employee)
-		if err != nil {
-			helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("failed to marshal employee: %v", err))
-			return
+		if err == nil {
+			_ = json.Unmarshal(jsonEmployee, &employeeMap)
 		}
-		if err := json.Unmarshal(jsonEmployee, &employeeMap); err != nil {
-			helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("failed to unmarshal employee JSON: %v", err))
-			return
-		}
-
 		employeeID = &employee.Id
 		orgID = &employee.OrgId
 	}
+	return employeeMap, employeeID, orgID
+}
 
-	// Generate tokens with possibly zero employeeID and orgID
-	accessToken, err := GenerateToken(usr.ID, employeeID, orgID, accessDur)
+func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.LoginInput) {
+	acc, err := s.getAccountByUsername(ctx, input.Username)
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	refreshToken, err := GenerateToken(usr.ID, employeeID, orgID, refreshDur)
+	if err := checkPassword(acc.Password, input.Password); err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	usr, err := getUserFromAccount(ctx, acc)
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
+	rolesArr, permsArr, permCodes, err := s.getUserRolesPerms(ctx, usr.ID)
+	if err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+	employeeMap, employeeID, orgID := s.getEmployeeInfo(ctx, usr.ID)
 
 	usr.Edges.Account = acc
+
+	accessDur, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
+	refreshDur, _ := time.ParseDuration(os.Getenv("JWT_REFRESH_TOKEN_DURATION"))
+
+	accessToken, err := GenerateAccessToken(TokenClaimsInput{
+		UserID:     usr.ID,
+		EmployeeID: employeeID,
+		OrgID:      orgID,
+		Duration:   accessDur,
+		Perms:      permCodes,
+	})
+	if err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	refreshToken, err := GenerateRefreshToken(usr.ID, refreshDur)
+	if err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	setTokenCookies(c, accessToken, refreshToken, int(accessDur.Seconds()), int(refreshDur.Seconds()))
 
 	c.JSON(http.StatusOK, gin.H{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 		"user":          usr,
 		"employee":      employeeMap,
+		"roles":         rolesArr,
+		"perms":         permsArr,
 	})
 }
 
@@ -203,7 +261,6 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("#3 DecodeToken: user_id not found in token claims"))
 		return
 	}
-
 	userID := int(userIDFloat)
 
 	// Query the user by ID
@@ -219,9 +276,9 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
-
 	usr.Edges.Account = acc
 
+	// Query employee
 	var employeeMap map[string]interface{}
 	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &hrPb.GetEmployeeByUserIdRequest{
 		UserId: strconv.Itoa(usr.ID),
@@ -235,19 +292,58 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 		employeeMap = nil
 	}
 
+	// Query roles & perms
+	userIDStr := strconv.Itoa(usr.ID)
+	permsResp, err := s.perClients.PermExt.GetUserPerms(ctx, &permPb.GetUserPermsRequest{UserId: userIDStr})
+	if err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("#4 DecodeToken: failed to get user perms: %w", err))
+		return
+	}
+
+	rolesResp, err := s.perClients.PermExt.GetUserRoles(ctx, &permPb.GetUserRolesRequest{UserId: userIDStr})
+	if err != nil {
+		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("#5 DecodeToken: failed to get user roles: %w", err))
+		return
+	}
+
+	// Lấy tất cả perm_codes từ các role (gộp, loại trùng)
+	permCodeSet := make(map[string]struct{})
+	for _, r := range rolesResp.Roles {
+		for _, p := range r.Perms {
+			permCodeSet[p.Code] = struct{}{}
+		}
+	}
+	permCodes := make([]string, 0, len(permCodeSet))
+	for code := range permCodeSet {
+		permCodes = append(permCodes, code)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"user":     usr,
 		"employee": employeeMap,
+		"roles":    helper.ToRoleArr(rolesResp.Roles),
+		"perms":    helper.ToPermArr(permsResp.Perms),
 	})
 }
 
-func GenerateToken(userID int, employeeID *int64, orgID *int64, duration time.Duration) (string, error) {
+// Định nghĩa struct chứa thông tin để sign token
+type TokenClaimsInput struct {
+	UserID     int
+	EmployeeID *int64
+	OrgID      *int64
+	Duration   time.Duration
+	Roles      []string
+	Perms      []string
+}
+
+func GenerateAccessToken(input TokenClaimsInput) (string, error) {
 	claims := jwt.MapClaims{
-		"user_id":     userID,
-		"org_id":      orgID,
-		"employee_id": employeeID,
-		"exp":         time.Now().Add(duration).Unix(),
+		"user_id":     input.UserID,
+		"org_id":      input.OrgID,
+		"employee_id": input.EmployeeID,
+		"exp":         time.Now().Add(input.Duration).Unix(),
 		"iss":         os.Getenv("ISS_KEY"),
+		"perm_codes":  input.Perms,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	secret := os.Getenv("JWT_SECRET")
@@ -255,4 +351,101 @@ func GenerateToken(userID int, employeeID *int64, orgID *int64, duration time.Du
 		return "", fmt.Errorf("JWT_SECRET is not set")
 	}
 	return token.SignedString([]byte(secret))
+}
+
+// Generate refresh token: chỉ chứa user_id và exp
+func GenerateRefreshToken(userID int, duration time.Duration) (string, error) {
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"exp":     time.Now().Add(duration).Unix(),
+		"iss":     os.Getenv("ISS_KEY"),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return "", fmt.Errorf("JWT_SECRET is not set")
+	}
+	return token.SignedString([]byte(secret))
+}
+
+// Helper: set tokens as httpOnly cookies
+func setTokenCookies(c *gin.Context, accessToken, refreshToken string, accessMaxAge, refreshMaxAge int) {
+	c.SetCookie("refresh_token", refreshToken, refreshMaxAge, "/refresh-token", "", false, true)
+}
+
+// POST /auth/refresh-token
+func (s *AuthService) RefreshToken(ctx context.Context, c *gin.Context) {
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil || refreshToken == "" {
+		helper.RespondWithError(c, http.StatusUnauthorized, fmt.Errorf("refresh token missing"))
+		return
+	}
+	parsedToken, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+	if err != nil || !parsedToken.Valid {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			helper.RespondWithError(c, http.StatusUnauthorized, fmt.Errorf("refresh token expired"))
+			return
+		}
+		helper.RespondWithError(c, http.StatusUnauthorized, fmt.Errorf("invalid refresh token: %v", err))
+		return
+	}
+
+	claims, ok := parsedToken.Claims.(jwt.MapClaims)
+	if !ok {
+		helper.RespondWithError(c, http.StatusUnauthorized, fmt.Errorf("invalid token claims"))
+		return
+	}
+
+	userIDFloat, ok := claims["user_id"].(float64)
+	if !ok {
+		helper.RespondWithError(c, http.StatusUnauthorized, fmt.Errorf("user_id not found in token claims"))
+		return
+	}
+	userID := int(userIDFloat)
+	usr, err := s.client.User.Query().Where(user.IDEQ(userID)).Only(ctx)
+	if err != nil {
+		helper.RespondWithError(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	// Query roles & perms
+	userIDStr := strconv.Itoa(usr.ID)
+	rolesResp, err := s.perClients.PermExt.GetUserRoles(ctx, &permPb.GetUserRolesRequest{UserId: userIDStr})
+	if err != nil {
+		helper.RespondWithError(c, http.StatusUnauthorized, fmt.Errorf("failed to get user roles: %w", err))
+		return
+	}
+
+	// Lấy tất cả perm_codes từ các role (gộp, loại trùng)
+	permCodeSet := make(map[string]struct{})
+	for _, r := range rolesResp.Roles {
+		for _, p := range r.Perms {
+			permCodeSet[p.Code] = struct{}{}
+		}
+	}
+	permCodes := make([]string, 0, len(permCodeSet))
+	for code := range permCodeSet {
+		permCodes = append(permCodes, code)
+	}
+
+	accessDur, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
+	// Generate new access token
+	accessToken, err := GenerateAccessToken(TokenClaimsInput{
+		UserID:     usr.ID,
+		EmployeeID: nil,
+		OrgID:      nil,
+		Duration:   accessDur,
+		Perms:      permCodes,
+	})
+	if err != nil {
+		helper.RespondWithError(c, http.StatusUnauthorized, err)
+		return
+	}
+	setTokenCookies(c, accessToken, refreshToken, int(accessDur.Seconds()), 0)
+	c.JSON(http.StatusOK, gin.H{"access_token": accessToken})
 }
