@@ -178,8 +178,14 @@ func (s *AuthService) getEmployeeInfo(ctx context.Context, userID int) (map[stri
 
 func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.LoginInput) {
 	acc, err := s.getAccountByUsername(ctx, input.Username)
+
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if acc.Status == account.StatusInactive {
+		helper.RespondWithError(c, http.StatusUnauthorized, fmt.Errorf("#1 Login: account is inactive"))
 		return
 	}
 
@@ -237,17 +243,20 @@ func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.Login
 
 func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Context) {
 	// Parse the token
+	fmt.Println(111)
 	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("#1 DecodeToken: unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
+	fmt.Println(222)
 
 	if err != nil || !parsedToken.Valid {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
+	fmt.Println(333)
 
 	// Extract claims
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
@@ -255,6 +264,7 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("#2 DecodeToken: invalid token claims"))
 		return
 	}
+	fmt.Println(444)
 
 	userIDFloat, ok := claims["user_id"].(float64)
 	if !ok {
@@ -274,6 +284,12 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 	acc, err := usr.QueryAccount().Only(ctx)
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// Validate account status
+	if acc.Status == account.StatusInactive {
+		helper.RespondWithError(c, http.StatusUnauthorized, fmt.Errorf("#4 DecodeToken: account is inactive"))
 		return
 	}
 	usr.Edges.Account = acc

@@ -254,10 +254,13 @@ func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int
 	}
 
 	accountUpdate := tx.Account.
-		UpdateOneID(acc.ID).
-		SetUsername(input.Account.Username).
-		SetStatus(account.Status(input.Account.Status))
-	if input.Account.Password != "" {
+		UpdateOneID(acc.ID)
+	// Chỉ update status nếu có truyền xuống
+	if input.Account != nil && input.Account.Status != "" {
+		accountUpdate = accountUpdate.SetStatus(account.Status(input.Account.Status))
+	}
+
+	if input.Account != nil && input.Account.Password != "" {
 		hashedPwd, err := bcrypt.GenerateFromPassword([]byte(input.Account.Password), bcrypt.DefaultCost)
 		if err != nil {
 			return nil, fmt.Errorf("#3 UpdateUserByID: failed to hash password: %w", err)
