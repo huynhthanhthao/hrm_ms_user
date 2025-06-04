@@ -43,67 +43,6 @@ func NewAuthService(
 	}, nil
 }
 
-func (s *AuthService) Register(ctx context.Context, c *gin.Context, input dto.RegisterInput) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
-
-	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Bắt đầu transaction
-	tx, err := s.client.Tx(ctx)
-	if err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	// Tạo người dùng mới
-	usr, err := tx.User.
-		Create().
-		SetFirstName(input.FirstName).
-		SetLastName(input.LastName).
-		SetEmail(input.Email).
-		SetAvatar(input.Avatar).
-		SetPhone(input.Phone).
-		SetWardCode(input.WardCode).
-		SetAddress(input.Address).
-		SetGender(user.Gender(input.Gender)).
-		Save(ctx)
-
-	if err != nil {
-		_ = tx.Rollback()
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	// Tạo tài khoản cho người dùng
-	acc, err := tx.Account.
-		Create().
-		SetUsername(input.Username).
-		SetPassword(string(hashedPassword)).
-		SetStatus(account.StatusActive).
-		SetUser(usr).
-		Save(ctx)
-
-	if err != nil {
-		_ = tx.Rollback()
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	if err := tx.Commit(); err != nil {
-		helper.RespondWithError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	usr.Edges.Account = acc
-
-	c.JSON(http.StatusOK, gin.H{
-		"user": usr,
-	})
-}
-
 // Struct kết quả trả về cho login
 type LoginResult struct {
 	User       *ent.User
@@ -165,6 +104,7 @@ func (s *AuthService) getEmployeeInfo(ctx context.Context, userID int) (map[stri
 	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &hrPb.GetEmployeeByUserIdRequest{
 		UserId: strconv.Itoa(userID),
 	})
+
 	if err == nil && employee != nil {
 		jsonEmployee, err := protojson.Marshal(employee)
 		if err == nil {
