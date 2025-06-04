@@ -206,17 +206,25 @@ func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.Login
 	}
 	employeeMap, employeeID, orgID := s.getEmployeeInfo(ctx, usr.ID)
 
+	var employeeStatus string
+	if employeeMap != nil {
+		if status, ok := employeeMap["status"].(string); ok {
+			employeeStatus = status
+		}
+	}
+
 	usr.Edges.Account = acc
 
 	accessDur, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
 	refreshDur, _ := time.ParseDuration(os.Getenv("JWT_REFRESH_TOKEN_DURATION"))
 
 	accessToken, err := GenerateAccessToken(TokenClaimsInput{
-		UserID:     usr.ID,
-		EmployeeID: employeeID,
-		OrgID:      orgID,
-		Duration:   accessDur,
-		Perms:      permCodes,
+		UserID:         usr.ID,
+		EmployeeID:     employeeID,
+		EmployeeStatus: employeeStatus,
+		OrgID:          orgID,
+		Duration:       accessDur,
+		Perms:          permCodes,
 	})
 	if err != nil {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
@@ -243,20 +251,17 @@ func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.Login
 
 func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Context) {
 	// Parse the token
-	fmt.Println(111)
 	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("#1 DecodeToken: unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
-	fmt.Println(222)
 
 	if err != nil || !parsedToken.Valid {
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
-	fmt.Println(333)
 
 	// Extract claims
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
@@ -264,7 +269,6 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 		helper.RespondWithError(c, http.StatusBadRequest, fmt.Errorf("#2 DecodeToken: invalid token claims"))
 		return
 	}
-	fmt.Println(444)
 
 	userIDFloat, ok := claims["user_id"].(float64)
 	if !ok {
@@ -344,22 +348,24 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 
 // Định nghĩa struct chứa thông tin để sign token
 type TokenClaimsInput struct {
-	UserID     int
-	EmployeeID *int64
-	OrgID      *int64
-	Duration   time.Duration
-	Roles      []string
-	Perms      []string
+	UserID         int
+	EmployeeID     *int64
+	EmployeeStatus string
+	OrgID          *int64
+	Duration       time.Duration
+	Roles          []string
+	Perms          []string
 }
 
 func GenerateAccessToken(input TokenClaimsInput) (string, error) {
 	claims := jwt.MapClaims{
-		"user_id":     input.UserID,
-		"org_id":      input.OrgID,
-		"employee_id": input.EmployeeID,
-		"exp":         time.Now().Add(input.Duration).Unix(),
-		"iss":         os.Getenv("ISS_KEY"),
-		"perm_codes":  input.Perms,
+		"user_id":         input.UserID,
+		"org_id":          input.OrgID,
+		"employee_status": input.EmployeeStatus,
+		"employee_id":     input.EmployeeID,
+		"exp":             time.Now().Add(input.Duration).Unix(),
+		"iss":             os.Getenv("ISS_KEY"),
+		"perm_codes":      input.Perms,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	secret := os.Getenv("JWT_SECRET")
