@@ -232,17 +232,34 @@ func (s *UserService) UpdateUserRoles(ctx context.Context, userID int, roleIDs [
 }
 
 func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int, input *userPb.UpdateUserRequest) (*ent.User, error) {
-	userCreated, err := tx.User.UpdateOneID(userID).
-		SetFirstName(input.FirstName).
-		SetLastName(input.LastName).
-		SetGender(user.Gender(input.Gender)).
-		SetEmail(input.Email).
-		SetPhone(input.Phone).
-		SetWardCode(input.WardCode).
-		SetAddress(input.Address).
-		SetAvatar(input.Avatar).
-		Save(ctx)
+	userUpdate := tx.User.UpdateOneID(userID)
 
+	if input.FirstName != "" {
+		userUpdate = userUpdate.SetFirstName(input.FirstName)
+	}
+	if input.LastName != "" {
+		userUpdate = userUpdate.SetLastName(input.LastName)
+	}
+	if input.Gender != "" {
+		userUpdate = userUpdate.SetGender(user.Gender(input.Gender))
+	}
+	if input.Email != "" {
+		userUpdate = userUpdate.SetEmail(input.Email)
+	}
+	if input.Phone != "" {
+		userUpdate = userUpdate.SetPhone(input.Phone)
+	}
+	if input.WardCode != "" {
+		userUpdate = userUpdate.SetWardCode(input.WardCode)
+	}
+	if input.Address != "" {
+		userUpdate = userUpdate.SetAddress(input.Address)
+	}
+	if input.Avatar != "" {
+		userUpdate = userUpdate.SetAvatar(input.Avatar)
+	}
+
+	userCreated, err := userUpdate.Save(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("#1 UpdateUserByID: failed to update user: %w", err)
 	}
@@ -253,32 +270,37 @@ func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int
 		return nil, fmt.Errorf("#2 UpdateUserByID: account not found for userID %d", userID)
 	}
 
-	accountUpdate := tx.Account.
-		UpdateOneID(acc.ID)
-	// Chỉ update status nếu có truyền xuống
-	if input.Account != nil && input.Account.Status != "" {
-		accountUpdate = accountUpdate.SetStatus(account.Status(input.Account.Status))
-	}
-
-	if input.Account != nil && input.Account.Password != "" {
-		hashedPwd, err := bcrypt.GenerateFromPassword([]byte(input.Account.Password), bcrypt.DefaultCost)
-		if err != nil {
-			return nil, fmt.Errorf("#3 UpdateUserByID: failed to hash password: %w", err)
+	accountUpdate := tx.Account.UpdateOneID(acc.ID)
+	if input.Account != nil {
+		if input.Account.Status != "" {
+			accountUpdate = accountUpdate.SetStatus(account.Status(input.Account.Status))
 		}
-		accountUpdate = accountUpdate.SetPassword(string(hashedPwd))
+		if input.Account.Password != "" {
+			hashedPwd, err := bcrypt.GenerateFromPassword([]byte(input.Account.Password), bcrypt.DefaultCost)
+			if err != nil {
+				return nil, fmt.Errorf("#3 UpdateUserByID: failed to hash password: %w", err)
+			}
+			accountUpdate = accountUpdate.SetPassword(string(hashedPwd))
+		}
+		// Chỉ gọi Save nếu có update
+		if input.Account.Status != "" || input.Account.Password != "" {
+			_, err = accountUpdate.Save(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("#4 UpdateUserByID: failed to update account: %w", err)
+			}
+		}
 	}
 
-	_, err = accountUpdate.Save(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("#4 UpdateUserByID: failed to update account: %w", err)
+	if input.PermIds != nil {
+		if err := s.UpdateUserPerms(ctx, userID, input.PermIds); err != nil {
+			return nil, fmt.Errorf("#5 UpdateUserByID: failed to update user perms: %w", err)
+		}
 	}
 
-	if err := s.UpdateUserPerms(ctx, userID, input.PermIds); err != nil {
-		return nil, fmt.Errorf("#5 UpdateUserByID: failed to update user perms: %w", err)
-	}
-
-	if err := s.UpdateUserRoles(ctx, userID, input.RoleIds); err != nil {
-		return nil, fmt.Errorf("#6 UpdateUserByID: failed to update user roles: %w", err)
+	if input.RoleIds != nil {
+		if err := s.UpdateUserRoles(ctx, userID, input.RoleIds); err != nil {
+			return nil, fmt.Errorf("#6 UpdateUserByID: failed to update user roles: %w", err)
+		}
 	}
 
 	return userCreated, nil
