@@ -149,16 +149,15 @@ func (s *UserService) CreateUser(ctx context.Context, input *userPb.CreateUserRe
 
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(input.Account.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, fmt.Errorf("#2 CreateUser: failed to hash password: %w", err)
+		return nil, fmt.Errorf("#3 CreateUser: failed to hash password: %w", err)
 	}
-
 	_, err = tx.Account.Create().
 		SetUsername(input.Account.Username).
 		SetPassword(string(hashedPwd)).
 		SetUser(user).
 		Save(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("#3 CreateUser: failed to create account: %w", err)
+		return nil, fmt.Errorf("#4 CreateUser: failed to create account: %w", err)
 	}
 
 	// Call grpc to permission service here
@@ -167,7 +166,7 @@ func (s *UserService) CreateUser(ctx context.Context, input *userPb.CreateUserRe
 		for i, permID := range input.PermIds {
 			parsedUUID, err := uuid.Parse(permID)
 			if err != nil {
-				return nil, fmt.Errorf("#4 CreateUser: invalid permID %s: %w", permID, err)
+				return nil, fmt.Errorf("#5 CreateUser: invalid permID %s: %w", permID, err)
 			}
 
 			userPermRequests[i] = &permPb.CreateUserPermRequest{
@@ -182,7 +181,7 @@ func (s *UserService) CreateUser(ctx context.Context, input *userPb.CreateUserRe
 			Requests: userPermRequests,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("#5 CreateUser: failed to create user permissions: %w", err)
+			return nil, fmt.Errorf("#6 CreateUser: failed to create user permissions: %w", err)
 		}
 	}
 
@@ -191,7 +190,7 @@ func (s *UserService) CreateUser(ctx context.Context, input *userPb.CreateUserRe
 		for i, roleID := range input.RoleIds {
 			parsedUUID, err := uuid.Parse(roleID)
 			if err != nil {
-				return nil, fmt.Errorf("#6 CreateUser: invalid roleID %s: %w", roleID, err)
+				return nil, fmt.Errorf("#7 CreateUser: invalid roleID %s: %w", roleID, err)
 			}
 			userRoleRequests[i] = &permPb.CreateUserRoleRequest{
 				UserRole: &permPb.UserRole{
@@ -205,7 +204,7 @@ func (s *UserService) CreateUser(ctx context.Context, input *userPb.CreateUserRe
 			Requests: userRoleRequests,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("#7 CreateUser: failed to create user roles: %w", err)
+			return nil, fmt.Errorf("#8 CreateUser: failed to create user roles: %w", err)
 		}
 	}
 
