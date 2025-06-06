@@ -84,18 +84,18 @@ func (x *ListUsersRequest) GetSearch() string {
 }
 
 type User struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	FirstName     string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Gender        string                 `protobuf:"bytes,4,opt,name=gender,proto3" json:"gender,omitempty"`
-	Email         string                 `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
-	Phone         string                 `protobuf:"bytes,6,opt,name=phone,proto3" json:"phone,omitempty"`
-	WardCode      string                 `protobuf:"bytes,7,opt,name=ward_code,json=wardCode,proto3" json:"ward_code,omitempty"`
-	Address       string                 `protobuf:"bytes,8,opt,name=address,proto3" json:"address,omitempty"`
-	Avatar        string                 `protobuf:"bytes,9,opt,name=avatar,proto3" json:"avatar,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Id            int32                   `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	FirstName     string                  `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName      string                  `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	Gender        string                  `protobuf:"bytes,4,opt,name=gender,proto3" json:"gender,omitempty"`
+	Phone         *wrapperspb.StringValue `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
+	Email         *wrapperspb.StringValue `protobuf:"bytes,6,opt,name=email,proto3" json:"email,omitempty"`
+	WardCode      *wrapperspb.StringValue `protobuf:"bytes,7,opt,name=ward_code,json=wardCode,proto3" json:"ward_code,omitempty"`
+	Address       *wrapperspb.StringValue `protobuf:"bytes,8,opt,name=address,proto3" json:"address,omitempty"`
+	Avatar        *wrapperspb.StringValue `protobuf:"bytes,9,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	CreatedAt     string                  `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                  `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -158,39 +158,39 @@ func (x *User) GetGender() string {
 	return ""
 }
 
-func (x *User) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
-func (x *User) GetPhone() string {
+func (x *User) GetPhone() *wrapperspb.StringValue {
 	if x != nil {
 		return x.Phone
 	}
-	return ""
+	return nil
 }
 
-func (x *User) GetWardCode() string {
+func (x *User) GetEmail() *wrapperspb.StringValue {
+	if x != nil {
+		return x.Email
+	}
+	return nil
+}
+
+func (x *User) GetWardCode() *wrapperspb.StringValue {
 	if x != nil {
 		return x.WardCode
 	}
-	return ""
+	return nil
 }
 
-func (x *User) GetAddress() string {
+func (x *User) GetAddress() *wrapperspb.StringValue {
 	if x != nil {
 		return x.Address
 	}
-	return ""
+	return nil
 }
 
-func (x *User) GetAvatar() string {
+func (x *User) GetAvatar() *wrapperspb.StringValue {
 	if x != nil {
 		return x.Avatar
 	}
-	return ""
+	return nil
 }
 
 func (x *User) GetCreatedAt() string {
@@ -704,18 +704,18 @@ func (x *Account) GetStatus() string {
 }
 
 type CreateUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	FirstName     string                 `protobuf:"bytes,1,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName      string                 `protobuf:"bytes,2,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Gender        string                 `protobuf:"bytes,3,opt,name=gender,proto3" json:"gender,omitempty"`
-	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
-	Phone         string                 `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
-	WardCode      string                 `protobuf:"bytes,6,opt,name=ward_code,json=wardCode,proto3" json:"ward_code,omitempty"`
-	Address       string                 `protobuf:"bytes,7,opt,name=address,proto3" json:"address,omitempty"`
-	Avatar        string                 `protobuf:"bytes,8,opt,name=avatar,proto3" json:"avatar,omitempty"`
-	Account       *Account               `protobuf:"bytes,9,opt,name=account,proto3" json:"account,omitempty"`
-	PermIds       []string               `protobuf:"bytes,10,rep,name=perm_ids,json=permIds,proto3" json:"perm_ids,omitempty"`
-	RoleIds       []string               `protobuf:"bytes,11,rep,name=role_ids,json=roleIds,proto3" json:"role_ids,omitempty"`
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	FirstName     string                  `protobuf:"bytes,1,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName      string                  `protobuf:"bytes,2,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	Gender        string                  `protobuf:"bytes,3,opt,name=gender,proto3" json:"gender,omitempty"`
+	Phone         string                  `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`
+	Email         *wrapperspb.StringValue `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
+	WardCode      *wrapperspb.StringValue `protobuf:"bytes,6,opt,name=ward_code,json=wardCode,proto3" json:"ward_code,omitempty"`
+	Address       *wrapperspb.StringValue `protobuf:"bytes,7,opt,name=address,proto3" json:"address,omitempty"`
+	Avatar        *wrapperspb.StringValue `protobuf:"bytes,8,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	Account       *Account                `protobuf:"bytes,9,opt,name=account,proto3" json:"account,omitempty"`
+	PermIds       []string                `protobuf:"bytes,10,rep,name=perm_ids,json=permIds,proto3" json:"perm_ids,omitempty"`
+	RoleIds       []string                `protobuf:"bytes,11,rep,name=role_ids,json=roleIds,proto3" json:"role_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -771,13 +771,6 @@ func (x *CreateUserRequest) GetGender() string {
 	return ""
 }
 
-func (x *CreateUserRequest) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
 func (x *CreateUserRequest) GetPhone() string {
 	if x != nil {
 		return x.Phone
@@ -785,25 +778,32 @@ func (x *CreateUserRequest) GetPhone() string {
 	return ""
 }
 
-func (x *CreateUserRequest) GetWardCode() string {
+func (x *CreateUserRequest) GetEmail() *wrapperspb.StringValue {
+	if x != nil {
+		return x.Email
+	}
+	return nil
+}
+
+func (x *CreateUserRequest) GetWardCode() *wrapperspb.StringValue {
 	if x != nil {
 		return x.WardCode
 	}
-	return ""
+	return nil
 }
 
-func (x *CreateUserRequest) GetAddress() string {
+func (x *CreateUserRequest) GetAddress() *wrapperspb.StringValue {
 	if x != nil {
 		return x.Address
 	}
-	return ""
+	return nil
 }
 
-func (x *CreateUserRequest) GetAvatar() string {
+func (x *CreateUserRequest) GetAvatar() *wrapperspb.StringValue {
 	if x != nil {
 		return x.Avatar
 	}
-	return ""
+	return nil
 }
 
 func (x *CreateUserRequest) GetAccount() *Account {
@@ -872,19 +872,19 @@ func (x *CreateUserResponse) GetUser() *User {
 }
 
 type UpdateUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	FirstName     string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Gender        string                 `protobuf:"bytes,4,opt,name=gender,proto3" json:"gender,omitempty"`
-	Email         string                 `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
-	Phone         string                 `protobuf:"bytes,6,opt,name=phone,proto3" json:"phone,omitempty"`
-	WardCode      string                 `protobuf:"bytes,7,opt,name=ward_code,json=wardCode,proto3" json:"ward_code,omitempty"`
-	Address       string                 `protobuf:"bytes,8,opt,name=address,proto3" json:"address,omitempty"`
-	Avatar        string                 `protobuf:"bytes,9,opt,name=avatar,proto3" json:"avatar,omitempty"`
-	Account       *Account               `protobuf:"bytes,10,opt,name=account,proto3" json:"account,omitempty"`
-	PermIds       []string               `protobuf:"bytes,11,rep,name=perm_ids,json=permIds,proto3" json:"perm_ids,omitempty"`
-	RoleIds       []string               `protobuf:"bytes,12,rep,name=role_ids,json=roleIds,proto3" json:"role_ids,omitempty"`
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Id            int32                   `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	FirstName     string                  `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName      string                  `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	Gender        string                  `protobuf:"bytes,4,opt,name=gender,proto3" json:"gender,omitempty"`
+	Phone         string                  `protobuf:"bytes,5,opt,name=phone,proto3" json:"phone,omitempty"`
+	Email         *wrapperspb.StringValue `protobuf:"bytes,6,opt,name=email,proto3" json:"email,omitempty"`
+	WardCode      *wrapperspb.StringValue `protobuf:"bytes,7,opt,name=ward_code,json=wardCode,proto3" json:"ward_code,omitempty"`
+	Address       *wrapperspb.StringValue `protobuf:"bytes,8,opt,name=address,proto3" json:"address,omitempty"`
+	Avatar        *wrapperspb.StringValue `protobuf:"bytes,9,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	Account       *Account                `protobuf:"bytes,10,opt,name=account,proto3" json:"account,omitempty"`
+	PermIds       []string                `protobuf:"bytes,11,rep,name=perm_ids,json=permIds,proto3" json:"perm_ids,omitempty"`
+	RoleIds       []string                `protobuf:"bytes,12,rep,name=role_ids,json=roleIds,proto3" json:"role_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -947,13 +947,6 @@ func (x *UpdateUserRequest) GetGender() string {
 	return ""
 }
 
-func (x *UpdateUserRequest) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
 func (x *UpdateUserRequest) GetPhone() string {
 	if x != nil {
 		return x.Phone
@@ -961,25 +954,32 @@ func (x *UpdateUserRequest) GetPhone() string {
 	return ""
 }
 
-func (x *UpdateUserRequest) GetWardCode() string {
+func (x *UpdateUserRequest) GetEmail() *wrapperspb.StringValue {
+	if x != nil {
+		return x.Email
+	}
+	return nil
+}
+
+func (x *UpdateUserRequest) GetWardCode() *wrapperspb.StringValue {
 	if x != nil {
 		return x.WardCode
 	}
-	return ""
+	return nil
 }
 
-func (x *UpdateUserRequest) GetAddress() string {
+func (x *UpdateUserRequest) GetAddress() *wrapperspb.StringValue {
 	if x != nil {
 		return x.Address
 	}
-	return ""
+	return nil
 }
 
-func (x *UpdateUserRequest) GetAvatar() string {
+func (x *UpdateUserRequest) GetAvatar() *wrapperspb.StringValue {
 	if x != nil {
 		return x.Avatar
 	}
-	return ""
+	return nil
 }
 
 func (x *UpdateUserRequest) GetAccount() *Account {
@@ -1143,18 +1143,18 @@ const file_proto_user_user_proto_rawDesc = "" +
 	"\x10ListUsersRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x16\n" +
-	"\x06search\x18\x03 \x01(\tR\x06search\"\xa3\x02\n" +
+	"\x06search\x18\x03 \x01(\tR\x06search\"\xb9\x03\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
 	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x16\n" +
-	"\x06gender\x18\x04 \x01(\tR\x06gender\x12\x14\n" +
-	"\x05email\x18\x05 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x06 \x01(\tR\x05phone\x12\x1b\n" +
-	"\tward_code\x18\a \x01(\tR\bwardCode\x12\x18\n" +
-	"\aaddress\x18\b \x01(\tR\aaddress\x12\x16\n" +
-	"\x06avatar\x18\t \x01(\tR\x06avatar\x12\x1d\n" +
+	"\x06gender\x18\x04 \x01(\tR\x06gender\x122\n" +
+	"\x05phone\x18\x05 \x01(\v2\x1c.google.protobuf.StringValueR\x05phone\x122\n" +
+	"\x05email\x18\x06 \x01(\v2\x1c.google.protobuf.StringValueR\x05email\x129\n" +
+	"\tward_code\x18\a \x01(\v2\x1c.google.protobuf.StringValueR\bwardCode\x126\n" +
+	"\aaddress\x18\b \x01(\v2\x1c.google.protobuf.StringValueR\aaddress\x124\n" +
+	"\x06avatar\x18\t \x01(\v2\x1c.google.protobuf.StringValueR\x06avatar\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\n" +
 	" \x01(\tR\tcreatedAt\x12\x1d\n" +
@@ -1200,35 +1200,35 @@ const file_proto_user_user_proto_rawDesc = "" +
 	"\aAccount\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\"\xc1\x02\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\"\xb9\x03\n" +
 	"\x11CreateUserRequest\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x01 \x01(\tR\tfirstName\x12\x1b\n" +
 	"\tlast_name\x18\x02 \x01(\tR\blastName\x12\x16\n" +
 	"\x06gender\x18\x03 \x01(\tR\x06gender\x12\x14\n" +
-	"\x05email\x18\x04 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x05 \x01(\tR\x05phone\x12\x1b\n" +
-	"\tward_code\x18\x06 \x01(\tR\bwardCode\x12\x18\n" +
-	"\aaddress\x18\a \x01(\tR\aaddress\x12\x16\n" +
-	"\x06avatar\x18\b \x01(\tR\x06avatar\x12'\n" +
+	"\x05phone\x18\x04 \x01(\tR\x05phone\x122\n" +
+	"\x05email\x18\x05 \x01(\v2\x1c.google.protobuf.StringValueR\x05email\x129\n" +
+	"\tward_code\x18\x06 \x01(\v2\x1c.google.protobuf.StringValueR\bwardCode\x126\n" +
+	"\aaddress\x18\a \x01(\v2\x1c.google.protobuf.StringValueR\aaddress\x124\n" +
+	"\x06avatar\x18\b \x01(\v2\x1c.google.protobuf.StringValueR\x06avatar\x12'\n" +
 	"\aaccount\x18\t \x01(\v2\r.user.AccountR\aaccount\x12\x19\n" +
 	"\bperm_ids\x18\n" +
 	" \x03(\tR\apermIds\x12\x19\n" +
 	"\brole_ids\x18\v \x03(\tR\aroleIds\"4\n" +
 	"\x12CreateUserResponse\x12\x1e\n" +
 	"\x04user\x18\x01 \x01(\v2\n" +
-	".user.UserR\x04user\"\xd1\x02\n" +
+	".user.UserR\x04user\"\xc9\x03\n" +
 	"\x11UpdateUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
 	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x16\n" +
 	"\x06gender\x18\x04 \x01(\tR\x06gender\x12\x14\n" +
-	"\x05email\x18\x05 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x06 \x01(\tR\x05phone\x12\x1b\n" +
-	"\tward_code\x18\a \x01(\tR\bwardCode\x12\x18\n" +
-	"\aaddress\x18\b \x01(\tR\aaddress\x12\x16\n" +
-	"\x06avatar\x18\t \x01(\tR\x06avatar\x12'\n" +
+	"\x05phone\x18\x05 \x01(\tR\x05phone\x122\n" +
+	"\x05email\x18\x06 \x01(\v2\x1c.google.protobuf.StringValueR\x05email\x129\n" +
+	"\tward_code\x18\a \x01(\v2\x1c.google.protobuf.StringValueR\bwardCode\x126\n" +
+	"\aaddress\x18\b \x01(\v2\x1c.google.protobuf.StringValueR\aaddress\x124\n" +
+	"\x06avatar\x18\t \x01(\v2\x1c.google.protobuf.StringValueR\x06avatar\x12'\n" +
 	"\aaccount\x18\n" +
 	" \x01(\v2\r.user.AccountR\aaccount\x12\x19\n" +
 	"\bperm_ids\x18\v \x03(\tR\apermIds\x12\x19\n" +
@@ -1284,37 +1284,50 @@ var file_proto_user_user_proto_goTypes = []any{
 	(*timestamppb.Timestamp)(nil),  // 17: google.protobuf.Timestamp
 }
 var file_proto_user_user_proto_depIdxs = []int32{
-	16, // 0: user.RoleExt.color:type_name -> google.protobuf.StringValue
-	16, // 1: user.RoleExt.description:type_name -> google.protobuf.StringValue
-	17, // 2: user.RoleExt.created_at:type_name -> google.protobuf.Timestamp
-	17, // 3: user.RoleExt.updated_at:type_name -> google.protobuf.Timestamp
-	16, // 4: user.PermExt.description:type_name -> google.protobuf.StringValue
-	1,  // 5: user.ListUsersResponse.users:type_name -> user.User
-	1,  // 6: user.GetUserByIdResponse.user:type_name -> user.User
-	2,  // 7: user.GetUserByIdResponse.roles:type_name -> user.RoleExt
-	3,  // 8: user.GetUserByIdResponse.perms:type_name -> user.PermExt
-	1,  // 9: user.GetUsersByIDsResponse.users:type_name -> user.User
-	9,  // 10: user.CreateUserRequest.account:type_name -> user.Account
-	1,  // 11: user.CreateUserResponse.user:type_name -> user.User
-	9,  // 12: user.UpdateUserRequest.account:type_name -> user.Account
-	1,  // 13: user.UpdateUserResponse.user:type_name -> user.User
-	0,  // 14: user.UserService.ListUsers:input_type -> user.ListUsersRequest
-	5,  // 15: user.UserService.GetUserById:input_type -> user.GetUserByIdRequest
-	7,  // 16: user.UserService.GetUsersByIDs:input_type -> user.GetUsersByIDsRequest
-	10, // 17: user.UserService.CreateUser:input_type -> user.CreateUserRequest
-	12, // 18: user.UserService.UpdateUserByID:input_type -> user.UpdateUserRequest
-	14, // 19: user.UserService.DeleteUserByID:input_type -> user.DeleteUserRequest
-	4,  // 20: user.UserService.ListUsers:output_type -> user.ListUsersResponse
-	6,  // 21: user.UserService.GetUserById:output_type -> user.GetUserByIdResponse
-	8,  // 22: user.UserService.GetUsersByIDs:output_type -> user.GetUsersByIDsResponse
-	11, // 23: user.UserService.CreateUser:output_type -> user.CreateUserResponse
-	13, // 24: user.UserService.UpdateUserByID:output_type -> user.UpdateUserResponse
-	15, // 25: user.UserService.DeleteUserByID:output_type -> user.DeleteUserResponse
-	20, // [20:26] is the sub-list for method output_type
-	14, // [14:20] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	16, // 0: user.User.phone:type_name -> google.protobuf.StringValue
+	16, // 1: user.User.email:type_name -> google.protobuf.StringValue
+	16, // 2: user.User.ward_code:type_name -> google.protobuf.StringValue
+	16, // 3: user.User.address:type_name -> google.protobuf.StringValue
+	16, // 4: user.User.avatar:type_name -> google.protobuf.StringValue
+	16, // 5: user.RoleExt.color:type_name -> google.protobuf.StringValue
+	16, // 6: user.RoleExt.description:type_name -> google.protobuf.StringValue
+	17, // 7: user.RoleExt.created_at:type_name -> google.protobuf.Timestamp
+	17, // 8: user.RoleExt.updated_at:type_name -> google.protobuf.Timestamp
+	16, // 9: user.PermExt.description:type_name -> google.protobuf.StringValue
+	1,  // 10: user.ListUsersResponse.users:type_name -> user.User
+	1,  // 11: user.GetUserByIdResponse.user:type_name -> user.User
+	2,  // 12: user.GetUserByIdResponse.roles:type_name -> user.RoleExt
+	3,  // 13: user.GetUserByIdResponse.perms:type_name -> user.PermExt
+	1,  // 14: user.GetUsersByIDsResponse.users:type_name -> user.User
+	16, // 15: user.CreateUserRequest.email:type_name -> google.protobuf.StringValue
+	16, // 16: user.CreateUserRequest.ward_code:type_name -> google.protobuf.StringValue
+	16, // 17: user.CreateUserRequest.address:type_name -> google.protobuf.StringValue
+	16, // 18: user.CreateUserRequest.avatar:type_name -> google.protobuf.StringValue
+	9,  // 19: user.CreateUserRequest.account:type_name -> user.Account
+	1,  // 20: user.CreateUserResponse.user:type_name -> user.User
+	16, // 21: user.UpdateUserRequest.email:type_name -> google.protobuf.StringValue
+	16, // 22: user.UpdateUserRequest.ward_code:type_name -> google.protobuf.StringValue
+	16, // 23: user.UpdateUserRequest.address:type_name -> google.protobuf.StringValue
+	16, // 24: user.UpdateUserRequest.avatar:type_name -> google.protobuf.StringValue
+	9,  // 25: user.UpdateUserRequest.account:type_name -> user.Account
+	1,  // 26: user.UpdateUserResponse.user:type_name -> user.User
+	0,  // 27: user.UserService.ListUsers:input_type -> user.ListUsersRequest
+	5,  // 28: user.UserService.GetUserById:input_type -> user.GetUserByIdRequest
+	7,  // 29: user.UserService.GetUsersByIDs:input_type -> user.GetUsersByIDsRequest
+	10, // 30: user.UserService.CreateUser:input_type -> user.CreateUserRequest
+	12, // 31: user.UserService.UpdateUserByID:input_type -> user.UpdateUserRequest
+	14, // 32: user.UserService.DeleteUserByID:input_type -> user.DeleteUserRequest
+	4,  // 33: user.UserService.ListUsers:output_type -> user.ListUsersResponse
+	6,  // 34: user.UserService.GetUserById:output_type -> user.GetUserByIdResponse
+	8,  // 35: user.UserService.GetUsersByIDs:output_type -> user.GetUsersByIDsResponse
+	11, // 36: user.UserService.CreateUser:output_type -> user.CreateUserResponse
+	13, // 37: user.UserService.UpdateUserByID:output_type -> user.UpdateUserResponse
+	15, // 38: user.UserService.DeleteUserByID:output_type -> user.DeleteUserResponse
+	33, // [33:39] is the sub-list for method output_type
+	27, // [27:33] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_proto_user_user_proto_init() }

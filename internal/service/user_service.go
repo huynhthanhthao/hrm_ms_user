@@ -119,35 +119,44 @@ func (s *UserService) CreateUser(ctx context.Context, input *userPb.CreateUserRe
 	}
 	defer tx.Rollback()
 
-	user, err := tx.User.Create().
+	userCreate := tx.User.Create().
 		SetFirstName(input.FirstName).
 		SetLastName(input.LastName).
 		SetGender(user.Gender(input.Gender)).
-		SetEmail(input.Email).
-		SetPhone(input.Phone).
-		SetWardCode(input.WardCode).
-		SetAddress(input.Address).
-		SetAvatar(input.Avatar).
-		Save(ctx)
+		SetPhone(input.Phone)
 
+	if input.Email != nil {
+		userCreate = userCreate.SetEmail(input.Email.Value)
+	}
+	if input.WardCode != nil {
+		userCreate = userCreate.SetWardCode(input.WardCode.Value)
+	}
+	if input.Address != nil {
+		userCreate = userCreate.SetAddress(input.Address.Value)
+	}
+	if input.Avatar != nil {
+		userCreate = userCreate.SetAvatar(input.Avatar.Value)
+	}
+
+	user, err := userCreate.Save(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("#1 CreateUser: failed when create user: %w", err)
 	}
 
-	// Hash password before saving account
+	if input.Account == nil {
+		return nil, fmt.Errorf("#2 CreateUser: account info is required")
+	}
+
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(input.Account.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, fmt.Errorf("#2 CreateUser: failed to hash password: %w", err)
 	}
-
-	fmt.Println(user)
 
 	_, err = tx.Account.Create().
 		SetUsername(input.Account.Username).
 		SetPassword(string(hashedPwd)).
 		SetUser(user).
 		Save(ctx)
-
 	if err != nil {
 		return nil, fmt.Errorf("#3 CreateUser: failed to create account: %w", err)
 	}
@@ -237,26 +246,48 @@ func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int
 	if input.FirstName != "" {
 		userUpdate = userUpdate.SetFirstName(input.FirstName)
 	}
+
 	if input.LastName != "" {
 		userUpdate = userUpdate.SetLastName(input.LastName)
 	}
+
 	if input.Gender != "" {
 		userUpdate = userUpdate.SetGender(user.Gender(input.Gender))
 	}
-	if input.Email != "" {
-		userUpdate = userUpdate.SetEmail(input.Email)
+
+	// Nullable fields: email, ward_code, address, avatar
+	if input.Email != nil {
+		if input.Email.Value == "" {
+			userUpdate = userUpdate.ClearEmail()
+		} else {
+			userUpdate = userUpdate.SetEmail(input.Email.Value)
+		}
 	}
+	if input.WardCode != nil {
+		if input.WardCode.Value == "" {
+			userUpdate = userUpdate.ClearWardCode()
+		} else {
+			userUpdate = userUpdate.SetWardCode(input.WardCode.Value)
+		}
+	}
+	if input.Address != nil {
+		if input.Address.Value == "" {
+			userUpdate = userUpdate.ClearAddress()
+		} else {
+			userUpdate = userUpdate.SetAddress(input.Address.Value)
+		}
+	}
+	if input.Avatar != nil {
+		if input.Avatar.Value == "" {
+			userUpdate = userUpdate.ClearAvatar()
+		} else {
+			userUpdate = userUpdate.SetAvatar(input.Avatar.Value)
+		}
+	}
+
+	// Phone is not nullable, only update if not empty string
 	if input.Phone != "" {
 		userUpdate = userUpdate.SetPhone(input.Phone)
-	}
-	if input.WardCode != "" {
-		userUpdate = userUpdate.SetWardCode(input.WardCode)
-	}
-	if input.Address != "" {
-		userUpdate = userUpdate.SetAddress(input.Address)
-	}
-	if input.Avatar != "" {
-		userUpdate = userUpdate.SetAvatar(input.Avatar)
 	}
 
 	userCreated, err := userUpdate.Save(ctx)
@@ -282,7 +313,6 @@ func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int
 			}
 			accountUpdate = accountUpdate.SetPassword(string(hashedPwd))
 		}
-		// Chỉ gọi Save nếu có update
 		if input.Account.Status != "" || input.Account.Password != "" {
 			_, err = accountUpdate.Save(ctx)
 			if err != nil {

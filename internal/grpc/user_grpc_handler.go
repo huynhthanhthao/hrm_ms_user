@@ -4,9 +4,11 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/huynhthanhthao/hrm_user_service/ent"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
 	"github.com/huynhthanhthao/hrm_user_service/internal/service"
 	userpb "github.com/huynhthanhthao/hrm_user_service/proto/user"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type UserGRPCServer struct {
@@ -20,6 +22,44 @@ func NewUserGRPCServer(us *service.UserService) *UserGRPCServer {
 	}
 }
 
+func entUserToProtoUser(u *ent.User) *userpb.User {
+	if u == nil {
+		return nil
+	}
+	var (
+		email, wardCode, address, avatar *wrapperspb.StringValue
+	)
+	if u.Email != nil {
+		email = wrapperspb.String(*u.Email)
+	}
+	if u.WardCode != nil {
+		wardCode = wrapperspb.String(*u.WardCode)
+	}
+	if u.Address != nil {
+		address = wrapperspb.String(*u.Address)
+	}
+	if u.Avatar != nil {
+		avatar = wrapperspb.String(*u.Avatar)
+	}
+	var phone *wrapperspb.StringValue
+	if u.Phone != "" {
+		phone = wrapperspb.String(u.Phone)
+	}
+	return &userpb.User{
+		Id:        int32(u.ID),
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
+		Gender:    string(u.Gender),
+		Phone:     phone,
+		Email:     email,
+		WardCode:  wardCode,
+		Address:   address,
+		Avatar:    avatar,
+		CreatedAt: u.CreatedAt.String(),
+		UpdatedAt: u.UpdatedAt.String(),
+	}
+}
+
 func (s *UserGRPCServer) ListUsers(ctx context.Context, req *userpb.ListUsersRequest) (*userpb.ListUsersResponse, error) {
 	users, err := s.userService.GetAllUsers(ctx)
 	if err != nil {
@@ -28,19 +68,7 @@ func (s *UserGRPCServer) ListUsers(ctx context.Context, req *userpb.ListUsersReq
 
 	var res []*userpb.User
 	for _, u := range users {
-		res = append(res, &userpb.User{
-			Id:        int32(u.ID),
-			FirstName: u.FirstName,
-			LastName:  u.LastName,
-			Gender:    string(u.Gender),
-			Phone:     u.Phone,
-			Email:     *u.Email,
-			WardCode:  *u.WardCode,
-			Address:   *u.Address,
-			Avatar:    *u.Avatar,
-			CreatedAt: u.CreatedAt.String(),
-			UpdatedAt: u.UpdatedAt.String(),
-		})
+		res = append(res, entUserToProtoUser(u))
 	}
 
 	/*
@@ -96,19 +124,7 @@ func (s *UserGRPCServer) GetUserById(ctx context.Context, req *userpb.GetUserByI
 	}
 
 	return &userpb.GetUserByIdResponse{
-		User: &userpb.User{
-			Id:        int32(user.ID),
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			Gender:    string(user.Gender),
-			Email:     *user.Email,
-			Phone:     user.Phone,
-			WardCode:  *user.WardCode,
-			Address:   *user.Address,
-			Avatar:    *user.Avatar,
-			CreatedAt: user.CreatedAt.String(),
-			UpdatedAt: user.UpdatedAt.String(),
-		},
+		User:  entUserToProtoUser(user),
 		Roles: roles,
 		Perms: perms,
 	}, nil
@@ -135,19 +151,7 @@ func (s *UserGRPCServer) GetUsersByIDs(ctx context.Context, req *userpb.GetUsers
 
 	var res []*userpb.User
 	for _, u := range users {
-		res = append(res, &userpb.User{
-			Id:        int32(u.ID),
-			FirstName: u.FirstName,
-			LastName:  u.LastName,
-			Gender:    string(u.Gender),
-			Email:     *u.Email,
-			Phone:     u.Phone,
-			WardCode:  *u.WardCode,
-			Address:   *u.Address,
-			Avatar:    *u.Avatar,
-			CreatedAt: u.CreatedAt.String(),
-			UpdatedAt: u.UpdatedAt.String(),
-		})
+		res = append(res, entUserToProtoUser(u))
 	}
 
 	return &userpb.GetUsersByIDsResponse{
@@ -163,19 +167,7 @@ func (s *UserGRPCServer) CreateUser(ctx context.Context, req *userpb.CreateUserR
 	}
 
 	return &userpb.CreateUserResponse{
-		User: &userpb.User{
-			Id:        int32(user.ID),
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			Gender:    string(user.Gender),
-			Phone:     user.Phone,
-			Email:     *user.Email,
-			WardCode:  *user.WardCode,
-			Address:   *user.Address,
-			Avatar:    *user.Avatar,
-			CreatedAt: user.CreatedAt.String(),
-			UpdatedAt: user.UpdatedAt.String(),
-		},
+		User: entUserToProtoUser(user),
 	}, nil
 }
 
@@ -196,19 +188,7 @@ func (s *UserGRPCServer) UpdateUserByID(ctx context.Context, req *userpb.UpdateU
 	}
 
 	return &userpb.UpdateUserResponse{
-		User: &userpb.User{
-			Id:        int32(user.ID),
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			Gender:    string(user.Gender),
-			Email:     *user.Email,
-			Phone:     user.Phone,
-			WardCode:  *user.WardCode,
-			Address:   *user.Address,
-			Avatar:    *user.Avatar,
-			CreatedAt: user.CreatedAt.String(),
-			UpdatedAt: user.UpdatedAt.String(),
-		},
+		User: entUserToProtoUser(user),
 	}, nil
 }
 
