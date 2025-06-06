@@ -17,27 +17,27 @@ import (
 type User struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID int `json:"id"`
 	// FirstName holds the value of the "first_name" field.
-	FirstName string `json:"first_name,omitempty"`
+	FirstName string `json:"first_name"`
 	// LastName holds the value of the "last_name" field.
-	LastName string `json:"last_name,omitempty"`
+	LastName string `json:"last_name"`
 	// Gender holds the value of the "gender" field.
-	Gender user.Gender `json:"gender,omitempty"`
+	Gender user.Gender `json:"gender"`
 	// Phone holds the value of the "phone" field.
-	Phone string `json:"phone,omitempty"`
+	Phone string `json:"phone"`
 	// Email holds the value of the "email" field.
-	Email *string `json:"email,omitempty"`
+	Email *string `json:"email"`
 	// Avatar holds the value of the "avatar" field.
-	Avatar *string `json:"avatar,omitempty"`
+	Avatar *string `json:"avatar"`
 	// WardCode holds the value of the "ward_code" field.
-	WardCode *string `json:"ward_code,omitempty"`
+	WardCode *string `json:"ward_code"`
 	// Address holds the value of the "address" field.
-	Address *string `json:"address,omitempty"`
+	Address *string `json:"address"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`

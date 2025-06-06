@@ -41,16 +41,12 @@ func entUserToProtoUser(u *ent.User) *userpb.User {
 	if u.Avatar != nil {
 		avatar = wrapperspb.String(*u.Avatar)
 	}
-	var phone *wrapperspb.StringValue
-	if u.Phone != "" {
-		phone = wrapperspb.String(u.Phone)
-	}
 	return &userpb.User{
 		Id:        int32(u.ID),
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
 		Gender:    string(u.Gender),
-		Phone:     phone,
+		Phone:     wrapperspb.String(u.Phone),
 		Email:     email,
 		WardCode:  wardCode,
 		Address:   address,

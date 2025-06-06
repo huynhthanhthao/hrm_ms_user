@@ -17,17 +17,17 @@ import (
 type Account struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID int `json:"id"`
 	// Username holds the value of the "username" field.
-	Username string `json:"username,omitempty"`
+	Username string `json:"username"`
 	// Password holds the value of the "password" field.
 	Password string `json:"-"`
 	// Status holds the value of the "status" field.
-	Status account.Status `json:"status,omitempty"`
+	Status account.Status `json:"status"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AccountQuery when eager-loading is set.
 	Edges        AccountEdges `json:"edges"`

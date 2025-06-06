@@ -256,32 +256,16 @@ func (s *UserService) UpdateUserByID(ctx context.Context, tx *ent.Tx, userID int
 
 	// Nullable fields: email, ward_code, address, avatar
 	if input.Email != nil {
-		if input.Email.Value == "" {
-			userUpdate = userUpdate.ClearEmail()
-		} else {
-			userUpdate = userUpdate.SetEmail(input.Email.Value)
-		}
+		userUpdate = userUpdate.SetEmail(input.Email.Value)
 	}
 	if input.WardCode != nil {
-		if input.WardCode.Value == "" {
-			userUpdate = userUpdate.ClearWardCode()
-		} else {
-			userUpdate = userUpdate.SetWardCode(input.WardCode.Value)
-		}
+		userUpdate = userUpdate.SetWardCode(input.WardCode.Value)
 	}
 	if input.Address != nil {
-		if input.Address.Value == "" {
-			userUpdate = userUpdate.ClearAddress()
-		} else {
-			userUpdate = userUpdate.SetAddress(input.Address.Value)
-		}
+		userUpdate = userUpdate.SetAddress(input.Address.Value)
 	}
 	if input.Avatar != nil {
-		if input.Avatar.Value == "" {
-			userUpdate = userUpdate.ClearAvatar()
-		} else {
-			userUpdate = userUpdate.SetAvatar(input.Avatar.Value)
-		}
+		userUpdate = userUpdate.SetAvatar(input.Avatar.Value)
 	}
 
 	// Phone is not nullable, only update if not empty string
