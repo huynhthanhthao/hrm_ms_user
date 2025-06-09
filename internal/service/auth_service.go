@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -15,7 +14,6 @@ import (
 	"github.com/huynhthanhthao/hrm_user_service/ent/user"
 	"github.com/huynhthanhthao/hrm_user_service/internal/dto"
 	"github.com/huynhthanhthao/hrm_user_service/internal/helper"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -98,22 +96,17 @@ func (s *AuthService) getUserRolesPerms(ctx context.Context, userID int) ([]map[
 }
 
 // Lấy employee, employeeID, orgID
-func (s *AuthService) getEmployeeInfo(ctx context.Context, userID int) (map[string]interface{}, *int64, *int64) {
-	var employeeMap map[string]interface{}
+func (s *AuthService) getEmployeeInfo(ctx context.Context, userID int) (*hrPb.Employee, *int64, *int64) {
 	var employeeID, orgID *int64
 	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &hrPb.GetEmployeeByUserIdRequest{
 		UserId: strconv.Itoa(userID),
 	})
 
 	if err == nil && employee != nil {
-		jsonEmployee, err := protojson.Marshal(employee)
-		if err == nil {
-			_ = json.Unmarshal(jsonEmployee, &employeeMap)
-		}
 		employeeID = &employee.Id
 		orgID = &employee.OrgId
 	}
-	return employeeMap, employeeID, orgID
+	return employee, employeeID, orgID
 }
 
 func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.LoginInput) {
@@ -144,13 +137,11 @@ func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.Login
 		helper.RespondWithError(c, http.StatusBadRequest, err)
 		return
 	}
-	employeeMap, employeeID, orgID := s.getEmployeeInfo(ctx, usr.ID)
+	employee, employeeID, orgID := s.getEmployeeInfo(ctx, usr.ID)
 
-	var employeeStatus string
-	if employeeMap != nil {
-		if status, ok := employeeMap["status"].(string); ok {
-			employeeStatus = status
-		}
+	var employeeMap map[string]interface{}
+	if employee != nil {
+		employeeMap = helper.ToEmployeeMap(employee)
 	}
 
 	usr.Edges.Account = acc
@@ -161,7 +152,7 @@ func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.Login
 	accessToken, err := GenerateAccessToken(TokenClaimsInput{
 		UserID:         usr.ID,
 		EmployeeID:     employeeID,
-		EmployeeStatus: employeeStatus,
+		EmployeeStatus: employeeMap["status"].(string),
 		OrgID:          orgID,
 		Duration:       accessDur,
 		Perms:          permCodes,
@@ -240,16 +231,9 @@ func (s *AuthService) DecodeToken(ctx context.Context, token string, c *gin.Cont
 
 	// Query employee
 	var employeeMap map[string]interface{}
-	employee, err := s.hrClients.HrExt.GetEmployeeByUserId(ctx, &hrPb.GetEmployeeByUserIdRequest{
-		UserId: strconv.Itoa(usr.ID),
-	})
-	if err == nil && employee != nil {
-		jsonEmployee, err := protojson.Marshal(employee)
-		if err == nil {
-			_ = json.Unmarshal(jsonEmployee, &employeeMap)
-		}
-	} else {
-		employeeMap = nil
+	employee, _, _ := s.getEmployeeInfo(ctx, usr.ID)
+	if employee != nil {
+		employeeMap = helper.ToEmployeeMap(employee)
 	}
 
 	// Query roles & perms

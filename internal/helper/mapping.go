@@ -1,8 +1,11 @@
 package helper
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
+	hrPb "github.com/longgggwwww/hrm-ms-hr/ent/proto/entpb"
 	permPb "github.com/longgggwwww/hrm-ms-permission/ent/proto/entpb"
 )
 
@@ -71,4 +74,75 @@ func ToPermArr(perms []*permPb.PermExt) []map[string]interface{} {
 		})
 	}
 	return arr
+}
+
+func toOrganizationMap(o *hrPb.Organization) map[string]interface{} {
+	if o == nil {
+		return nil
+	}
+	return map[string]interface{}{
+		"id":   o.Id,
+		"name": o.Name,
+		"code": o.Code,
+	}
+}
+
+func toDepartmentMap(d *hrPb.Department) map[string]interface{} {
+	if d == nil {
+		return nil
+	}
+	return map[string]interface{}{
+		"id":           d.Id,
+		"name":         d.Name,
+		"code":         d.Code,
+		"organization": toOrganizationMap(d.Organization),
+	}
+}
+
+func toPositionMap(p *hrPb.Position) map[string]interface{} {
+	if p == nil {
+		return nil
+	}
+	return map[string]interface{}{
+		"id":          p.Id,
+		"name":        p.Name,
+		"code":        p.Code,
+		"departments": toDepartmentMap(p.Departments),
+	}
+}
+
+func parseStatusEnum(status interface{}) string {
+	statusStr := ""
+	switch v := status.(type) {
+	case string:
+		statusStr = v
+	case fmt.Stringer:
+		statusStr = v.String()
+	default:
+		return ""
+	}
+	parts := strings.Split(statusStr, "_")
+	if len(parts) > 1 {
+		return strings.ToLower(parts[1])
+	}
+	return strings.ToLower(statusStr)
+}
+
+// Helper: convert hrPb.Employee to map[string]interface{}
+func ToEmployeeMap(e *hrPb.Employee) map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return map[string]interface{}{
+		"id":          e.Id,
+		"user_id":     GetProtoValue(e.UserId),
+		"code":        e.Code,
+		"status":      parseStatusEnum(e.Status),
+		"position_id": e.PositionId,
+		"joining_at":  ProtoTimestampToString(e.JoiningAt),
+		"org_id":      e.OrgId,
+		"created_at":  ProtoTimestampToString(e.CreatedAt),
+		"updated_at":  ProtoTimestampToString(e.UpdatedAt),
+		"position":    toPositionMap(e.Position),
+	}
 }
