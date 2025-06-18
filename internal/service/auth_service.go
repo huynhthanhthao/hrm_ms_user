@@ -168,8 +168,6 @@ func (s *AuthService) Login(ctx context.Context, c *gin.Context, input dto.Login
 		return
 	}
 
-	setTokenCookies(c, accessToken, refreshToken, int(accessDur.Seconds()), int(refreshDur.Seconds()))
-
 	c.JSON(http.StatusOK, gin.H{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
@@ -314,18 +312,13 @@ func GenerateRefreshToken(userID int, duration time.Duration) (string, error) {
 	return token.SignedString([]byte(secret))
 }
 
-// Helper: set tokens as httpOnly cookies
-func setTokenCookies(c *gin.Context, accessToken, refreshToken string, accessMaxAge, refreshMaxAge int) {
-	c.SetCookie("refresh_token", refreshToken, refreshMaxAge, "/refresh-token", "", false, true)
-}
-
 // POST /auth/refresh-token
-func (s *AuthService) RefreshToken(ctx context.Context, c *gin.Context) {
-	refreshToken, err := c.Cookie("refresh_token")
-	if err != nil || refreshToken == "" {
+func (s *AuthService) RefreshToken(ctx context.Context, c *gin.Context, refreshToken string) {
+	if refreshToken == "" {
 		helper.RespondWithError(c, http.StatusUnauthorized, fmt.Errorf("refresh token missing"))
 		return
 	}
+
 	parsedToken, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -359,6 +352,26 @@ func (s *AuthService) RefreshToken(ctx context.Context, c *gin.Context) {
 		return
 	}
 
+	// Query account to check status
+	acc, err := usr.QueryAccount().Only(ctx)
+	if err != nil {
+		helper.RespondWithError(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	if acc.Status == account.StatusInactive {
+		helper.RespondWithError(c, http.StatusUnauthorized, fmt.Errorf("account is inactive"))
+		return
+	}
+
+	// Get employee info for claims
+	employee, employeeID, orgID := s.getEmployeeInfo(ctx, usr.ID)
+	var employeeStatus string
+	if employee != nil {
+		employeeMap := helper.ToEmployeeMap(employee)
+		employeeStatus = employeeMap["status"].(string)
+	}
+
 	// Query roles & perms
 	userIDStr := strconv.Itoa(usr.ID)
 	rolesResp, err := s.perClients.PermExt.GetUserRoles(ctx, &permPb.GetUserRolesRequest{UserId: userIDStr})
@@ -380,18 +393,33 @@ func (s *AuthService) RefreshToken(ctx context.Context, c *gin.Context) {
 	}
 
 	accessDur, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
+	refreshDur, _ := time.ParseDuration(os.Getenv("JWT_REFRESH_TOKEN_DURATION"))
+
 	// Generate new access token
 	accessToken, err := GenerateAccessToken(TokenClaimsInput{
-		UserID:     usr.ID,
-		EmployeeID: nil,
-		OrgID:      nil,
-		Duration:   accessDur,
-		Perms:      permCodes,
+		UserID:         usr.ID,
+		EmployeeID:     employeeID,
+		EmployeeStatus: employeeStatus,
+		OrgID:          orgID,
+		Duration:       accessDur,
+		Perms:          permCodes,
 	})
 	if err != nil {
 		helper.RespondWithError(c, http.StatusUnauthorized, err)
 		return
 	}
-	setTokenCookies(c, accessToken, refreshToken, int(accessDur.Seconds()), 0)
-	c.JSON(http.StatusOK, gin.H{"access_token": accessToken})
+
+	// Generate new refresh token (recommended for security)
+	newRefreshToken, err := GenerateRefreshToken(usr.ID, refreshDur)
+	if err != nil {
+		helper.RespondWithError(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"access_token":  accessToken,
+		"refresh_token": newRefreshToken,
+		"token_type":    "Bearer",
+		"expires_in":    int(accessDur.Seconds()),
+	})
 }

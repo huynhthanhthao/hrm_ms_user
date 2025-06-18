@@ -52,5 +52,12 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 }
 
 func (h *AuthHandler) RefreshTokenHandler(c *gin.Context) {
-	h.authService.RefreshToken(c.Request.Context(), c)
+	var req dto.RefreshTokenRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "refresh_token is required"})
+		return
+	}
+
+	h.authService.RefreshToken(c.Request.Context(), c, req.RefreshToken)
 }
