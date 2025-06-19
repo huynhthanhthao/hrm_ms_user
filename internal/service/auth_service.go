@@ -393,7 +393,6 @@ func (s *AuthService) RefreshToken(ctx context.Context, c *gin.Context, refreshT
 	}
 
 	accessDur, _ := time.ParseDuration(os.Getenv("JWT_ACCESS_TOKEN_DURATION"))
-	refreshDur, _ := time.ParseDuration(os.Getenv("JWT_REFRESH_TOKEN_DURATION"))
 
 	// Generate new access token
 	accessToken, err := GenerateAccessToken(TokenClaimsInput{
@@ -409,17 +408,9 @@ func (s *AuthService) RefreshToken(ctx context.Context, c *gin.Context, refreshT
 		return
 	}
 
-	// Generate new refresh token (recommended for security)
-	newRefreshToken, err := GenerateRefreshToken(usr.ID, refreshDur)
-	if err != nil {
-		helper.RespondWithError(c, http.StatusUnauthorized, err)
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{
-		"access_token":  accessToken,
-		"refresh_token": newRefreshToken,
-		"token_type":    "Bearer",
-		"expires_in":    int(accessDur.Seconds()),
+		"access_token": accessToken,
+		"token_type":   "Bearer",
+		"expires_in":   int(accessDur.Seconds()),
 	})
 }
